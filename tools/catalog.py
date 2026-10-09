@@ -34,17 +34,17 @@ def git(*args):
 def entries():
     index = read_json(ROOT / "index.json")
     ids = index["shaders"]
-    if not ids or len(ids) != len(set(ids)) or index["defaultShaderID"] not in ids:
+    if not 1 <= len(ids) <= 500 or len(ids) != len(set(ids)) or index["defaultShaderID"] not in ids:
         raise ValueError("Catalog must be nonempty with unique IDs and an existing default")
     result = []
     for shader_id in ids:
-        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", shader_id):
+        if len(shader_id) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", shader_id):
             raise ValueError("Invalid shader ID")
         directory = ROOT / "shaders" / shader_id
         metadata = read_json(directory / "metadata.json")
         if metadata["id"] != shader_id or metadata["category"] not in ("PROCEDURAL", "3D MATERIAL"):
             raise ValueError(f"Invalid metadata for {shader_id}")
-        if not metadata["name"].strip() or not metadata["description"].strip():
+        if not metadata["name"].strip() or not metadata["description"].strip() or len(metadata["name"]) > 200 or len(metadata["description"]) > 2000:
             raise ValueError(f"Missing name/description for {shader_id}")
         colors = metadata["colors"]
         if len(colors) != 2 or any(len(c) != 3 or any(type(v) not in (int, float) or not 0 <= v <= 1 for v in c) for c in colors):
@@ -56,7 +56,11 @@ def entries():
         source = "".join((ROOT / "shared" / f"{part}.metal").read_text() for part in shared[:-1])
         source += (directory / "body.metal").read_text() + (ROOT / "shared" / "fragment.metal").read_text()
         fingerprint = digest(source.encode() + (ROOT / "tools/render-preview.swift").read_bytes() + json.dumps(SETTINGS, sort_keys=True).encode())
+        if not source or len(source.encode()) > 1_048_576:
+            raise ValueError(f"Invalid source size for {shader_id}")
         result.append((metadata, source, fingerprint, dependencies, directory))
+    if sum(len(entry[1].encode()) for entry in result) > 16_777_216:
+        raise ValueError("Catalog sources exceed 16 MiB")
     return index, result
 
 
@@ -84,7 +88,7 @@ def build(output, compile_metal=False):
         image = (directory / "preview.png").read_bytes()
         if preview != {"fingerprint": fingerprint, "sha256": digest(image), "settings": SETTINGS}:
             raise ValueError(f"Stale preview for {metadata['id']}; run generate")
-        if image[:8] != b"\x89PNG\r\n\x1a\n":
+        if len(image) > 8_388_608 or image[:8] != b"\x89PNG\r\n\x1a\n":
             raise ValueError("Preview is not PNG")
         shader_id = metadata["id"]
         source_path = f"sources/{shader_id}.metal"

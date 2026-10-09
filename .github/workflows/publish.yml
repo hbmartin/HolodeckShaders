@@ -19,6 +19,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Test publication validation
+        run: python3 tools/test_catalog.py
       - name: Validate previews, metadata and tvOS Metal compilation
         run: python3 tools/catalog.py validate
       - name: Publish one complete snapshot

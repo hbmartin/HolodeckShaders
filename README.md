@@ -14,15 +14,9 @@ Requires a Mac with Xcode and a Metal device for rendering previews. Python 3 us
 
 `updatedAt` is the committer date of the latest commit affecting that shader's metadata, body or shared helpers. Initial dates come from the migration commit. Preview-only regeneration does not change the date. The manifest records the authoring commit as `sourceRevision`; the app separately records the publication commit.
 
-## Offline app snapshot
+## App delivery
 
-From the Holodeck checkout, run `python3 tools/update-bundled-catalog.py`. It fetches the public published ref, verifies metadata and all source/image hashes, then exports the bundled JSON and PNGs. Commit those resources with the app. Ordinary Xcode builds and tests never fetch content.
-
-For local export after building this repository:
-
-```sh
-python3 tools/catalog.py export-bundle --app ../Holodeck/Holodeck/BundledCatalog --publication-revision <published-commit-sha>
-```
+Holodeck downloads the published catalog and assets directly from this repository at a fixed commit. It ships with no catalog, shader source or previews. First launch requires internet; later launches can use a validated downloaded cache offline. If tvOS evicts that cache, the app needs to download again. Publishing shaders requires no app rebuild or snapshot-export step.
 
 ## Contract
 

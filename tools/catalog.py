@@ -6,7 +6,6 @@ import hashlib
 import json
 import pathlib
 import re
-import shutil
 import subprocess
 import tempfile
 
@@ -113,30 +112,13 @@ def build(output, compile_metal=False):
     return manifest
 
 
-def export_bundle(output, app, revision):
-    manifest = read_json(output / "catalog.json")
-    sources = {entry["id"]: (output / entry["sourcePath"]).read_text() for entry in manifest["shaders"]}
-    app.mkdir(parents=True, exist_ok=True)
-    write_json(app / "BundledCatalog.json", {"manifest": manifest, "sources": sources, "publicationRevision": revision})
-    for old in app.glob("preview-*.png"):
-        old.unlink()
-    for entry in manifest["shaders"]:
-        shutil.copyfile(output / entry["previewPath"], app / f"preview-{entry['previewSHA256']}.png")
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["generate", "validate", "build", "export-bundle"])
+    parser.add_argument("command", choices=["generate", "validate", "build"])
     parser.add_argument("--output", type=pathlib.Path, default=ROOT / "dist")
-    parser.add_argument("--app", type=pathlib.Path)
-    parser.add_argument("--publication-revision")
     args = parser.parse_args()
     if args.command == "generate":
         generate()
-    elif args.command == "export-bundle":
-        if not args.app or not args.publication_revision or not re.fullmatch(r"[0-9a-f]{40}", args.publication_revision):
-            parser.error("export-bundle requires --app and a 40-character --publication-revision")
-        export_bundle(args.output, args.app, args.publication_revision)
     else:
         build(args.output, compile_metal=args.command == "validate")
         print(f"Validated publication at {args.output}")

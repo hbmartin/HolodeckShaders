@@ -73,9 +73,14 @@ def show(kind, asset_id):
     item["documentation"] = readme.read_text() if readme.is_file() else (catalog.ROOT / "docs/shader-authoring.md").read_text()
     if kind == "shader":
         item["sourcePath"] = item["path"] + "/body.metal"
+        item["sourceLocations"] = [item["sourcePath"]] + [f"shared/{part}.metal" for part in item["specification"]["shared"]]
+        item["examplePath"] = item["sourcePath"]
+        item["example"] = path(item["examplePath"]).read_text()
     else:
         item["source"] = item["specification"].get("source", {"files": item["specification"].get("files", {})})
         item["examplePath"] = item["specification"].get("examplePath")
+        item["example"] = path(item["examplePath"]).read_text() if item["examplePath"] else None
+        item["sourceLocations"] = [item["source"]["path"]] if kind == "snippet" else [item["path"] + "/original/" + file for file in sorted(item["specification"]["files"])]
     return item
 
 
@@ -254,6 +259,10 @@ def emit(items, as_json=False):
     else:
         print(json.dumps(items["specification"], indent=2, sort_keys=True))
         print(items["documentation"])
+        print("Source locations: " + ", ".join(items["sourceLocations"]))
+        if items["example"] is not None:
+            print("Example: " + items["examplePath"])
+            print(items["example"])
 
 
 def main():

@@ -33,7 +33,12 @@ class LibraryTests(unittest.TestCase):
         with contextlib.redirect_stdout(text): library.emit(matches)
         with contextlib.redirect_stdout(machine): library.emit(matches, True)
         self.assertEqual([v.split("\t")[1] for v in text.getvalue().splitlines()], [v["id"] for v in json.loads(machine.getvalue())])
-        self.assertIn("Interface", library.show("snippet", "fbm")["documentation"])
+        detail = library.show("snippet", "fbm")
+        self.assertIn("Interface", detail["documentation"])
+        self.assertIn("float3 shade", detail["example"])
+        self.assertEqual(detail["sourceLocations"], ["shared/common.metal"])
+        with contextlib.redirect_stdout(text): library.emit(detail)
+        self.assertIn(detail["example"], text.getvalue())
 
     def test_primary_search_matches_precede_descriptive_matches(self):
         primary_path = self.root / "snippets/value-noise/snippet.json"

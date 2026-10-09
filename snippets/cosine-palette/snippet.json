@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/cosine-palette/example.metal",
+  "id": "cosine-palette",
+  "kind": "shared-helper",
+  "name": "Cosine Palette",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "plasma",
+      "waves",
+      "kaleidoscope"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "color cycle",
+    "cosine color"
+  ],
+  "source": {
+    "path": "shared/common.metal",
+    "symbols": [
+      "palette"
+    ]
+  },
+  "summary": "A periodic RGB palette for vivid continuous color transitions.",
+  "tags": [
+    "color",
+    "palette",
+    "rainbow"
+  ]
+}

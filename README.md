@@ -4,6 +4,8 @@ Public source of truth for Holodeck's runtime Metal shaders. `main` contains aut
 
 ## Authoring
 
+See [the reuse library](docs/shader-library.md) and [complete authoring workflow](docs/shader-authoring.md) for discovery, recipe contracts, local reference imports, scaffolding and validation. Run `python3 tools/library.py --help` for CLI commands. Snippets and references are authoring assets; only IDs in `index.json` enter the app catalog.
+
 Requires a Mac with Xcode and a Metal device for rendering previews. Python 3 uses only its standard library.
 
 1. Create `shaders/<id>/metadata.json` and `body.metal`. IDs are stable lowercase words separated by hyphens. Metadata includes `id`, `name`, `description`, `category` (`PROCEDURAL` or `3D MATERIAL`), two RGB colors with values in 0...1, and `shared`: `["common", "fragment"]` or `["common", "material", "fragment"]`.
@@ -19,5 +21,7 @@ Requires a Mac with Xcode and a Metal device for rendering previews. Python 3 us
 Holodeck downloads the published catalog and assets directly from this repository at a fixed commit. It ships with no catalog, shader source or previews. First launch requires internet; later launches can use a validated downloaded cache offline. If tvOS evicts that cache, the app needs to download again. Publishing shaders requires no app rebuild or snapshot-export step.
 
 ## Contract
+
+Schema version 1 also supports optional ordered `collections` (`id`, `name`, `description`, `shaderIDs`) and per-shader `discovery` (`tags`, `moods`, `motion`). Existing apps ignore these additions. Authoring-only `reuse` links are excluded from publication. New apps use collection order, mood/motion filters and tag search; older snapshots remain usable.
 
 `catalog.json` schema version 1 contains `defaultShaderID`, `sourceRevision`, and ordered `shaders` entries: `id`, `name`, `category`, `description`, `colors`, UTC ISO-8601 `updatedAt`, `sourcePath`, `sourceSHA256`, `previewPath`, `previewSHA256`. Paths are `sources/<id>.metal` and `previews/<id>.png`; hashes are lowercase SHA-256. Each source is a complete runtime library exposing `vertexShader` and `fragmentShader` with the 16-byte `ShaderUniforms` layout. Keep this contract compatible with released apps; incompatible formats require a new schema version.

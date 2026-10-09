@@ -1,0 +1,24 @@
+{
+  "examplePath": "snippets/__ID__/example.metal",
+  "id": "__ID__",
+  "kind": "recipe",
+  "name": "__NAME__",
+  "origin": {
+    "attribution": "Original authoring",
+    "license": "Record provenance before redistribution",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [],
+  "source": {
+    "path": "snippets/__ID__/code.metal",
+    "symbols": [
+      "hdRecipe"
+    ]
+  },
+  "summary": "A new reusable Metal recipe; refine its contract before use.",
+  "tags": []
+}

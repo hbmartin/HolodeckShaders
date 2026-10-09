@@ -1,21 +1,39 @@
 {
-  "category" : "3D MATERIAL",
-  "colors" : [
+  "category": "3D MATERIAL",
+  "colors": [
     [
-      0.43999999761581421,
+      0.4399999976158142,
       0.23999999463558197,
-      0.070000000298023224
+      0.07000000029802322
     ],
     [
-      0.95999997854232788,
-      0.70999997854232788,
+      0.9599999785423279,
+      0.7099999785423279,
       0.27000001072883606
     ]
   ],
-  "description" : "Warm metal with fine grain and soft reflections.",
-  "id" : "brushed-gold",
-  "name" : "Brushed Gold",
-  "shared" : [
+  "description": "Warm metal with fine grain and soft reflections.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "slow",
+    "tags": [
+      "material",
+      "metal",
+      "warm",
+      "textured"
+    ]
+  },
+  "id": "brushed-gold",
+  "name": "Brushed Gold",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "studio-material"
+    ]
+  },
+  "shared": [
     "common",
     "material",
     "fragment"

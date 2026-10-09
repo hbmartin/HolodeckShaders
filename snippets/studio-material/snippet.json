@@ -1,0 +1,38 @@
+{
+  "examplePath": "snippets/studio-material/example.metal",
+  "id": "studio-material",
+  "kind": "shared-helper",
+  "name": "Studio Material",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "chrome",
+      "brushed-gold",
+      "iridescent"
+    ]
+  },
+  "requiredShared": [
+    "common",
+    "material"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "chrome",
+    "brushed gold",
+    "iridescent studio"
+  ],
+  "source": {
+    "path": "shared/material.metal",
+    "symbols": [
+      "shadeMaterial"
+    ]
+  },
+  "summary": "Ray-marched sphere, analytical floor and studio reflections for metal finishes.",
+  "tags": [
+    "material",
+    "metal",
+    "reflection",
+    "sphere"
+  ]
+}

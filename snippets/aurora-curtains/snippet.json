@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/aurora-curtains/example.metal",
+  "id": "aurora-curtains",
+  "kind": "recipe",
+  "name": "Aurora Curtains",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "aurora"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "northern lights",
+    "dreamy flowing curtains"
+  ],
+  "source": {
+    "path": "snippets/aurora-curtains/code.metal",
+    "symbols": [
+      "hdAuroraCurtains"
+    ]
+  },
+  "summary": "Three moving bands of colored light modulated by layered noise.",
+  "tags": [
+    "aurora",
+    "curtains",
+    "atmospheric"
+  ]
+}

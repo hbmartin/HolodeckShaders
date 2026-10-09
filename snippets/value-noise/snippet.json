@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/value-noise/example.metal",
+  "id": "value-noise",
+  "kind": "shared-helper",
+  "name": "Value Noise",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "aurora",
+      "starfield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "smooth random field",
+    "surface variation"
+  ],
+  "source": {
+    "path": "shared/common.metal",
+    "symbols": [
+      "hash21",
+      "noise2"
+    ]
+  },
+  "summary": "Smooth deterministic 2D value noise for grain, mist and surface variation.",
+  "tags": [
+    "noise",
+    "grain",
+    "mist"
+  ]
+}

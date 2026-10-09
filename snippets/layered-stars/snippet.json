@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/layered-stars/example.metal",
+  "id": "layered-stars",
+  "kind": "recipe",
+  "name": "Layered Stars",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "starfield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "drifting starfield",
+    "seeded point lights"
+  ],
+  "source": {
+    "path": "snippets/layered-stars/code.metal",
+    "symbols": [
+      "hdLayeredStars"
+    ]
+  },
+  "summary": "Three independently drifting star layers with seeded colors and twinkle.",
+  "tags": [
+    "stars",
+    "space",
+    "particles"
+  ]
+}

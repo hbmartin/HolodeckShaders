@@ -1,21 +1,42 @@
 {
-  "category" : "PROCEDURAL",
-  "colors" : [
+  "category": "PROCEDURAL",
+  "colors": [
     [
-      0.039999999105930328,
-      0.72000002861022949,
-      0.52999997138977051
+      0.03999999910593033,
+      0.7200000286102295,
+      0.5299999713897705
     ],
     [
       0.17000000178813934,
       0.2800000011920929,
-      0.75999999046325684
+      0.7599999904632568
     ]
   ],
-  "description" : "Curtains of light beneath a midnight sky.",
-  "id" : "aurora",
-  "name" : "Aurora",
-  "shared" : [
+  "description": "Curtains of light beneath a midnight sky.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "atmospheric",
+      "curtains",
+      "night",
+      "glow"
+    ]
+  },
+  "id": "aurora",
+  "name": "Aurora",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "value-noise",
+      "fbm",
+      "aurora-curtains"
+    ]
+  },
+  "shared": [
     "common",
     "fragment"
   ]

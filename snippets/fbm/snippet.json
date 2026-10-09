@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/fbm/example.metal",
+  "id": "fbm",
+  "kind": "shared-helper",
+  "name": "Fractal Brownian Motion",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "aurora",
+      "starfield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "layered noise",
+    "fractal brownian motion"
+  ],
+  "source": {
+    "path": "shared/common.metal",
+    "symbols": [
+      "fbm"
+    ]
+  },
+  "summary": "Four-octave layered noise for clouds, nebulae and domain warping.",
+  "tags": [
+    "noise",
+    "clouds",
+    "nebula",
+    "domain-warp"
+  ]
+}

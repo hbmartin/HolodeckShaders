@@ -1,6 +1,48 @@
 {
-  "defaultShaderID" : "plasma",
-  "shaders" : [
+  "collections": [
+    {
+      "description": "A varied selection of Holodeck scenes.",
+      "id": "featured",
+      "name": "Featured",
+      "shaderIDs": [
+        "aurora",
+        "waves",
+        "kaleidoscope",
+        "chrome"
+      ]
+    },
+    {
+      "description": "Night skies and moving light.",
+      "id": "atmospheric",
+      "name": "Atmospheric",
+      "shaderIDs": [
+        "aurora",
+        "starfield"
+      ]
+    },
+    {
+      "description": "Flowing color and geometric patterns.",
+      "id": "abstract",
+      "name": "Abstract",
+      "shaderIDs": [
+        "plasma",
+        "waves",
+        "kaleidoscope"
+      ]
+    },
+    {
+      "description": "Metal finishes under moving studio lights.",
+      "id": "materials",
+      "name": "Materials",
+      "shaderIDs": [
+        "chrome",
+        "brushed-gold",
+        "iridescent"
+      ]
+    }
+  ],
+  "defaultShaderID": "plasma",
+  "shaders": [
     "plasma",
     "aurora",
     "waves",

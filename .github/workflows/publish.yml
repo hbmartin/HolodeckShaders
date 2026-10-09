@@ -20,7 +20,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Test publication validation
-        run: python3 tools/test_catalog.py
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - name: Validate authoring assets and compile snippet examples
+        run: python3 tools/library.py validate --compile
       - name: Validate previews, metadata and tvOS Metal compilation
         run: python3 tools/catalog.py validate
       - name: Publish one complete snapshot

@@ -1,10 +1,10 @@
 {
-  "category" : "PROCEDURAL",
-  "colors" : [
+  "category": "PROCEDURAL",
+  "colors": [
     [
-      0.40000000596046448,
-      0.15999999642372131,
-      0.95999997854232788
+      0.4000000059604645,
+      0.1599999964237213,
+      0.9599999785423279
     ],
     [
       1,
@@ -12,10 +12,27 @@
       0.5
     ]
   ],
-  "description" : "Liquid color, flowing through an electric field.",
-  "id" : "plasma",
-  "name" : "Plasma",
-  "shared" : [
+  "description": "Liquid color, flowing through an electric field.",
+  "discovery": {
+    "moods": [
+      "energetic"
+    ],
+    "motion": "steady",
+    "tags": [
+      "abstract",
+      "fluid",
+      "colorful"
+    ]
+  },
+  "id": "plasma",
+  "name": "Plasma",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "cosine-palette"
+    ]
+  },
+  "shared": [
     "common",
     "fragment"
   ]

@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/polar-fold/example.metal",
+  "id": "polar-fold",
+  "kind": "recipe",
+  "name": "Polar Fold",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "kaleidoscope"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "radial symmetry",
+    "mirrored angular sectors"
+  ],
+  "source": {
+    "path": "snippets/polar-fold/code.metal",
+    "symbols": [
+      "hdPolarFold"
+    ]
+  },
+  "summary": "Fold a plane into mirrored angular sectors for kaleidoscope patterns.",
+  "tags": [
+    "geometry",
+    "symmetry",
+    "kaleidoscope"
+  ]
+}

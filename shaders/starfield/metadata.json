@@ -1,21 +1,41 @@
 {
-  "category" : "PROCEDURAL",
-  "colors" : [
+  "category": "PROCEDURAL",
+  "colors": [
     [
       0.10000000149011612,
       0.14000000059604645,
-      0.34999999403953552
+      0.3499999940395355
     ],
     [
-      0.31000000238418579,
-      0.40000000596046448,
-      0.75999999046325684
+      0.3100000023841858,
+      0.4000000059604645,
+      0.7599999904632568
     ]
   ],
-  "description" : "Drift through layers of distant constellations.",
-  "id" : "starfield",
-  "name" : "Starfield",
-  "shared" : [
+  "description": "Drift through layers of distant constellations.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "atmospheric",
+      "space",
+      "stars",
+      "drifting"
+    ]
+  },
+  "id": "starfield",
+  "name": "Starfield",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "fbm",
+      "layered-stars"
+    ]
+  },
+  "shared": [
     "common",
     "fragment"
   ]

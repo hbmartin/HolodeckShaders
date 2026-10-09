@@ -1,21 +1,40 @@
 {
-  "category" : "PROCEDURAL",
-  "colors" : [
+  "category": "PROCEDURAL",
+  "colors": [
     [
       0.029999999329447746,
-      0.56000000238418579,
-      0.89999997615814209
+      0.5600000023841858,
+      0.8999999761581421
     ],
     [
-      0.31000000238418579,
+      0.3100000023841858,
       0.11999999731779099,
-      0.72000002861022949
+      0.7200000286102295
     ]
   ],
-  "description" : "Luminous ribbons moving in overlapping tides.",
-  "id" : "waves",
-  "name" : "Waves",
-  "shared" : [
+  "description": "Luminous ribbons moving in overlapping tides.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "steady",
+    "tags": [
+      "abstract",
+      "ribbons",
+      "flowing",
+      "luminous"
+    ]
+  },
+  "id": "waves",
+  "name": "Waves",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "cosine-palette",
+      "glowing-ribbons"
+    ]
+  },
+  "shared": [
     "common",
     "fragment"
   ]

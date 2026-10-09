@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/glowing-ribbons/example.metal",
+  "id": "glowing-ribbons",
+  "kind": "recipe",
+  "name": "Glowing Ribbons",
+  "origin": {
+    "attribution": "Holodeck repository shader source",
+    "license": "See repository provenance; no additional license inferred",
+    "shaderIDs": [
+      "waves"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "soft light trails",
+    "flowing luminous ribbons"
+  ],
+  "source": {
+    "path": "snippets/glowing-ribbons/code.metal",
+    "symbols": [
+      "hdGlowingRibbon"
+    ]
+  },
+  "summary": "A soft luminous ribbon mask with a tight core and broad halo.",
+  "tags": [
+    "ribbons",
+    "glow",
+    "waves"
+  ]
+}

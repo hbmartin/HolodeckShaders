@@ -1,0 +1,17 @@
+{
+  "adaptationNotes": "Reference only. Record uniforms, textures, passes and coordinate conventions before adapting.",
+  "files": {},
+  "id": "__ID__",
+  "language": "unknown",
+  "name": "__NAME__",
+  "origin": {
+    "author": "unknown",
+    "license": "unknown",
+    "url": null
+  },
+  "requirements": [],
+  "schemaVersion": 1,
+  "searchTerms": [],
+  "summary": "Original shader reference awaiting adaptation.",
+  "tags": []
+}

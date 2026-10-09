@@ -1,21 +1,39 @@
 {
-  "category" : "3D MATERIAL",
-  "colors" : [
+  "category": "3D MATERIAL",
+  "colors": [
     [
       0.28999999165534973,
-      0.75999999046325684,
-      0.76999998092651367
+      0.7599999904632568,
+      0.7699999809265137
     ],
     [
-      0.80000001192092896,
+      0.800000011920929,
       0.27000001072883606,
-      0.72000002861022949
+      0.7200000286102295
     ]
   ],
-  "description" : "An interference finish that changes with the light.",
-  "id" : "iridescent",
-  "name" : "Iridescent",
-  "shared" : [
+  "description": "An interference finish that changes with the light.",
+  "discovery": {
+    "moods": [
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "material",
+      "shimmer",
+      "colorful",
+      "studio"
+    ]
+  },
+  "id": "iridescent",
+  "name": "Iridescent",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "studio-material"
+    ]
+  },
+  "shared": [
     "common",
     "material",
     "fragment"

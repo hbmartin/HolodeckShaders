@@ -1,0 +1,22 @@
+{
+  "category" : "PROCEDURAL",
+  "colors" : [
+    [
+      0.039999999105930328,
+      0.72000002861022949,
+      0.52999997138977051
+    ],
+    [
+      0.17000000178813934,
+      0.2800000011920929,
+      0.75999999046325684
+    ]
+  ],
+  "description" : "Curtains of light beneath a midnight sky.",
+  "id" : "aurora",
+  "name" : "Aurora",
+  "shared" : [
+    "common",
+    "fragment"
+  ]
+}

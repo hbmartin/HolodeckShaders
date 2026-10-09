@@ -1,0 +1,23 @@
+{
+  "category" : "3D MATERIAL",
+  "colors" : [
+    [
+      0.43999999761581421,
+      0.23999999463558197,
+      0.070000000298023224
+    ],
+    [
+      0.95999997854232788,
+      0.70999997854232788,
+      0.27000001072883606
+    ]
+  ],
+  "description" : "Warm metal with fine grain and soft reflections.",
+  "id" : "brushed-gold",
+  "name" : "Brushed Gold",
+  "shared" : [
+    "common",
+    "material",
+    "fragment"
+  ]
+}

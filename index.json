@@ -1,0 +1,13 @@
+{
+  "defaultShaderID" : "plasma",
+  "shaders" : [
+    "plasma",
+    "aurora",
+    "waves",
+    "kaleidoscope",
+    "starfield",
+    "chrome",
+    "brushed-gold",
+    "iridescent"
+  ]
+}

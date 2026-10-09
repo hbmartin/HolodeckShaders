@@ -1,0 +1,23 @@
+{
+  "category" : "3D MATERIAL",
+  "colors" : [
+    [
+      0.28999999165534973,
+      0.75999999046325684,
+      0.76999998092651367
+    ],
+    [
+      0.80000001192092896,
+      0.27000001072883606,
+      0.72000002861022949
+    ]
+  ],
+  "description" : "An interference finish that changes with the light.",
+  "id" : "iridescent",
+  "name" : "Iridescent",
+  "shared" : [
+    "common",
+    "material",
+    "fragment"
+  ]
+}

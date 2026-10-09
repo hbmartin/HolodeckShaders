@@ -1,0 +1,22 @@
+{
+  "category" : "PROCEDURAL",
+  "colors" : [
+    [
+      0.10000000149011612,
+      0.14000000059604645,
+      0.34999999403953552
+    ],
+    [
+      0.31000000238418579,
+      0.40000000596046448,
+      0.75999999046325684
+    ]
+  ],
+  "description" : "Drift through layers of distant constellations.",
+  "id" : "starfield",
+  "name" : "Starfield",
+  "shared" : [
+    "common",
+    "fragment"
+  ]
+}

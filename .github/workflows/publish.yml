@@ -1,0 +1,40 @@
+name: Validate and publish catalog
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: catalog-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate previews, metadata and tvOS Metal compilation
+        run: python3 tools/catalog.py validate
+      - name: Publish one complete snapshot
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Refuse to publish an obsolete main commit after a newer merge.
+          current=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')
+          if [ "$current" != "$GITHUB_SHA" ]; then exit 0; fi
+          cd dist
+          git init -b published
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Publish catalog from $GITHUB_SHA"
+          gh auth setup-git
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git push --force origin published

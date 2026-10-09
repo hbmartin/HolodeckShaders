@@ -1,0 +1,23 @@
+{
+  "category" : "3D MATERIAL",
+  "colors" : [
+    [
+      0.36000001430511475,
+      0.43000000715255737,
+      0.52999997138977051
+    ],
+    [
+      0.81000000238418579,
+      0.87000000476837158,
+      0.93999999761581421
+    ]
+  ],
+  "description" : "A polished sphere reflecting a moving light studio.",
+  "id" : "chrome",
+  "name" : "Chrome",
+  "shared" : [
+    "common",
+    "material",
+    "fragment"
+  ]
+}

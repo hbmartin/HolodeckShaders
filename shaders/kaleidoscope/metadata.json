@@ -1,0 +1,22 @@
+{
+  "category" : "PROCEDURAL",
+  "colors" : [
+    [
+      0.89999997615814209,
+      0.28999999165534973,
+      0.15999999642372131
+    ],
+    [
+      0.61000001430511475,
+      0.12999999523162842,
+      0.76999998092651367
+    ]
+  ],
+  "description" : "A shifting mosaic of mirrored color.",
+  "id" : "kaleidoscope",
+  "name" : "Kaleidoscope",
+  "shared" : [
+    "common",
+    "fragment"
+  ]
+}

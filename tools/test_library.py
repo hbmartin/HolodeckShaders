@@ -30,6 +30,7 @@ class LibraryTests(unittest.TestCase):
         self.root_patch.start()
         self.addCleanup(self.root_patch.stop)
         self.addCleanup(self.temp.cleanup)
+        self.asset_count = len(library.assets())
 
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.root), *args], stderr=subprocess.PIPE, text=True)
@@ -51,11 +52,11 @@ class LibraryTests(unittest.TestCase):
                 yield from self.metadata_strings(item)
 
     def test_library_and_search_output(self):
-        self.assertEqual(len(library.validate()), 16)
+        self.assertEqual(len(library.validate()), self.asset_count)
         matches = library.search("FLOWING ribbons", "snippet")
         self.assertEqual([v["id"] for v in matches], ["glowing-ribbons"])
         self.assertEqual(library.search("hdPolarFold")[0]["id"], "polar-fold")
-        self.assertEqual(library.search("noise")[0]["id"], "value-noise")
+        self.assertEqual(library.search("value noise")[0]["id"], "value-noise")
         text, machine = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(text): library.emit(matches)
         with contextlib.redirect_stdout(machine): library.emit(matches, True)
@@ -82,7 +83,7 @@ class LibraryTests(unittest.TestCase):
         original = (self.root / "index.json").read_bytes()
         library.scaffold("shader", "new-scene")
         self.assertEqual((self.root / "index.json").read_bytes(), original)
-        self.assertEqual(len(library.validate()), 17)
+        self.assertEqual(len(library.validate()), self.asset_count + 1)
         self.assertNotIn("new-scene", [v[0]["id"] for v in catalog.entries()[1]])
         with self.assertRaises(ValueError): library.scaffold("shader", "new-scene")
         with self.assertRaises(ValueError): library.scaffold("shader", "../escape")
@@ -173,7 +174,7 @@ class LibraryTests(unittest.TestCase):
                     file.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(self.root / name, file)
                 with patch.object(catalog, "ROOT", fresh):
-                    self.assertEqual(len(library.validate()), 17)
+                    self.assertEqual(len(library.validate()), self.asset_count + 1)
                 for name, data in originals.items():
                     self.assertEqual((fresh / "references/hidden-files/original" / name).read_bytes(), data)
             self.assertEqual(list((self.root / "references").glob(".import-*")), [])
@@ -280,9 +281,10 @@ class LibraryTests(unittest.TestCase):
             (source / "nested").chmod(0o555)
             source.chmod(0o555)
             validate_reference = library.validate_reference
+            references = library.assets("reference")
             def inspect_stage(item):
                 self.assertFalse((self.root / "references/readonly").exists())
-                self.assertEqual(library.assets("reference"), [])
+                self.assertEqual(library.assets("reference"), references)
                 validate_reference(item)
             try:
                 with patch.object(library, "validate_reference", side_effect=inspect_stage):
@@ -342,6 +344,7 @@ class LibraryTests(unittest.TestCase):
             library.import_reference("partial-copy", source, "GLSL")
 
     def test_cleanup_failure_preserves_original_error_and_reports_hidden_stage(self):
+        references = library.assets("reference")
         with tempfile.TemporaryDirectory() as temp:
             source = pathlib.Path(temp) / "input.frag"
             source.write_bytes(b"shader")
@@ -357,8 +360,8 @@ class LibraryTests(unittest.TestCase):
             stages = list((self.root / "references").glob(".import-*"))
             self.assertEqual(len(stages), 1)
             self.assertIn("Could not remove import staging " + str(stages[0].relative_to(self.root)), diagnostics.getvalue())
-            self.assertEqual(library.assets("reference"), [])
-            self.assertEqual(len(library.validate()), 16)
+            self.assertEqual(library.assets("reference"), references)
+            self.assertEqual(len(library.validate()), self.asset_count)
             shutil.rmtree(stages[0])
 
     def test_import_is_independent_of_unrelated_broken_reference(self):

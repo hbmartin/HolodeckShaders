@@ -1,0 +1,329 @@
+{
+  "collections": [
+    {
+      "description": "A varied selection of Holodeck scenes.",
+      "id": "featured",
+      "name": "Featured",
+      "shaderIDs": [
+        "aurora",
+        "waves",
+        "kaleidoscope",
+        "chrome"
+      ]
+    },
+    {
+      "description": "Night skies and moving light.",
+      "id": "atmospheric",
+      "name": "Atmospheric",
+      "shaderIDs": [
+        "aurora",
+        "starfield"
+      ]
+    },
+    {
+      "description": "Flowing color and geometric patterns.",
+      "id": "abstract",
+      "name": "Abstract",
+      "shaderIDs": [
+        "plasma",
+        "waves",
+        "kaleidoscope"
+      ]
+    },
+    {
+      "description": "Metal finishes under moving studio lights.",
+      "id": "materials",
+      "name": "Materials",
+      "shaderIDs": [
+        "chrome",
+        "brushed-gold",
+        "iridescent"
+      ]
+    }
+  ],
+  "defaultShaderID": "plasma",
+  "schemaVersion": 1,
+  "shaders": [
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.4000000059604645,
+          0.1599999964237213,
+          0.9599999785423279
+        ],
+        [
+          1,
+          0.2800000011920929,
+          0.5
+        ]
+      ],
+      "description": "Liquid color, flowing through an electric field.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "abstract",
+          "fluid",
+          "colorful"
+        ]
+      },
+      "id": "plasma",
+      "name": "Plasma",
+      "previewPath": "previews/plasma.png",
+      "previewSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+      "sourcePath": "sources/plasma.metal",
+      "sourceSHA256": "e05061d4f18a102682fa8caa5aac6641c3824a0a51e20de222059312558dab48",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.03999999910593033,
+          0.7200000286102295,
+          0.5299999713897705
+        ],
+        [
+          0.17000000178813934,
+          0.2800000011920929,
+          0.7599999904632568
+        ]
+      ],
+      "description": "Curtains of light beneath a midnight sky.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "atmospheric",
+          "curtains",
+          "night",
+          "glow"
+        ]
+      },
+      "id": "aurora",
+      "name": "Aurora",
+      "previewPath": "previews/aurora.png",
+      "previewSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+      "sourcePath": "sources/aurora.metal",
+      "sourceSHA256": "a469fcdff1e66ee6cb9137fc486a07637838b6fd1addfcb86206b264dca9db8d",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.029999999329447746,
+          0.5600000023841858,
+          0.8999999761581421
+        ],
+        [
+          0.3100000023841858,
+          0.11999999731779099,
+          0.7200000286102295
+        ]
+      ],
+      "description": "Luminous ribbons moving in overlapping tides.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "abstract",
+          "ribbons",
+          "flowing",
+          "luminous"
+        ]
+      },
+      "id": "waves",
+      "name": "Waves",
+      "previewPath": "previews/waves.png",
+      "previewSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+      "sourcePath": "sources/waves.metal",
+      "sourceSHA256": "c5ab7d48c1bdcb9eaabc8744d7c49795591baf5080c5a6af4aa9157c80af86b6",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.8999999761581421,
+          0.28999999165534973,
+          0.1599999964237213
+        ],
+        [
+          0.6100000143051147,
+          0.12999999523162842,
+          0.7699999809265137
+        ]
+      ],
+      "description": "A shifting mosaic of mirrored color.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "geometric",
+          "symmetry",
+          "colorful"
+        ]
+      },
+      "id": "kaleidoscope",
+      "name": "Kaleidoscope",
+      "previewPath": "previews/kaleidoscope.png",
+      "previewSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+      "sourcePath": "sources/kaleidoscope.metal",
+      "sourceSHA256": "2b833a9de09e3a8c2abacedb77f259cc332c4ba7165495f449bb43ed145e3549",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.10000000149011612,
+          0.14000000059604645,
+          0.3499999940395355
+        ],
+        [
+          0.3100000023841858,
+          0.4000000059604645,
+          0.7599999904632568
+        ]
+      ],
+      "description": "Drift through layers of distant constellations.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "atmospheric",
+          "space",
+          "stars",
+          "drifting"
+        ]
+      },
+      "id": "starfield",
+      "name": "Starfield",
+      "previewPath": "previews/starfield.png",
+      "previewSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+      "sourcePath": "sources/starfield.metal",
+      "sourceSHA256": "1ddd39408b837603c721288a36ed94fb82df5994bf9636cd7c60b5ea41b5c867",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.36000001430511475,
+          0.4300000071525574,
+          0.5299999713897705
+        ],
+        [
+          0.8100000023841858,
+          0.8700000047683716,
+          0.9399999976158142
+        ]
+      ],
+      "description": "A polished sphere reflecting a moving light studio.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "metal",
+          "reflective",
+          "studio"
+        ]
+      },
+      "id": "chrome",
+      "name": "Chrome",
+      "previewPath": "previews/chrome.png",
+      "previewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "sourcePath": "sources/chrome.metal",
+      "sourceSHA256": "e38e15ed044c38be482446abd16b761f15721211ab42a4bd49f2734f29016038",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.4399999976158142,
+          0.23999999463558197,
+          0.07000000029802322
+        ],
+        [
+          0.9599999785423279,
+          0.7099999785423279,
+          0.27000001072883606
+        ]
+      ],
+      "description": "Warm metal with fine grain and soft reflections.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "metal",
+          "warm",
+          "textured"
+        ]
+      },
+      "id": "brushed-gold",
+      "name": "Brushed Gold",
+      "previewPath": "previews/brushed-gold.png",
+      "previewSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+      "sourcePath": "sources/brushed-gold.metal",
+      "sourceSHA256": "745570a1dc512e6d20e8abbfebb561cfb65b0b2694e4573045057f2f0af3e00e",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.28999999165534973,
+          0.7599999904632568,
+          0.7699999809265137
+        ],
+        [
+          0.800000011920929,
+          0.27000001072883606,
+          0.7200000286102295
+        ]
+      ],
+      "description": "An interference finish that changes with the light.",
+      "discovery": {
+        "moods": [
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "shimmer",
+          "colorful",
+          "studio"
+        ]
+      },
+      "id": "iridescent",
+      "name": "Iridescent",
+      "previewPath": "previews/iridescent.png",
+      "previewSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+      "sourcePath": "sources/iridescent.metal",
+      "sourceSHA256": "7a40900e31b781b3d6fdff789db07cab31fb13a752776b93de61c169b186f419",
+      "updatedAt": "2026-10-09T19:25:37Z"
+    }
+  ],
+  "sourceRevision": "30a110d3f635f85ba9bc3ead66ff2670b8af8e24"
+}

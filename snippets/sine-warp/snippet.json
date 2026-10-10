@@ -1,0 +1,34 @@
+{
+  "examplePath": "snippets/sine-warp/example.metal",
+  "id": "sine-warp",
+  "kind": "recipe",
+  "name": "Sine Warp",
+  "origin": {
+    "attribution": "Inferno Water by Paul Hudson and other authors (https://github.com/twostraws/Inferno); see references/inferno",
+    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "water distortion",
+    "domain warp",
+    "underwater wobble",
+    "heat haze"
+  ],
+  "source": {
+    "path": "snippets/sine-warp/code.metal",
+    "symbols": [
+      "hdSineWarp"
+    ]
+  },
+  "summary": "Sine and cosine domain warp that wobbles coordinates like a water surface, with a seamless wrapped phase.",
+  "tags": [
+    "warp",
+    "distortion",
+    "water",
+    "uv"
+  ]
+}

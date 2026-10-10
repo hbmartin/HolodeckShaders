@@ -1,0 +1,41 @@
+{
+  "examplePath": "snippets/crt-overlay/example.metal",
+  "id": "crt-overlay",
+  "kind": "recipe",
+  "name": "CRT Overlay",
+  "origin": {
+    "attribution": "Timothy Lottes CRTS (after FixingPixelArtFast, https://www.shadertoy.com/view/MtSfRK) as adapted for Ghostty by Qwerasd (https://gist.github.com/qwerasd205/c3da6c610c8ffe17d6d2d3cc7068f17f), see references/crt-lottes; VHS overlay by Alex Brinsmead (https://gist.github.com/abrinsmead/be7d2d2209d0dd3097000af369867927), Copyright (c) 2026 Alex Brinsmead, see references/vhs-overlay",
+    "license": "Unlicense / public domain (Timothy Lottes CRTS) and MIT (Alex Brinsmead VHS)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "shadow mask",
+    "scanlines",
+    "film grain",
+    "vhs tracking",
+    "retro tv",
+    "tube curvature"
+  ],
+  "source": {
+    "path": "snippets/crt-overlay/code.metal",
+    "symbols": [
+      "hdCrtShadowMask",
+      "hdScanlines",
+      "hdFilmGrain",
+      "hdTrackingBand",
+      "hdCrtWarp"
+    ]
+  },
+  "summary": "Shadow mask, scanline, grain, tracking-band and tube-warp overlays that give procedural colour a CRT or VHS look.",
+  "tags": [
+    "crt",
+    "vhs",
+    "retro",
+    "post",
+    "overlay"
+  ]
+}

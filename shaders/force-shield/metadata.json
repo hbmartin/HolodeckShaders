@@ -1,0 +1,48 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.149,
+      0.682,
+      1.0
+    ],
+    [
+      0.01,
+      0.03,
+      0.07
+    ]
+  ],
+  "description": "A hexagonal energy shield shimmers, ripples under distant impacts and quietly rebuilds itself.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "steady",
+    "tags": [
+      "sci-fi",
+      "shield",
+      "hexagon",
+      "energy",
+      "glow"
+    ]
+  },
+  "id": "force-shield",
+  "name": "Force Shield",
+  "reuse": {
+    "references": [
+      "flow-shield-effect",
+      "ashima-webgl-noise"
+    ],
+    "snippets": [
+      "simplex-noise-3d",
+      "hex-grid",
+      "sphere-shell",
+      "impact-ripple",
+      "noise-dissolve"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

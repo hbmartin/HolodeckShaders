@@ -1,0 +1,36 @@
+{
+  "examplePath": "snippets/sphere-shell/example.metal",
+  "id": "sphere-shell",
+  "kind": "recipe",
+  "name": "Sphere Shell",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by flow-shield-effect by Christian Ortiz (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "force-shield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "ray sphere intersection",
+    "translucent bubble rim glow"
+  ],
+  "source": {
+    "path": "snippets/sphere-shell/code.metal",
+    "symbols": [
+      "hdRaySphere",
+      "hdFresnel",
+      "hdSphereHalo"
+    ]
+  },
+  "summary": "Analytic ray-sphere intersection, view fresnel and closest-approach halo for translucent bubbles.",
+  "tags": [
+    "sphere",
+    "fresnel",
+    "raytracing",
+    "glow"
+  ]
+}

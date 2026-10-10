@@ -17,7 +17,10 @@
       "name": "Atmospheric",
       "shaderIDs": [
         "aurora",
-        "starfield"
+        "starfield",
+        "ember-drift",
+        "sunlit-shallows",
+        "fireworks"
       ]
     },
     {
@@ -27,7 +30,10 @@
       "shaderIDs": [
         "plasma",
         "waves",
-        "kaleidoscope"
+        "kaleidoscope",
+        "apollonian-twist",
+        "light-grid",
+        "sonar-pulse"
       ]
     },
     {
@@ -38,6 +44,17 @@
         "chrome",
         "brushed-gold",
         "iridescent"
+      ]
+    },
+    {
+      "description": "Simulated rooms, energy fields and digital worlds.",
+      "id": "holodeck",
+      "name": "Holodeck",
+      "shaderIDs": [
+        "holodeck-grid",
+        "force-shield",
+        "warp-speed",
+        "matrix-corridor"
       ]
     }
   ],
@@ -50,6 +67,16 @@
     "starfield",
     "chrome",
     "brushed-gold",
-    "iridescent"
+    "iridescent",
+    "force-shield",
+    "holodeck-grid",
+    "warp-speed",
+    "matrix-corridor",
+    "apollonian-twist",
+    "light-grid",
+    "sonar-pulse",
+    "ember-drift",
+    "sunlit-shallows",
+    "fireworks"
   ]
 }

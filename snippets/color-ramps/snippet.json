@@ -1,0 +1,40 @@
+{
+  "examplePath": "snippets/color-ramps/example.metal",
+  "id": "color-ramps",
+  "kind": "recipe",
+  "name": "Color Ramps",
+  "origin": {
+    "attribution": "Inferno Infrared and Shimmer (Shimmer by bwhtmn after markiv/SwiftUI-Shimmer), by Paul Hudson and other authors (https://github.com/twostraws/Inferno); see references/inferno. HSV conversion is the common branchless formulation.",
+    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors)",
+    "shaderIDs": [
+      "apollonian-twist"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "thermal infrared ramp",
+    "hsl conversion",
+    "hsv conversion",
+    "hue saturation lightness"
+  ],
+  "source": {
+    "path": "snippets/color-ramps/code.metal",
+    "symbols": [
+      "hdHeatRamp",
+      "hdRgbToHsl",
+      "hdHslToRgb",
+      "hdHsvToRgb"
+    ]
+  },
+  "summary": "Heat-map ramp plus HSL and HSV conversions for remapping scalars and adjusting hue, saturation or lightness.",
+  "tags": [
+    "color",
+    "ramp",
+    "heatmap",
+    "hsl",
+    "hsv"
+  ]
+}

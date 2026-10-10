@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/box-room/example.metal",
+  "id": "box-room",
+  "kind": "recipe",
+  "name": "Box Room",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by holodeck-scene by Chris Lane Jones (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "holodeck-grid"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "ray box exit",
+    "bouncing objects in a room"
+  ],
+  "source": {
+    "path": "snippets/box-room/code.metal",
+    "symbols": [
+      "hdRoomHit",
+      "hdBounceInBox"
+    ]
+  },
+  "summary": "Ray exit intersection with an axis-aligned room and triangle-wave bounce paths inside it.",
+  "tags": [
+    "room",
+    "box",
+    "raytracing",
+    "motion"
+  ]
+}

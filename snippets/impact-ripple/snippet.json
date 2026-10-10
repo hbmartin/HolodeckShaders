@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/impact-ripple/example.metal",
+  "id": "impact-ripple",
+  "kind": "recipe",
+  "name": "Impact Ripple",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by flow-shield-effect by Christian Ortiz (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "force-shield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "shield hit ring",
+    "geodesic shockwave"
+  ],
+  "source": {
+    "path": "snippets/impact-ripple/code.metal",
+    "symbols": [
+      "hdImpact",
+      "hdScheduledHit"
+    ]
+  },
+  "summary": "Noisy rings expanding along a sphere surface from scheduled impact points.",
+  "tags": [
+    "impact",
+    "ripple",
+    "sphere",
+    "shield"
+  ]
+}

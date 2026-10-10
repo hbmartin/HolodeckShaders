@@ -1,0 +1,44 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.1,
+      0.75,
+      0.3
+    ],
+    [
+      0.0,
+      0.06,
+      0.02
+    ]
+  ],
+  "description": "Walk the streets of a city built from falling green code.",
+  "discovery": {
+    "moods": [
+      "energetic"
+    ],
+    "motion": "steady",
+    "tags": [
+      "matrix",
+      "digital rain",
+      "glyphs",
+      "city",
+      "cyber"
+    ]
+  },
+  "id": "matrix-corridor",
+  "name": "Matrix Corridor",
+  "reuse": {
+    "references": [
+      "inside-the-matrix",
+      "ghostty-shaders"
+    ],
+    "snippets": [
+      "rune-glyph"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.96,
+      0.32,
+      0.62
+    ],
+    [
+      0.2,
+      0.62,
+      0.95
+    ]
+  ],
+  "description": "A glowing orb sending slow rings of light out into the dark.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "slow",
+    "tags": [
+      "rings",
+      "orb",
+      "pulse",
+      "glow"
+    ]
+  },
+  "id": "sonar-pulse",
+  "name": "Sonar Pulse",
+  "reuse": {
+    "references": [
+      "inferno"
+    ],
+    "snippets": [
+      "cosine-palette",
+      "fbm"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

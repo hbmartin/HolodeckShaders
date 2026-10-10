@@ -1,0 +1,44 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.95,
+      0.55,
+      0.3
+    ],
+    [
+      0.02,
+      0.03,
+      0.09
+    ]
+  ],
+  "description": "Rainbow fireworks bloom and fall across a quiet night sky.",
+  "discovery": {
+    "moods": [
+      "energetic"
+    ],
+    "motion": "steady",
+    "tags": [
+      "fireworks",
+      "celebration",
+      "night",
+      "particles",
+      "glow"
+    ]
+  },
+  "id": "fireworks",
+  "name": "Fireworks",
+  "reuse": {
+    "references": [
+      "bigwings-fireworks",
+      "ghostty-shaders"
+    ],
+    "snippets": [
+      "layered-stars"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

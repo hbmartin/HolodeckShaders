@@ -1,0 +1,45 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      1.0,
+      0.45,
+      0.08
+    ],
+    [
+      0.25,
+      0.07,
+      0.02
+    ]
+  ],
+  "description": "Glowing embers drift upward through warm, rolling smoke.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "steady",
+    "tags": [
+      "fire",
+      "embers",
+      "sparks",
+      "smoke",
+      "warm"
+    ]
+  },
+  "id": "ember-drift",
+  "name": "Ember Drift",
+  "reuse": {
+    "references": [
+      "sparks-from-fire",
+      "ghostty-shaders"
+    ],
+    "snippets": [
+      "ember-sparks",
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

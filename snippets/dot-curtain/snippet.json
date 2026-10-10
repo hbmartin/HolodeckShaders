@@ -1,0 +1,34 @@
+{
+  "examplePath": "snippets/dot-curtain/example.metal",
+  "id": "dot-curtain",
+  "kind": "recipe",
+  "name": "Dot Curtain",
+  "origin": {
+    "attribution": "Inferno Circle Wave and Diamond Wave transitions by Paul Hudson and other authors (https://github.com/twostraws/Inferno), after gl-transitions PolkaDotsCurtain by bobylito; see references/inferno",
+    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors; PolkaDotsCurtain MIT)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "polka dot transition",
+    "halftone wipe",
+    "diamond reveal",
+    "diagonal sweep"
+  ],
+  "source": {
+    "path": "snippets/dot-curtain/code.metal",
+    "symbols": [
+      "hdDotCurtain"
+    ]
+  },
+  "summary": "Polka-dot or diamond halftone wipe mask that grows diagonally from the top-left as amount goes from 0 to 1.",
+  "tags": [
+    "transition",
+    "mask",
+    "halftone",
+    "wipe"
+  ]
+}

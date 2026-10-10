@@ -1,0 +1,37 @@
+{
+  "examplePath": "snippets/kali-starfield/example.metal",
+  "id": "kali-starfield",
+  "kind": "recipe",
+  "name": "Kali Starfield",
+  "origin": {
+    "attribution": "Dave Hoskins, \"Warp Speed 2\" (https://www.shadertoy.com/view/4tjSDt), after Kali's fractal folding; adapted in shaders/warp-speed",
+    "license": "CC BY-NC-SA 3.0 (derived from Dave Hoskins \"Warp Speed 2\" 4tjSDt) \u2014 adaptations must keep this license and attribution",
+    "shaderIDs": [
+      "warp-speed"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "warp speed tunnel",
+    "fractal star streaks",
+    "hyperspace travel",
+    "kaliset volume"
+  ],
+  "source": {
+    "path": "snippets/kali-starfield/code.metal",
+    "symbols": [
+      "hdKaliStarfield"
+    ]
+  },
+  "summary": "Ray-accumulated Kali fractal fold that renders radial warp-speed star streaks as RGB light.",
+  "tags": [
+    "space",
+    "fractal",
+    "stars",
+    "warp",
+    "volumetric"
+  ]
+}

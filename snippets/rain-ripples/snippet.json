@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/rain-ripples/example.metal",
+  "id": "rain-ripples",
+  "kind": "recipe",
+  "name": "Rain Ripples",
+  "origin": {
+    "attribution": "SwiftShaders rainDrops by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91); see references/swiftshaders",
+    "license": "MIT (Copyright (c) 2024 Muhittin Camdali)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "raindrops on water",
+    "puddle rings",
+    "expanding circles"
+  ],
+  "source": {
+    "path": "snippets/rain-ripples/code.metal",
+    "symbols": [
+      "hdRainRipples"
+    ]
+  },
+  "summary": "Expanding raindrop rings from three offset cell layers, with drops that move and skip from cycle to cycle.",
+  "tags": [
+    "rain",
+    "ripples",
+    "water",
+    "rings"
+  ]
+}

@@ -16,6 +16,26 @@ Run `python3 tools/library.py list`, `search "flowing ribbons"`, or `show snippe
 | polar-fold | Mirrored radial patterns |
 | layered-stars | Drifting star layers |
 | aurora-curtains | Noise-modulated curtains of light |
+| simplex-noise-3d | Smooth 3D noise for animated surfaces and volumes |
+| gradient-noise | 2D gradient (Perlin-style) noise |
+| voronoi | Cell distances for cells, edges and caustics |
+| hex-grid | Hexagonal tiling, cell edges and twinkling cells |
+| grid-lines | Antialiased grid masks for surfaces |
+| box-room | Ray–room intersection and bounce paths |
+| sphere-shell | Ray–sphere hits, fresnel and halo glow |
+| hologram-rim | Blue translucent body with amber fresnel rim |
+| impact-ripple | Scheduled impact rings on a sphere |
+| noise-dissolve | Noise-threshold dissolve with glowing edge |
+| kali-starfield | Volumetric Kali-fractal star cloud (CC BY-NC-SA) |
+| ember-sparks | Rising spark particles (CC BY) |
+| rune-glyph | Procedural glyphs for digital rain (CC BY-NC-SA) |
+| god-rays | Swaying light shafts |
+| sinebow-lines | Neon inverse-distance glow lines |
+| dot-curtain | Polka-dot and diamond halftone sweeps |
+| sine-warp | Seamless sinusoidal domain warp |
+| color-ramps | Heat ramp and HSL/HSV conversion |
+| rain-ripples | Expanding raindrop rings |
+| crt-overlay | Shadow mask, scanlines and grain over scene colour |
 
 Shared-helper snippets link to the existing implementation. Recipe snippets have copyable `code.metal` functions. Every snippet includes a machine-readable specification, a contract and a working example. The example harness concatenates declared existing helpers, recipe code if applicable, the example body and the standard fragment wrapper. It is a validation harness, not a production dependency assembler.
 
@@ -27,7 +47,11 @@ Imports reject selected source entries named `.git`, `.DS_Store`, `__pycache__`,
 
 Successful imports do not record the local source location in generated provenance metadata or a separate local record. New imports omit `origin.importedFrom`, including when it is present in the reference template. File names, original contents and error diagnostics may contain identifying information; imports do not anonymize them. Fill in the original URL, author, license, requirements and adaptation notes. Unknown provenance stays explicitly unknown. `validate` checks the inventory and bytes against recorded checksums. Legacy `origin.importedFrom` values are ignored without checking or rewriting them; authors can delete the field manually. Validation does not rewrite metadata or Git history. Keep originals unchanged and adapt into a separate finished shader or snippet.
 
-Initial examples are the eight canonical shaders under `shaders/`; their originals are not duplicated in `references/`.
+The eight original canonical shaders under `shaders/` have no separate originals in `references/`. Later scenes adapted from external work link their provenance through `metadata.reuse.references`.
+
+## Licensing
+
+Check `origin.license` before copying a snippet and the reference before adapting an original. Adapted catalog bodies start with an attribution comment (title, author, URL, license, changes) because published sources travel to the app. Share-alike terms propagate: code derived from a CC BY-NC-SA snippet or reference keeps that license, so prefer permissive snippets when a choice exists. Sources without a license are clean-room inspiration only: record them as metadata-only references and never copy their code. `references/` preserves original files only for permissive licenses (MIT, CC0, CC BY, Unlicense); non-commercial, share-alike or unlicensed sources keep URL, author, license and notes with an empty file inventory.
 
 ## Specifications
 

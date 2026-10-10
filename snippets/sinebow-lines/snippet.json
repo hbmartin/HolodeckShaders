@@ -1,0 +1,33 @@
+{
+  "examplePath": "snippets/sinebow-lines/example.metal",
+  "id": "sinebow-lines",
+  "kind": "recipe",
+  "name": "Sinebow Lines",
+  "origin": {
+    "attribution": "Inferno Sinebow by Paul Hudson and other authors (https://github.com/twostraws/Inferno); see references/inferno",
+    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "neon rainbow lines",
+    "undulating glow lines",
+    "inverse distance glow"
+  ],
+  "source": {
+    "path": "snippets/sinebow-lines/code.metal",
+    "symbols": [
+      "hdSinebowLines"
+    ]
+  },
+  "summary": "Ten undulating neon lines with inverse-distance glow and rainbow drift, returned as additive light.",
+  "tags": [
+    "lines",
+    "neon",
+    "rainbow",
+    "glow"
+  ]
+}

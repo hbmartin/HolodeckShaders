@@ -1,0 +1,42 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.2,
+      0.6,
+      0.9
+    ],
+    [
+      0.8,
+      0.9,
+      1.0
+    ]
+  ],
+  "description": "Streak through a folding fractal starfield at warp speed.",
+  "discovery": {
+    "moods": [
+      "energetic"
+    ],
+    "motion": "fast",
+    "tags": [
+      "space",
+      "fractal",
+      "stars",
+      "tunnel"
+    ]
+  },
+  "id": "warp-speed",
+  "name": "Warp Speed",
+  "reuse": {
+    "references": [
+      "warp-speed-2"
+    ],
+    "snippets": [
+      "kali-starfield"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

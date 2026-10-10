@@ -1,0 +1,38 @@
+{
+  "examplePath": "snippets/rune-glyph/example.metal",
+  "id": "rune-glyph",
+  "kind": "recipe",
+  "name": "Rune Glyph",
+  "origin": {
+    "attribution": "\"runes\" by FabriceNeyret2 (https://www.shadertoy.com/view/4ltyDM), based on \"runes\" by otaviogood (https://shadertoy.com/view/MsXSRn); segment distance from https://www.shadertoy.com/view/4dcfW8; as modified in ghostty-shaders inside-the-matrix.glsl (@pkazmier); adapted in shaders/matrix-corridor",
+    "license": "CC BY-NC-SA 3.0 (derived from Shadertoy 4ltyDM / MsXSRn lineage) \u2014 adaptations must keep this license and these credits",
+    "shaderIDs": [
+      "matrix-corridor"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "matrix code symbols",
+    "random alien glyphs",
+    "digital rain characters"
+  ],
+  "source": {
+    "path": "snippets/rune-glyph/code.metal",
+    "symbols": [
+      "hdRuneGlyph",
+      "hdRuneDistance",
+      "hdRuneHash42"
+    ]
+  },
+  "summary": "Random four-stroke rune glyphs snapped to a 2x3 grid, as a distance or a 0..1 mask, for digital rain and alien text.",
+  "tags": [
+    "glyphs",
+    "text",
+    "matrix",
+    "symbols",
+    "sdf"
+  ]
+}

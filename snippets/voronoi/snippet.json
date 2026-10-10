@@ -1,0 +1,38 @@
+{
+  "examplePath": "snippets/voronoi/example.metal",
+  "id": "voronoi",
+  "kind": "recipe",
+  "name": "Voronoi F1/F2",
+  "origin": {
+    "attribution": "Adapted from SwiftShaders by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91, Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal); used in shaders/sunlit-shallows",
+    "license": "MIT (Copyright (c) 2024 Muhittin Camdali) \u2014 keep the copyright notice when adapting",
+    "shaderIDs": [
+      "sunlit-shallows"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "worley cellular noise",
+    "water caustics net",
+    "cell edges",
+    "crackle pattern"
+  ],
+  "source": {
+    "path": "snippets/voronoi/code.metal",
+    "symbols": [
+      "hdVoronoiF1F2",
+      "hdVoronoiHash22"
+    ]
+  },
+  "summary": "Animated Voronoi (Worley) F1 and F2 distances for cells, edge networks and water caustics.",
+  "tags": [
+    "voronoi",
+    "worley",
+    "cells",
+    "caustics",
+    "noise"
+  ]
+}

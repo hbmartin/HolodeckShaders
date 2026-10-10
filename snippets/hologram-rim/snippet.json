@@ -1,0 +1,34 @@
+{
+  "examplePath": "snippets/hologram-rim/example.metal",
+  "id": "hologram-rim",
+  "kind": "recipe",
+  "name": "Hologram Rim",
+  "origin": {
+    "attribution": "Original Holodeck implementation; look inspired by the Blueprint Mode starship breakdown by Allen White on ArtStation (no code or imagery copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "holodeck-grid"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "blueprint mode",
+    "sci-fi hologram shading"
+  ],
+  "source": {
+    "path": "snippets/hologram-rim/code.metal",
+    "symbols": [
+      "hdHologramRim"
+    ]
+  },
+  "summary": "Blueprint hologram light: translucent blue body, amber fresnel rim and drifting contour lines.",
+  "tags": [
+    "hologram",
+    "fresnel",
+    "blueprint",
+    "material"
+  ]
+}

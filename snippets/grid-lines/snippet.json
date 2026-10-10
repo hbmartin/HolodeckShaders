@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/grid-lines/example.metal",
+  "id": "grid-lines",
+  "kind": "recipe",
+  "name": "Grid Lines",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by holodeck-scene by Chris Lane Jones (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "holodeck-grid"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "filtered grid",
+    "holodeck grid",
+    "tron floor"
+  ],
+  "source": {
+    "path": "snippets/grid-lines/code.metal",
+    "symbols": [
+      "hdGridLine"
+    ]
+  },
+  "summary": "Box-filtered grid line mask that stays stable from close-up to grazing distance.",
+  "tags": [
+    "grid",
+    "lines",
+    "antialiasing",
+    "floor"
+  ]
+}

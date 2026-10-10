@@ -1,0 +1,47 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.1,
+      0.55,
+      0.55
+    ],
+    [
+      0.01,
+      0.08,
+      0.12
+    ]
+  ],
+  "description": "Sunbeams sway through clear shallows as caustics dance across the sand.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "underwater",
+      "ocean",
+      "caustics",
+      "light rays",
+      "water"
+    ]
+  },
+  "id": "sunlit-shallows",
+  "name": "Sunlit Shallows",
+  "reuse": {
+    "references": [
+      "ghostty-shaders",
+      "swiftshaders"
+    ],
+    "snippets": [
+      "voronoi",
+      "god-rays",
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

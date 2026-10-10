@@ -1,0 +1,33 @@
+{
+  "adaptationNotes": "Survey only. Permissive files are preserved separately (sparks-from-fire, crt-lottes, vhs-overlay); inside-the-matrix and bigwings-fireworks have their own metadata references. shaders/sunlit-shallows is a clean-room scene inspired by underwater.glsl and water.glsl (no code read or copied).",
+  "files": {},
+  "id": "ghostty-shaders",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "Ghostty Shaders",
+  "origin": {
+    "author": "Various (see README); collected by 0xhckr",
+    "license": "No repository license; per-file licenses vary",
+    "url": "https://github.com/0xhckr/ghostty-shaders/tree/85898f08fcf4a9274e418912098e99e00a5f8350"
+  },
+  "requirements": [
+    "Shadertoy-style mainImage; iChannel0 is the terminal contents",
+    "Cursor shaders use iCurrentCursor, iPreviousCursor, iTimeCursorChange",
+    "Generators only use iChannel0 to blend over dark terminal pixels"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "terminal shaders",
+    "crt",
+    "cursor effects",
+    "underwater",
+    "starfield"
+  ],
+  "summary": "Classification of all 37 shaders in 0xhckr/ghostty-shaders (no repository license; per-file provenance varies).",
+  "tags": [
+    "ghostty",
+    "terminal",
+    "post-process",
+    "generator",
+    "catalog-survey"
+  ]
+}

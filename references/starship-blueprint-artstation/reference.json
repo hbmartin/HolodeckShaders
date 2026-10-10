@@ -1,0 +1,29 @@
+{
+  "adaptationNotes": "Visual reference only; nothing copied. The 'Blueprint Mode' image (deep-blue translucent body, amber rim, wireframe circles) informed snippets/hologram-rim used by shaders/holodeck-grid. Do not reproduce ship silhouettes, LCARS trade dress or images.",
+  "files": {},
+  "id": "starship-blueprint-artstation",
+  "language": "Art reference (Unity materials; no code)",
+  "name": "Starship Blueprint Shaders",
+  "origin": {
+    "author": "Allen White (dicewrenchdesigns), for Disruptor Beam",
+    "license": "All rights reserved (images (c) Disruptor Beam; Star Trek property of Paramount)",
+    "url": "https://www.artstation.com/artwork/XABr3"
+  },
+  "requirements": [
+    "Meshes with vertex colours, UV sets, normal and specular textures"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "blueprint mode",
+    "hologram material",
+    "starship shader"
+  ],
+  "summary": "Allen White's Star Trek Timelines starship shader breakdown on ArtStation; mood reference for the hologram-rim look.",
+  "tags": [
+    "hologram",
+    "blueprint",
+    "fresnel",
+    "art-reference",
+    "unity"
+  ]
+}

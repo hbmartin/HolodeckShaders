@@ -1,0 +1,38 @@
+{
+  "adaptationNotes": "Pinned to 4acb3a91, the last commit before upstream deleted all shaders ('Purged broken monoliths'). Voronoi F1/F2 -> snippets/voronoi (used by shaders/sunlit-shallows), perlinNoise -> snippets/gradient-noise, rainDrops -> snippets/rain-ripples. Each was rewritten to compile, use aspect-correct coordinates and precision-safe time.",
+  "files": {
+    "LICENSE": "b24736b7c093ad8882679db1d4466fb809e76de5d5d5dd8ac9351128c74ecdb3",
+    "Sources/SwiftShaders/Shaders/Noise/NoiseShader.metal": "04cce0c6f3e3bc3de50b0540e26bb01308b713091246000025fd23d762069a6f",
+    "Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal": "d0be28345e96de32ca2c69c62164105dbd7c2eb2a5d51adf658c04b4242c4be5",
+    "Sources/SwiftShaders/Shaders/Water/WaterShader.metal": "ec0a9ec49076873d2c37df6db03ff188bee0eda87b55ebfcf5f35cb9ac247445"
+  },
+  "id": "swiftshaders",
+  "language": "Metal (SwiftUI stitchable)",
+  "name": "SwiftShaders",
+  "origin": {
+    "author": "Muhittin Camdali",
+    "importedAt": "2026-10-10T18:51:45.568056Z",
+    "license": "MIT (Copyright (c) 2024 Muhittin Camdali)",
+    "url": "https://github.com/muhittincamdali/SwiftShaders/tree/4acb3a91c44b474a5fc8a994195e8b8c16af4e8f"
+  },
+  "requirements": [
+    "SwiftUI [[stitchable]] signatures with boundingRect uniforms",
+    "not aspect-corrected (position / bounds.zw)",
+    "upstream never verified to compile (duplicate stitchable names)"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "voronoi cells",
+    "perlin noise",
+    "rain drops",
+    "caustics"
+  ],
+  "summary": "Muhittin Camdali's MIT SwiftUI shader collection at commit 4acb3a91 (shaders later purged); Voronoi, gradient noise and rain ripples became snippets.",
+  "tags": [
+    "swiftui",
+    "voronoi",
+    "noise",
+    "water",
+    "mit"
+  ]
+}

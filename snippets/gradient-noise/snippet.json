@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/gradient-noise/example.metal",
+  "id": "gradient-noise",
+  "kind": "recipe",
+  "name": "Gradient Noise",
+  "origin": {
+    "attribution": "SwiftShaders perlinNoise by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91); see references/swiftshaders",
+    "license": "MIT (Copyright (c) 2024 Muhittin Camdali)",
+    "shaderIDs": []
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "perlin noise",
+    "2d gradient noise",
+    "marble",
+    "smooth random field"
+  ],
+  "source": {
+    "path": "snippets/gradient-noise/code.metal",
+    "symbols": [
+      "hdGradientNoise2",
+      "hdGradientNoiseDir"
+    ]
+  },
+  "summary": "Perlin-style 2D gradient noise in 0..1 with a quintic fade, built on the shared hash21.",
+  "tags": [
+    "noise",
+    "perlin",
+    "gradient",
+    "procedural"
+  ]
+}

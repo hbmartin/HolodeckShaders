@@ -1,0 +1,46 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      1.0,
+      0.72,
+      0.18
+    ],
+    [
+      0.08,
+      0.12,
+      0.6
+    ]
+  ],
+  "description": "Blueprint holograms drift slowly through an amber-gridded holodeck.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "steady",
+    "tags": [
+      "sci-fi",
+      "grid",
+      "hologram",
+      "room",
+      "retro"
+    ]
+  },
+  "id": "holodeck-grid",
+  "name": "Holodeck Grid",
+  "reuse": {
+    "references": [
+      "holodeck-scene",
+      "starship-blueprint-artstation"
+    ],
+    "snippets": [
+      "grid-lines",
+      "box-room",
+      "hologram-rim"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

@@ -67,7 +67,7 @@ class CatalogValidationTests(unittest.TestCase):
         with patch.object(catalog, "git", side_effect=git):
             output = self.root / "dist"
             manifest = catalog.build(output)
-        self.assertEqual(len(manifest["shaders"]), 8)
+        self.assertEqual([entry["id"] for entry in manifest["shaders"]], catalog.read_json(self.root / "index.json")["shaders"])
         self.assertEqual(manifest["collections"][0]["shaderIDs"], ["aurora", "waves", "kaleidoscope", "chrome"])
         self.assertEqual(manifest["shaders"][0]["discovery"]["moods"], ["energetic"])
         self.assertTrue(all("reuse" not in entry for entry in manifest["shaders"]))

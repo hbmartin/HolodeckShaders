@@ -1,0 +1,40 @@
+{
+  "examplePath": "snippets/ember-sparks/example.metal",
+  "id": "ember-sparks",
+  "kind": "recipe",
+  "name": "Ember Sparks",
+  "origin": {
+    "attribution": "Jan Mr\u00f3z (jaszunio15), \"Sparks from fire\" (https://www.shadertoy.com/view/wl2Gzc), via Alex Sherwin's Ghostty adaptation; adapted in shaders/ember-drift",
+    "license": "CC BY 3.0 (derived from Jan Mr\u00f3z \"Sparks from fire\" wl2Gzc) \u2014 keep attribution when adapting",
+    "shaderIDs": [
+      "ember-drift"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "rising embers",
+    "fire sparks with bloom",
+    "drifting particles",
+    "seamless loop"
+  ],
+  "source": {
+    "path": "snippets/ember-sparks/code.metal",
+    "symbols": [
+      "hdEmberLayer",
+      "hdEmberHash4",
+      "hdEmberDrift",
+      "hdEmberPeriod"
+    ]
+  },
+  "summary": "One layer of glowing sparks drifting diagonally upward with flutter, spin, bloom and per-spark fade, looping seamlessly.",
+  "tags": [
+    "fire",
+    "embers",
+    "sparks",
+    "particles",
+    "glow"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "examplePath": "snippets/god-rays/example.metal",
+  "id": "god-rays",
+  "kind": "recipe",
+  "name": "God Rays",
+  "origin": {
+    "attribution": "Original Holodeck implementation written for shaders/sunlit-shallows",
+    "license": "Original Holodeck work; see repository provenance",
+    "shaderIDs": [
+      "sunlit-shallows"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "light shafts",
+    "sun beams underwater",
+    "crepuscular rays",
+    "swaying beams"
+  ],
+  "source": {
+    "path": "snippets/god-rays/code.metal",
+    "symbols": [
+      "hdGodRays"
+    ]
+  },
+  "summary": "Soft light shafts fanning from a point above the frame that slowly sway and drift, as a 0..1 mask.",
+  "tags": [
+    "light",
+    "rays",
+    "underwater",
+    "atmosphere",
+    "beams"
+  ]
+}

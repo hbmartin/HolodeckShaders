@@ -1,0 +1,35 @@
+{
+  "examplePath": "snippets/simplex-noise-3d/example.metal",
+  "id": "simplex-noise-3d",
+  "kind": "recipe",
+  "name": "Simplex Noise 3D",
+  "origin": {
+    "attribution": "Port of Ashima Arts webgl-noise noise3D.glsl by Ian McEwan and Stefan Gustavson (https://github.com/ashima/webgl-noise)",
+    "license": "MIT (Ashima Arts webgl-noise)",
+    "shaderIDs": [
+      "force-shield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "gradient noise",
+    "ashima webgl noise",
+    "snoise"
+  ],
+  "source": {
+    "path": "snippets/simplex-noise-3d/code.metal",
+    "symbols": [
+      "hdSimplex3"
+    ]
+  },
+  "summary": "Textureless 3D simplex noise returning roughly -1 to 1.",
+  "tags": [
+    "noise",
+    "simplex",
+    "3d",
+    "procedural"
+  ]
+}

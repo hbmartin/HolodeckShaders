@@ -1,0 +1,34 @@
+{
+  "examplePath": "snippets/noise-dissolve/example.metal",
+  "id": "noise-dissolve",
+  "kind": "recipe",
+  "name": "Noise Dissolve",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by flow-shield-effect by Christian Ortiz (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "force-shield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "materialize effect",
+    "burn edge threshold"
+  ],
+  "source": {
+    "path": "snippets/noise-dissolve/code.metal",
+    "symbols": [
+      "hdDissolve"
+    ]
+  },
+  "summary": "Threshold a noise value into a visibility mask with a bright burning edge for materialize and dissolve effects.",
+  "tags": [
+    "dissolve",
+    "transition",
+    "mask",
+    "glow"
+  ]
+}

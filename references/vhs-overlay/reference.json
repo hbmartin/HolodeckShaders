@@ -1,0 +1,32 @@
+{
+  "adaptationNotes": "Only overlay terms that do not need a source image (grain, static flecks, tracking band, vignette) are reusable; see snippets/crt-overlay.",
+  "files": {
+    "vhs.glsl": "bf0f3e4ecfc32c733dc4fb6faf06e1cf433cae8972150e3637de1ae27b17bbe8"
+  },
+  "id": "vhs-overlay",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "VHS Overlay",
+  "origin": {
+    "author": "Alex Brinsmead",
+    "importedAt": "2026-10-10T18:51:46.005408Z",
+    "license": "MIT (Copyright (c) 2026 Alex Brinsmead)",
+    "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/vhs.glsl"
+  },
+  "requirements": [
+    "post-process: samples iChannel0 terminal texture several times"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "tape tracking",
+    "film grain",
+    "static noise"
+  ],
+  "summary": "Alex Brinsmead's MIT degraded-VHS and CRT post-process for Ghostty; grain and tracking pieces feed the crt-overlay snippet.",
+  "tags": [
+    "vhs",
+    "retro",
+    "grain",
+    "static",
+    "mit"
+  ]
+}

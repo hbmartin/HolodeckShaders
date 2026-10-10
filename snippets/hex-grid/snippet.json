@@ -1,0 +1,38 @@
+{
+  "examplePath": "snippets/hex-grid/example.metal",
+  "id": "hex-grid",
+  "kind": "recipe",
+  "name": "Hex Grid",
+  "origin": {
+    "attribution": "Original Holodeck implementation; technique inspired by flow-shield-effect by Christian Ortiz (no code copied)",
+    "license": "Original work (this repository)",
+    "shaderIDs": [
+      "force-shield"
+    ]
+  },
+  "requiredShared": [
+    "common"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "honeycomb lattice",
+    "hexagon tiling on a sphere",
+    "energy shield cells"
+  ],
+  "source": {
+    "path": "snippets/hex-grid/code.metal",
+    "symbols": [
+      "hdHexCell",
+      "hdHexEdge",
+      "hdCellFlash",
+      "hdSphereHexCell"
+    ]
+  },
+  "summary": "Hexagonal cell lookup, anti-aliased cell borders, sparse per-cell twinkles and a seamless hex lattice on a sphere.",
+  "tags": [
+    "hexagon",
+    "tiling",
+    "cells",
+    "sphere"
+  ]
+}

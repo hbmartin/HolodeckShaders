@@ -1,0 +1,43 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.93,
+      0.12,
+      0.62
+    ],
+    [
+      0.18,
+      0.86,
+      0.96
+    ]
+  ],
+  "description": "A wall of soft lights, each drifting through its own colors.",
+  "discovery": {
+    "moods": [
+      "calm"
+    ],
+    "motion": "steady",
+    "tags": [
+      "grid",
+      "lights",
+      "led",
+      "colorful"
+    ]
+  },
+  "id": "light-grid",
+  "name": "Light Grid",
+  "reuse": {
+    "references": [
+      "inferno"
+    ],
+    "snippets": [
+      "cosine-palette",
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

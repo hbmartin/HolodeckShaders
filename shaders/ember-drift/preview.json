@@ -1,10 +1,10 @@
 {
-  "fingerprint": "ad4a673b3a35881da4bd0d69033b4020f46bf47e90dd9a8a28562ccc0458764f",
+  "fingerprint": "96ffcddaacf5300106e5da7a87cfb2011480e1b7b5793325b7e6e0aa25eaedd6",
   "settings": {
     "height": 720,
     "pixelFormat": "bgra8Unorm_srgb",
     "time": 3,
     "width": 1280
   },
-  "sha256": "295fa4ca909b5c787c06a7cf714c2c3d4b614f155f9e5c9d9b1d33dd6c2afef7"
+  "sha256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818"
 }

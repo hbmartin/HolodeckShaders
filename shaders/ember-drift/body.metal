@@ -35,8 +35,9 @@ float hdEmberNoise(float2 uv) {
     return mix(mix(h.x, h.y, f.x), mix(h.z, h.w, f.x), f.y);
 }
 
-// Drift of n/3 lattice cells per second along (0.7, 1.0), wrapped to the 256-cell lattice period.
-float2 hdEmberDrift(float phase, float n) { return 256.0 * fract(phase * n * float2(7.0, 10.0)); }
+// Sampling offset at n/3 lattice cells per second along (0.7, -1.0), wrapped to the 256-cell lattice.
+// Adding this to Y-up coordinates moves the visible field in the opposite direction: left and upward.
+float2 hdEmberDrift(float phase, float n) { return 256.0 * fract(phase * n * float2(7.0, -10.0)); }
 
 // Layered value noise; drift[i] are per-octave speeds in thirds of a cell per second.
 float hdEmberSmoke(float2 uv, float phase) {

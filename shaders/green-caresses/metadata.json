@@ -1,0 +1,41 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.24,
+      0.98,
+      0.27
+    ],
+    [
+      0.58,
+      0.99,
+      1
+    ]
+  ],
+  "description": "Mint and lime fields breathe beneath soft, drifting folds of cyan light.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "mint",
+      "green",
+      "folds",
+      "pastel"
+    ]
+  },
+  "id": "green-caresses",
+  "name": "Green Caresses",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

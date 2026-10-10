@@ -1,0 +1,41 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.94,
+      0.26,
+      0.02
+    ],
+    [
+      0.04,
+      0.69,
+      0.85
+    ]
+  ],
+  "description": "Soft concentric ripples join scarlet evening and golden dawn with cyan and cobalt.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "ripples",
+      "warm",
+      "cool",
+      "color"
+    ]
+  },
+  "id": "evening-and-morning",
+  "name": "Evening and Morning",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.82,
+      0.87,
+      1
+    ],
+    [
+      0.025,
+      0.47,
+      0.59
+    ]
+  ],
+  "description": "A hazy lavender surface melts through blue and cyan into slow, deep teal currents.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "ocean",
+      "blue",
+      "gradient",
+      "haze"
+    ]
+  },
+  "id": "side-view-of-the-ocean",
+  "name": "Side View of the Ocean",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

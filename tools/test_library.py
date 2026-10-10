@@ -96,14 +96,13 @@ class LibraryTests(unittest.TestCase):
             destination = library.import_reference("test-source", source, "GLSL")
             self.assertEqual((destination / "original/nested/input.frag").read_bytes(), original)
             spec = catalog.read_json(destination / "reference.json")
-            self.assertEqual(spec["origin"]["importedFrom"], "test-source")
             self.assertTrue(spec["origin"]["importedAt"].endswith("Z"))
             library.validate()
             with self.assertRaises(ValueError): library.import_reference("test-source", source, "GLSL")
             (destination / "original/nested/input.frag").write_bytes(b"modified")
             with self.assertRaisesRegex(ValueError, "checksum"): library.validate()
 
-    def test_import_metadata_uses_public_label_without_private_paths(self):
+    def test_import_metadata_omits_private_paths(self):
         with tempfile.TemporaryDirectory() as temp:
             private = pathlib.Path(temp) / "private-contributor-José/private-project-雪"
             directory = private / "private-reference-directory-é"
@@ -120,7 +119,7 @@ class LibraryTests(unittest.TestCase):
                         destination = library.import_reference(asset_id, argument, "GLSL")
                         metadata = (destination / "reference.json").read_text()
                         spec = json.loads(metadata)
-                        self.assertEqual(spec["origin"]["importedFrom"], asset_id)
+                        self.assertNotIn("importedFrom", spec["origin"])
                         for value in self.metadata_strings(spec):
                             self.assertNotIn(str(source), value)
                             self.assertNotIn(str(source.parent), value)
@@ -386,22 +385,40 @@ class LibraryTests(unittest.TestCase):
                 library.import_reference("valid-id", source, "GLSL")
             self.assert_import_absent("valid-id")
 
-    def test_reference_imported_from_must_match_public_id_when_present(self):
+    def test_import_discards_template_imported_from(self):
+        template = self.root / "templates/reference/reference.json"
+        spec = catalog.read_json(template)
+        with tempfile.TemporaryDirectory() as temp:
+            source = pathlib.Path(temp) / "José/input.frag"
+            source.parent.mkdir()
+            source.write_bytes(b"shader")
+            spec["origin"]["importedFrom"] = str(source)
+            spec["origin"]["url"] = "https://example.invalid/shader"
+            catalog.write_json(template, spec)
+            destination = library.import_reference("public-reference", source, "GLSL")
+            imported = catalog.read_json(destination / "reference.json")
+            self.assertNotIn("importedFrom", imported["origin"])
+            for field in ("author", "license", "url"):
+                self.assertEqual(imported["origin"][field], spec["origin"][field])
+            library.validate()
+
+    def test_reference_legacy_imported_from_is_ignored_without_rewriting(self):
         destination = library.scaffold("reference", "public-reference")
-        spec = catalog.read_json(destination / "reference.json")
+        metadata = destination / "reference.json"
+        spec = catalog.read_json(metadata)
         spec["origin"]["url"] = "https://example.invalid/shader"
-        catalog.write_json(destination / "reference.json", spec)
+        catalog.write_json(metadata, spec)
         library.validate()
-        for value in ("/Users/José/private/input.frag", "relative/input.frag", "wrong-label", None, 42, {}, []):
+        for value in ("public-reference", "/Users/private/input.frag", "relative/input.frag",
+                      "/Users/José/雪/input.frag", "wrong-label", None, 42,
+                      {"source": "private/input.frag"}, ["private/input.frag"]):
             with self.subTest(value=value):
                 spec["origin"]["importedFrom"] = value
-                catalog.write_json(destination / "reference.json", spec)
-                with self.assertRaisesRegex(ValueError, "replace origin.importedFrom with the public reference ID"):
-                    library.validate()
-        spec["origin"]["importedFrom"] = "public-reference"
-        catalog.write_json(destination / "reference.json", spec)
-        library.validate()
-        self.assertEqual(catalog.read_json(destination / "reference.json")["origin"]["url"], "https://example.invalid/shader")
+                catalog.write_json(metadata, spec)
+                before = metadata.read_bytes()
+                library.validate()
+                self.assertEqual(metadata.read_bytes(), before)
+        self.assertEqual(catalog.read_json(metadata)["origin"]["url"], "https://example.invalid/shader")
 
     def test_destination_created_during_import_is_not_overwritten(self):
         with tempfile.TemporaryDirectory() as temp:

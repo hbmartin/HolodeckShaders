@@ -145,8 +145,6 @@ def validate_reference(item):
             raise ValueError(f"Invalid reference {field}: {item['id']}")
     if not isinstance(spec.get("origin"), dict) or any(not catalog.text_field(spec["origin"].get(field)) for field in ("author", "license")):
         raise ValueError(f"Missing reference provenance: {item['id']}")
-    if "importedFrom" in spec["origin"] and spec["origin"]["importedFrom"] != item["id"]:
-        raise ValueError(f"Invalid reference importedFrom: {item['id']}; replace origin.importedFrom with the public reference ID")
     path(item["path"] + "/README.md")
     files = spec.get("files")
     if not isinstance(files, dict):
@@ -299,7 +297,7 @@ def import_reference(asset_id, source, language):
         make_directories_writable(stage_root)
         spec = catalog.read_json(stage / "reference.json")
         spec["language"] = language
-        spec["origin"]["importedFrom"] = asset_id
+        spec["origin"].pop("importedFrom", None)
         spec["origin"]["importedAt"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         spec["files"] = {str(p.relative_to(original)): catalog.digest(p.read_bytes()) for p in sorted(original.rglob("*")) if p.is_file()}
         if not spec["files"]:

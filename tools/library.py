@@ -4,13 +4,17 @@ import argparse
 import datetime
 import json
 import math
+import os
 import pathlib
 import shutil
+import stat
 import subprocess
+import sys
 import tempfile
 import catalog
 
 KINDS = {"shader": ("shaders", "metadata.json"), "snippet": ("snippets", "snippet.json"), "reference": ("references", "reference.json")}
+IMPORT_ARTIFACTS = {".git", ".DS_Store", "__pycache__", ".idea", ".vscode", "xcuserdata"}
 
 
 def path(relative):
@@ -134,13 +138,15 @@ def snippet_source(item):
 
 def validate_reference(item):
     spec = item["specification"]
-    if spec.get("schemaVersion") != 1 or any(not catalog.text_field(spec.get(field)) for field in ("name", "summary", "language", "adaptationNotes")):
+    if not isinstance(spec, dict) or not catalog.valid_id(item["id"]) or spec.get("id") != item["id"] or spec.get("schemaVersion") != 1 or any(not catalog.text_field(spec.get(field)) for field in ("name", "summary", "language", "adaptationNotes")):
         raise ValueError(f"Invalid reference: {item['id']}")
     for field in ("tags", "searchTerms", "requirements"):
         if not catalog.string_list(spec.get(field)):
             raise ValueError(f"Invalid reference {field}: {item['id']}")
     if not isinstance(spec.get("origin"), dict) or any(not catalog.text_field(spec["origin"].get(field)) for field in ("author", "license")):
         raise ValueError(f"Missing reference provenance: {item['id']}")
+    if "importedFrom" in spec["origin"] and spec["origin"]["importedFrom"] != item["id"]:
+        raise ValueError(f"Invalid reference importedFrom: {item['id']}; replace origin.importedFrom with the public reference ID")
     path(item["path"] + "/README.md")
     files = spec.get("files")
     if not isinstance(files, dict):
@@ -178,55 +184,138 @@ def validate(compile_metal=False):
     return items
 
 
+def populate_template(kind, asset_id, destination):
+    shutil.copytree(catalog.ROOT / "templates" / kind, destination)
+    for file in destination.rglob("*"):
+        if file.is_file():
+            file.write_text(file.read_text().replace("__ID__", asset_id).replace("__NAME__", asset_id.replace("-", " ").title()))
+
+
 def scaffold(kind, asset_id):
     if kind not in KINDS or not catalog.valid_id(asset_id):
         raise ValueError("Invalid kind or ID")
-    folder, filename = KINDS[kind]
+    folder, _ = KINDS[kind]
     destination = catalog.ROOT / folder / asset_id
     if destination.exists() or destination.is_symlink():
         raise ValueError(f"Refusing to overwrite: {destination}")
-    template = catalog.ROOT / "templates" / kind
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=destination.parent) as temp:
         stage = pathlib.Path(temp) / asset_id
-        shutil.copytree(template, stage)
-        for file in stage.rglob("*"):
-            if file.is_file():
-                file.write_text(file.read_text().replace("__ID__", asset_id).replace("__NAME__", asset_id.replace("-", " ").title()))
+        populate_template(kind, asset_id, stage)
         if destination.exists() or destination.is_symlink():
             raise ValueError(f"Refusing to overwrite: {destination}")
         stage.rename(destination)
     return destination
 
 
+def import_checkout():
+    command = ["git", "-C", str(catalog.ROOT)]
+    try:
+        checkout = pathlib.Path(subprocess.check_output(command + ["rev-parse", "--show-toplevel"], stderr=subprocess.PIPE, text=True).rstrip("\n")).resolve()
+        git_dir = subprocess.check_output(command + ["rev-parse", "--absolute-git-dir"], stderr=subprocess.PIPE, text=True).rstrip("\n")
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ValueError("Reference imports require Git and a working checkout") from error
+    return checkout, git_dir
+
+
+def make_directories_writable(directory):
+    # Work top-down so a partially copied directory is traversable before listing it.
+    directory.chmod(stat.S_IMODE(directory.stat().st_mode) | stat.S_IRWXU)
+    for child in directory.iterdir():
+        if not child.is_symlink() and child.is_dir():
+            make_directories_writable(child)
+
+
+def check_import_ignored(stage_root, stage, checkout, git_dir):
+    # Reuse local/global excludes, resolving a configured relative path before changing worktrees.
+    excludes = subprocess.run(["git", "-C", str(checkout), "config", "--path", "--get", "core.excludesFile"], capture_output=True, text=True)
+    options = []
+    if excludes.returncode == 0:
+        exclude_file = excludes.stdout.rstrip("\n")
+        if exclude_file and not pathlib.Path(exclude_file).is_absolute():
+            exclude_file = checkout / exclude_file
+        options = ["-c", f"core.excludesFile={exclude_file}"]
+    elif excludes.returncode != 1:
+        excludes.check_returncode()
+    files = sorted(p.relative_to(stage_root).as_posix() for p in stage.rglob("*") if p.is_file())
+    result = subprocess.run(["git", *options, f"--git-dir={git_dir}", f"--work-tree={stage_root}",
+                             "check-ignore", "--no-index", "--stdin", "-z"],
+                            input=b"".join(os.fsencode(file) + b"\0" for file in files), capture_output=True, cwd=stage_root)
+    if result.returncode not in (0, 1):
+        result.check_returncode()
+    if result.stdout:
+        omitted = [os.fsdecode(file) for file in result.stdout.rstrip(b"\0").split(b"\0")]
+        raise ValueError("Import contains files Git would omit:\n" + "\n".join(f"  {file} (ignored by Git)" for file in omitted)
+                         + "\nPrepare a clean source or adjust ignore rules before importing")
+
+
 def import_reference(asset_id, source, language):
+    if not catalog.valid_id(asset_id):
+        raise ValueError("Invalid kind or ID")
     source = pathlib.Path(source).expanduser().absolute()
-    if not source.exists() or source.is_symlink() or any(p.is_symlink() for p in source.rglob("*")):
+    entries = [source, *sorted(source.rglob("*"))]
+    if not source.exists() or any(p.is_symlink() for p in entries):
         raise ValueError("Import requires a local file/directory without symlinks")
     if not catalog.text_field(language, 100):
         raise ValueError("Missing source language")
     if source.is_dir() and (catalog.ROOT / "references").resolve().is_relative_to(source.resolve()):
         raise ValueError("Import source must not contain the reference destination")
-    destination = scaffold("reference", asset_id)
+    destination = catalog.ROOT / "references" / asset_id
+    if destination.exists() or destination.is_symlink():
+        raise ValueError(f"Refusing to overwrite: {destination}")
+    checkout, git_dir = import_checkout()
+    relative = destination.resolve().relative_to(checkout)
+    artifacts = []
+    for entry in entries:
+        if entry.name in IMPORT_ARTIFACTS:
+            name = entry.relative_to(source) if source.is_dir() else pathlib.Path(source.name)
+            label = (relative / "original" / name).as_posix()
+            artifacts.append(f"  {label} (environment artifact: {entry.name})")
+    if artifacts:
+        raise ValueError("Import contains environment artifacts:\n" + "\n".join(artifacts) + "\nPrepare a clean source before importing")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    stage_root = pathlib.Path(tempfile.mkdtemp(prefix=".import-", dir=destination.parent))
     try:
-        original = destination / "original"
+        # Mirror the final path so anchored ignore rules never see the temporary prefix.
+        stage = stage_root / relative
+        stage.parent.mkdir(parents=True, exist_ok=True)
+        populate_template("reference", asset_id, stage)
+        ancestor = destination.parent.resolve()
+        while ancestor.is_relative_to(checkout):
+            ignore = ancestor / ".gitignore"
+            if ignore.is_file():
+                mirror = stage_root / ignore.relative_to(checkout)
+                mirror.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(ignore, mirror)
+            if ancestor == checkout:
+                break
+            ancestor = ancestor.parent
+        original = stage / "original"
         original.mkdir()
         if source.is_dir():
             shutil.copytree(source, original, dirs_exist_ok=True)
         else:
             shutil.copy2(source, original / source.name)
-        spec = catalog.read_json(destination / "reference.json")
+        make_directories_writable(stage_root)
+        spec = catalog.read_json(stage / "reference.json")
         spec["language"] = language
         spec["origin"]["importedFrom"] = asset_id
         spec["origin"]["importedAt"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         spec["files"] = {str(p.relative_to(original)): catalog.digest(p.read_bytes()) for p in sorted(original.rglob("*")) if p.is_file()}
         if not spec["files"]:
             raise ValueError("Import contains no files")
-        catalog.write_json(destination / "reference.json", spec)
-        validate_reference(find("reference", asset_id))
-    except Exception:
-        shutil.rmtree(destination)
-        raise
+        catalog.write_json(stage / "reference.json", spec)
+        check_import_ignored(stage_root, stage, checkout, git_dir)
+        validate_reference({"id": asset_id, "path": stage.relative_to(catalog.ROOT).as_posix(), "specification": spec})
+        if destination.exists() or destination.is_symlink():
+            raise ValueError(f"Refusing to overwrite: {destination}")
+        stage.rename(destination)
+    finally:
+        try:
+            make_directories_writable(stage_root)
+            shutil.rmtree(stage_root)
+        except Exception as error:
+            print(f"library: Could not remove import staging {stage_root.relative_to(catalog.ROOT)}: {error}", file=sys.stderr)
     return destination
 
 

@@ -9,6 +9,8 @@
 // static wobble field; smoke reduced to 4 + 2 octaves; uninitialized offsets zeroed; larger sparks
 // and bloom, a faint under-glow, exposure, dither and sRGB-style decode for the sRGB render target.
 
+// License terms: https://creativecommons.org/licenses/by/3.0/
+
 constant float hdEmberPeriod = 7680.0;   // seconds; every motion completes whole cycles over this
 
 // Hashes on a 256-cell periodic lattice (cells are wrapped before hashing).

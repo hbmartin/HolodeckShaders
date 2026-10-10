@@ -1,6 +1,8 @@
 // Derived from "Sparks from fire" by Jan Mróz (jaszunio15), https://www.shadertoy.com/view/wl2Gzc, CC BY 3.0.
 // Keep this attribution when adapting.
 
+// License terms: https://creativecommons.org/licenses/by/3.0/
+
 constant float hdEmberPeriod = 7680.0;   // seconds; every motion completes whole cycles over this
 
 // Hashes on a 256-cell periodic lattice (cells are wrapped before hashing).

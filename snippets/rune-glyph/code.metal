@@ -3,6 +3,8 @@
 // "inside-the-matrix.glsl" (@pkazmier); segment distance from https://www.shadertoy.com/view/4dcfW8.
 // CC BY-NC-SA 3.0 lineage: adaptations must keep CC BY-NC-SA 3.0 and these credits.
 // Hash after Dave Hoskins ("Hash without Sine").
+// License terms: https://creativecommons.org/licenses/by-nc-sa/3.0/
+
 float4 hdRuneHash42(float2 p) {
     float4 p4 = fract(float4(p.xyxy) * float4(0.1031, 0.1030, 0.0973, 0.1099));
     p4 += dot(p4, p4.wzxy + 33.33);

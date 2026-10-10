@@ -14,6 +14,8 @@
 // fog; route start offset 100 s; full brightness (was 0.25) with an sRGB-style decode.
 // This adaptation is licensed CC BY-NC-SA 3.0.
 
+// License terms: https://creativecommons.org/licenses/by-nc-sa/3.0/
+
 constant float hdMxCharH = 0.15;                     // STRIP_CHAR_HEIGHT
 constant float hdMxCharW = 0.10;                     // STRIP_CHAR_WIDTH
 constant float hdMxZCell = 0.15 * 40.0;              // ZCELL_SIZE

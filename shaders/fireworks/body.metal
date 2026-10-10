@@ -11,6 +11,8 @@
 // on the horizon haze; exponential tone mapping.
 // This adaptation is licensed CC BY-NC-SA 3.0.
 
+// License terms: https://creativecommons.org/licenses/by-nc-sa/3.0/
+
 float3 hdFwHash31(float p) {
     float3 p3 = fract(float3(p) * float3(0.1031, 0.11369, 0.13787));
     p3 += dot(p3, p3.yzx + 19.19);

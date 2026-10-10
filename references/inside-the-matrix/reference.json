@@ -1,5 +1,5 @@
 {
-  "adaptationNotes": "Metadata only (mixed provenance). Adapted to shaders/matrix-corridor and snippets/rune-glyph with the mouse path removed, a seamless time wrap instead of a 300 s reset and reduced traversal cost; the adaptation is treated as CC BY-NC-SA 3.0. Exact header text is quoted in the shader body.",
+  "adaptationNotes": "Metadata only (mixed provenance). Adapted to shaders/matrix-corridor and snippets/rune-glyph with the mouse path removed, camera and rain positions repeating every 1920 s instead of a 300 s reset, an independent glyph clock that continues across route wraps, and reduced traversal cost; the complete scene is not an exact 1920 s loop. The adaptation is treated as CC BY-NC-SA 3.0. Exact header text is quoted in the shader body.",
   "files": {},
   "id": "inside-the-matrix",
   "language": "GLSL (Ghostty/Shadertoy)",

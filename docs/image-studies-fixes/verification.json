@@ -1,0 +1,897 @@
+{
+  "verifiedOn": "2026-10-10",
+  "baselineRevision": "b084476259e351edc501c81b087123547766c04a",
+  "sourceRevision": "5a736216d86d155d818e55947a1caa3147b1cf8d",
+  "historicalSourceRevision": "54691e57840964c899336dda250f359cd77e30d9",
+  "device": "Apple M2 Pro",
+  "operatingSystem": "27.0.1",
+  "changes": {
+    "signedSquaresReplaced": 17,
+    "signedFourthPowersReplaced": 1,
+    "sunset": "Ellipse centre and radii shared by its field and flare; haze displacement evaluated once; unreachable blend clamp removed; all numeric tuning retained."
+  },
+  "checks": {
+    "unitTests": "HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p test_*.py: all 37 passed, including combined-recipe Metal compilation and rendering",
+    "library": "65 authoring assets validated; all 28 snippet examples compiled for macOS and tvOS",
+    "publication": "23 scenes; regenerated preview fingerprints and PNG hashes validate; every complete source compiles for tvOS",
+    "completeSourceCompilation": "All five corrected complete runtime sources compiled directly for macOS and tvOS",
+    "preservation": "All 23 preview PNGs, every unaffected shader body/metadata/fingerprint, shared runtime files, recipes, reference originals, index and preview renderer are byte-identical to baseline",
+    "historicalRecord": "Only sourceRevision was added and duplicated name/sourceSHA256/reuse fields removed; all original measurements, observations, image references, dates and limitations are unchanged",
+    "app": "All five exact corrected sources selected and inspected during active Debug HolodeckMac playback with an offline catalog fixture and in-memory preferences. Concurrent native UI tests restarted the standard app, so final Ocean inspection used an isolated copy of the same Debug build with a separate bundle identifier and local ad-hoc signature; application logic and shader sources were unchanged."
+  },
+  "renderComparison": {
+    "method": "Compare decoded 8-bit RGB from before/after sRGB PNGs at matching times and dimensions; differences measured per encoded RGB channel",
+    "baselineMathMode": "Default fast math",
+    "resolutionPairs": [
+      [
+        1280,
+        720
+      ],
+      [
+        1032,
+        774
+      ]
+    ],
+    "timeMethod": "0, 3, 10, 60 and 86400 seconds, plus +/-0.001 seconds around the first phase wrap computed as 6.2831853 / the existing phase rate; uniforms are uploaded as Float",
+    "framePairs": 70,
+    "acceptanceMaximumChannelDelta": 2,
+    "observedMaximumChannelDelta": 0,
+    "measurements": {
+      "dramamine-sunset": [
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 78.53881625,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 78.54081625,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 78.53881625,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 78.54081625,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        }
+      ],
+      "evening-and-morning": [
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 52.358877500000006,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 52.3608775,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 52.358877500000006,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 52.3608775,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        }
+      ],
+      "green-caresses": [
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 83.774804,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 83.77680400000001,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 83.774804,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 83.77680400000001,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        }
+      ],
+      "orange-flow": [
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 89.75878999999999,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 89.76079,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 89.75878999999999,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 89.76079,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        }
+      ],
+      "side-view-of-the-ocean": [
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 96.66338923076923,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1280,
+            720
+          ],
+          "timeSeconds": 96.66538923076924,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 0,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 3,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 10,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 60,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 86400,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 96.66338923076923,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        },
+        {
+          "resolution": [
+            1032,
+            774
+          ],
+          "timeSeconds": 96.66538923076924,
+          "maximumChannelDelta": 0,
+          "meanAbsoluteChannelDelta": 0.0,
+          "pixelsOverTwo": 0
+        }
+      ]
+    }
+  },
+  "finiteRGB": {
+    "method": "Diagnostic sources return color directly before the body clamp and pow(color, 2.2), and bypass the fragment wrapper clamp. Read RGB values from rgba32Float targets. Both tested math modes use corrected sources.",
+    "mathModes": "MTLCompileOptions.fastMathEnabled set to true for fast and false for precise",
+    "resolutions": [
+      [
+        1280,
+        720
+      ],
+      [
+        1032,
+        774
+      ]
+    ],
+    "times": "Same seven per-scene times as renderComparison",
+    "renderCount": 140,
+    "measurements": {
+      "dramamine-sunset": {
+        "fast": {
+          "nonfiniteValues": 0,
+          "minimum": -0.0019607327,
+          "maximum": 0.99870855
+        },
+        "precise": {
+          "nonfiniteValues": 0,
+          "minimum": -0.0019607327,
+          "maximum": 0.99870855
+        }
+      },
+      "evening-and-morning": {
+        "fast": {
+          "nonfiniteValues": 0,
+          "minimum": 0.007427251,
+          "maximum": 1.0660948
+        },
+        "precise": {
+          "nonfiniteValues": 0,
+          "minimum": 0.007427248,
+          "maximum": 1.0660952
+        }
+      },
+      "green-caresses": {
+        "fast": {
+          "nonfiniteValues": 0,
+          "minimum": 0.25950313,
+          "maximum": 1.0019587
+        },
+        "precise": {
+          "nonfiniteValues": 0,
+          "minimum": 0.25950307,
+          "maximum": 1.0019587
+        }
+      },
+      "orange-flow": {
+        "fast": {
+          "nonfiniteValues": 0,
+          "minimum": -0.0019607844,
+          "maximum": 0.9993167
+        },
+        "precise": {
+          "nonfiniteValues": 0,
+          "minimum": -0.0019607844,
+          "maximum": 0.9993167
+        }
+      },
+      "side-view-of-the-ocean": {
+        "fast": {
+          "nonfiniteValues": 0,
+          "minimum": 0.021323195,
+          "maximum": 1.0019917
+        },
+        "precise": {
+          "nonfiniteValues": 0,
+          "minimum": 0.021323193,
+          "maximum": 1.0019917
+        }
+      }
+    }
+  },
+  "performance": {
+    "method": "Metal command-buffer GPU timestamps; alternate baseline/corrected offscreen renders every frame; excludes compilation, CPU submission, readback and presentation",
+    "resolution": [
+      3840,
+      2160
+    ],
+    "pixelFormat": "bgra8Unorm_srgb",
+    "timeSeconds": 3,
+    "warmupPairs": 10,
+    "measuredPairs": 60,
+    "percentileMethod": "Sorted 60 samples; median index 30 and p95 index 56, matching the existing PR #4 paired benchmark",
+    "investigationThresholdMedianIncreasePercent": 5,
+    "measurements": {
+      "dramamine-sunset": {
+        "beforeMedianMilliseconds": 0.588,
+        "afterMedianMilliseconds": 0.58,
+        "beforeP95Milliseconds": 2.426,
+        "afterP95Milliseconds": 1.928,
+        "medianChangePercent": -1.361
+      },
+      "evening-and-morning": {
+        "beforeMedianMilliseconds": 1.137,
+        "afterMedianMilliseconds": 1.137,
+        "beforeP95Milliseconds": 2.556,
+        "afterP95Milliseconds": 2.409,
+        "medianChangePercent": 0.0
+      },
+      "green-caresses": {
+        "beforeMedianMilliseconds": 0.952,
+        "afterMedianMilliseconds": 0.952,
+        "beforeP95Milliseconds": 2.245,
+        "afterP95Milliseconds": 2.279,
+        "medianChangePercent": 0.0
+      },
+      "orange-flow": {
+        "beforeMedianMilliseconds": 1.237,
+        "afterMedianMilliseconds": 1.248,
+        "beforeP95Milliseconds": 2.54,
+        "afterP95Milliseconds": 2.327,
+        "medianChangePercent": 0.889
+      },
+      "side-view-of-the-ocean": {
+        "beforeMedianMilliseconds": 0.631,
+        "afterMedianMilliseconds": 0.632,
+        "beforeP95Milliseconds": 1.946,
+        "afterP95Milliseconds": 1.692,
+        "medianChangePercent": 0.158
+      }
+    },
+    "interpretation": "Largest paired median increase is 0.889%; no measurement exceeds the 5% investigation threshold. These are offscreen GPU timings, not app frame-pacing or sustained thermal measurements.",
+    "backgroundActivity": "The standard playback app was closed before timing. A concurrent Holodeck native UI test run was discovered afterward; unrelated GPU/background activity was not controlled. Use the adjacent paired measurements to compare this patch, not to claim isolated absolute GPU performance."
+  },
+  "reusedAssets": [
+    "glowing-ribbons",
+    "value-noise"
+  ],
+  "samples": [
+    "before-after.png"
+  ],
+  "unverified": [
+    "Physical Apple TV playback and GPU performance",
+    "Minimum supported macOS/tvOS runtime versions",
+    "TV/HDR display colour appearance",
+    "Instrumented app frame pacing and sustained thermal performance",
+    "Actual continuous 24-hour playback; one-day timestamps are sampled checks",
+    "GPU timings with all unrelated application/test activity excluded"
+  ]
+}

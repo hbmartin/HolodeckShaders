@@ -21,6 +21,8 @@ Room space: the box is centred at the origin, so pass `ro - roomCentre`. `ro` mu
 
 Shrink `halfExtents` by an object's radius so it never clips the walls. Give each object its own lane (centre plus extents) and different per-axis speeds (0.15–0.35 units/s reads as calm) to avoid clustering.
 
+For a rotating object, use its maximum radius over all orientations (for example, `size * sqrt(3)` for a cube of half-extent `size` or the symmetric-slab octahedron in Holodeck Grid). A lane offset from the room centre must satisfy `laneHalf + abs(laneCentre) + radius <= roomHalf`; a small additional clearance avoids contact. Reject object entry hits at or beyond `hdRoomHit(...).w` before compositing them over the room.
+
 ## Limitations
 
 The exit test assumes the origin is inside the room. Bounces are mirror reflections with no collisions between objects. `hdBounceInBox` wraps whole and fractional seconds separately; the residual error at one day of runtime is about 0.003 units for typical speeds, below the visible threshold.

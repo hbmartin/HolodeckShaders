@@ -10,7 +10,8 @@ float3 shade(float2 p, float time, float2 pixel) {
     color = mix(color, float3(0.025, 0.59, 0.76), smoothstep(0.39, 0.77, depth));
     color = mix(color, float3(0.025, 0.47, 0.59), smoothstep(0.72, 1.02, depth));
     float mist = noise2(p * 3.2 + float2(sin(phase), cos(phase)) * 0.23);
-    float haze = exp(-pow((depth - 0.48) / 0.20, 2.0));
+    float hazeDistance = (depth - 0.48) / 0.20;
+    float haze = exp(-(hazeDistance * hazeDistance));
     color += float3(0.03, 0.025, 0.025) * (mist - 0.5) * haze;
     color += (hash21(pixel) - 0.5) / 255.0;
     return pow(clamp(color, 0.0, 1.0), float3(2.2));

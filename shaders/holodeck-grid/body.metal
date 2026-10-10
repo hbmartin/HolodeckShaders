@@ -115,15 +115,17 @@ float3 shade(float2 p, float t, float2 pixel) {
     float layerAlpha[4];
     int layers = 0;
     for (int k = 0; k < 4; ++k) {
-        float3 centre = laneCentres[k] + hdBounceInBox(starts[k], speeds[k], laneHalves[k], t);
+        float bound = (k == 1 || k == 2) ? sizes[k] * 1.7320508 : sizes[k];
+        // Keep the entire rotated object inside the room, with a small clearance from every wall.
+        float3 bounceHalf = min(laneHalves[k], kRoomHalf - abs(laneCentres[k]) - bound - 0.05);
+        float3 centre = laneCentres[k] + hdBounceInBox(starts[k], speeds[k], bounceHalf, t);
         float3 local = ro - centre;
         float b = dot(local, rd);
-        float bound = (k == 1 || k == 2) ? sizes[k] * 1.7320508 : sizes[k];
         float h = b * b - dot(local, local) + bound * bound;
         if (h <= 0.0 || -b + sqrt(h) <= 0.0) continue;
         if (k == 0 || k == 3) {
             float tn = -b - sqrt(h);
-            if (tn <= 0.0) continue;
+            if (tn <= 0.0 || tn >= room.w) continue;
             float3 pos = local + rd * tn;
             float3 n = pos / sizes[k];
             float facing = saturate(dot(n, -rd));
@@ -151,7 +153,7 @@ float3 shade(float2 p, float t, float2 pixel) {
                 count = 4;
             }
             float3 slab = hdSlabs(lro, lrd, normals, extent, count);
-            if (slab.x >= slab.y || slab.x <= 0.0) continue;
+            if (slab.x >= slab.y || slab.x <= 0.0 || slab.x >= room.w) continue;
             float3 pos = lro + lrd * slab.x;
             float3 faceNormal = normals[int(slab.z)];
             float3 ln = faceNormal * (dot(pos, faceNormal) < 0.0 ? -1.0 : 1.0);

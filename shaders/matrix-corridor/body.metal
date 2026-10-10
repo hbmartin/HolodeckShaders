@@ -9,10 +9,13 @@
 // Adapted for Holodeck: terminal blending and mouse look removed; aspect-correct view rays; the
 // 300 s time reset (which made the camera jump) replaced by a wrap at the full 1920 s route period,
 // with fall speeds quantized to 0.1, z-cell hashes wrapped mod 16 and symbol indices wrapped mod 640
-// so the rain also loops seamlessly; sin hashes replaced by Hoskins hashes on bounded inputs; one
+// so camera and rain positions repeat; glyphs use an independent clock across route wraps;
+// sin hashes replaced by Hoskins hashes on bounded inputs; one
 // strip line per column instead of one per z-cell; 16 branchless DDA steps (was 40) with distance
 // fog; route start offset 100 s; full brightness (was 0.25) with an sRGB-style decode.
 // This adaptation is licensed CC BY-NC-SA 3.0.
+
+// License terms: https://creativecommons.org/licenses/by-nc-sa/3.0/
 
 constant float hdMxCharH = 0.15;                     // STRIP_CHAR_HEIGHT
 constant float hdMxCharW = 0.10;                     // STRIP_CHAR_WIDTH
@@ -60,8 +63,9 @@ float hdRuneDistance(float2 uv, float2 seed) {
     return d;
 }
 
-// Digital rain seen along a ray. xy horizontal, z vertical. time is the wrapped scene clock.
-float3 hdMxRain(float3 ro, float3 rd, float time) {
+// Digital rain seen along a ray. xy horizontal, z vertical. time wraps the rain positions;
+// glyphTime continues across route wraps, with only the hash seed reduced below 4096.
+float3 hdMxRain(float3 ro, float3 rd, float time, float glyphTime) {
     float4 result = float4(0.0);
     float2 ro2 = ro.xy;
     float t3ToT2 = max(length(rd.xy), 1e-4);
@@ -116,7 +120,7 @@ float3 hdMxRain(float3 ro, float3 rd, float time) {
         float2 charHash = hdMxHash22(float2(idx - 640.0 * floor(idx / 640.0), ch2.x * 97.0));
         if (charHash.x < 0.1 && k != 0.0) continue;   // 10% missing symbols
         float rate = k == 0.0 ? 1.0 : ch2.z + ch2.w * ch2.w * 4.0 * pow(charHash.y, 4.0);
-        float tf = floor(time * rate);
+        float tf = floor(glyphTime * rate);
         float d = hdRuneDistance(float2(u, q), float2(floor(charHash.x * 1024.0), tf - 4096.0 * floor(tf / 4096.0)));
         float highlight = max(1.0, 3.0 - k * 0.5) * 0.2;
         float a = smoothstep(0.1, 0.0, d) + highlight * smoothstep(0.4, 0.0, d);
@@ -147,6 +151,7 @@ float3 shade(float2 p, float t, float2 pixel) {
     const float period = 1920.0;                     // seconds for one full walk of the route
     float tw = t + 100.0;                            // start somewhere scenic
     float time = (tw - period * floor(tw / period)) * 0.5;   // SPEED
+    float glyphTime = tw * 0.5;                      // glyph updates continue across route wraps
 
     const float turnRad = 0.25 / 3.0;
     const float turnAbsTime = (hdMxPI / 2.0 * turnRad) * 1.5;
@@ -225,6 +230,6 @@ float3 shade(float2 p, float t, float2 pixel) {
     rd = normalize(rd);
     ro += rd * 0.2;
 
-    float3 col = hdMxRain(ro, rd, time);
+    float3 col = hdMxRain(ro, rd, time, glyphTime);
     return col * col;
 }

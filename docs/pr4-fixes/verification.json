@@ -1,0 +1,589 @@
+{
+  "verifiedOn": "2026-10-10",
+  "baselineRevision": "54691e57840964c899336dda250f359cd77e30d9",
+  "implementationRevision": "a9371e7b25a4110c2150e62ab6b0aae00cf2ec49",
+  "device": "Apple M2 Pro",
+  "operatingSystem": "27.0.1",
+  "checks": {
+    "unitTests": "HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py': all 37 passed, including compilation/rendering of the combined unlisted recipe",
+    "licenseRegression": {
+      "method": "Compare complete upstream MIT copyright, permission and warranty text after stripping line-comment prefixes and collapsing whitespace; verify canonical CC license URIs in published assembly, copyable recipes and recipe examples.",
+      "preFixFailures": 33,
+      "postFixFailures": 0,
+      "mitSceneCount": 5,
+      "mitRecipeCount": 9,
+      "ccSceneCount": 4,
+      "ccRecipeCount": 3,
+      "builtPublicationNoticesVerified": true
+    },
+    "library": "65 authoring assets validated; all 28 recipe examples compiled for macOS and tvOS",
+    "publication": "23 scenes; preview fingerprints and PNG hashes validated; every complete source compiled for tvOS",
+    "completeSourceCompilation": "All ten PR #4 scenes compiled directly for macOS and tvOS",
+    "noticeOnlyPreviewPixels": "All nine notice-only PNGs were byte-identical before the motion changes; all nine executable token streams were identical",
+    "preservation": "Original eight scenes, five PR #5 scenes, index ordering/collections, shared runtime files and every reference original remain byte-identical to baseline",
+    "app": "Existing Debug HolodeckMac with an offline catalog fixture containing the exact corrected assembled sources and in-memory preferences; Ember Drift, Matrix Corridor and Holodeck Grid selected and inspected during active playback"
+  },
+  "renders": {
+    "resolution": [
+      1280,
+      720
+    ],
+    "pixelFormat": "bgra8Unorm_srgb",
+    "timesSeconds": {
+      "ember-drift": [
+        0,
+        3,
+        3.125,
+        3.25,
+        3.375,
+        3.5,
+        3.625,
+        3.75,
+        3.875,
+        7679.99,
+        7679.999,
+        7680,
+        7680.001,
+        86400
+      ],
+      "ember-sparks": [
+        3,
+        3.25,
+        7679.999,
+        7680,
+        7680.001
+      ],
+      "matrix-corridor": [
+        1819.999,
+        1820,
+        1820.001,
+        3739.999,
+        3740,
+        3740.001,
+        86399.99,
+        86400
+      ],
+      "holodeck-grid": [
+        40.6,
+        640.6,
+        1240.6,
+        12440.6,
+        86400
+      ]
+    },
+    "measurements": {
+      "emberMotion": {
+        "ember-drift": {
+          "before": [
+            {
+              "rasterRows": [
+                0,
+                720
+              ],
+              "dx": -9,
+              "dy": 11
+            },
+            {
+              "rasterRows": [
+                350,
+                680
+              ],
+              "dx": -10,
+              "dy": 12
+            }
+          ],
+          "after": [
+            {
+              "rasterRows": [
+                0,
+                720
+              ],
+              "dx": -11,
+              "dy": -13
+            },
+            {
+              "rasterRows": [
+                350,
+                680
+              ],
+              "dx": -11,
+              "dy": -13
+            }
+          ]
+        },
+        "ember-sparks": {
+          "before": [
+            {
+              "rasterRows": [
+                0,
+                720
+              ],
+              "dx": -8,
+              "dy": 12
+            },
+            {
+              "rasterRows": [
+                350,
+                680
+              ],
+              "dx": -12,
+              "dy": 11
+            }
+          ],
+          "after": [
+            {
+              "rasterRows": [
+                0,
+                720
+              ],
+              "dx": -9,
+              "dy": -13
+            },
+            {
+              "rasterRows": [
+                350,
+                680
+              ],
+              "dx": -9,
+              "dy": -12
+            }
+          ]
+        }
+      },
+      "matrixSeams": {
+        "1820": {
+          "before": {
+            "meanMaxChannelDelta": 5.0760709635416665,
+            "pixelsOver20": 55024,
+            "pixelsOver100": 16174
+          },
+          "after": {
+            "meanMaxChannelDelta": 0.9342545572916666,
+            "pixelsOver20": 6467,
+            "pixelsOver100": 2646
+          }
+        },
+        "3740": {
+          "before": {
+            "meanMaxChannelDelta": 5.0760709635416665,
+            "pixelsOver20": 55024,
+            "pixelsOver100": 16174
+          },
+          "after": {
+            "meanMaxChannelDelta": 0.7110557725694444,
+            "pixelsOver20": 5259,
+            "pixelsOver100": 1682
+          }
+        }
+      },
+      "emberSeam": {
+        "before": {
+          "meanMaxChannelDelta": 0.02941623263888889,
+          "pixelsOver20": 14,
+          "pixelsOver100": 0
+        },
+        "after": {
+          "meanMaxChannelDelta": 0.024554036458333334,
+          "pixelsOver20": 1,
+          "pixelsOver100": 0
+        }
+      }
+    },
+    "motionMethod": "FFT cross-correlation of red-channel spark cores above 150/255, at t=3 and t=3.25 in the full frame and a lower-screen crop; negative raster dy means upward motion",
+    "deltaMethod": "Maximum absolute RGB-channel difference per pixel in encoded 8-bit sRGB images; means are in 0..255 units, not linear RGB"
+  },
+  "roomContainment": {
+    "effectiveLaneHalves": [
+      [
+        8.0,
+        4.0,
+        4.0
+      ],
+      [
+        7.5,
+        4.0,
+        3.5
+      ],
+      [
+        9.0,
+        3.6591036319732666,
+        3.0
+      ],
+      [
+        7.0,
+        3.799999952316284,
+        3.0
+      ]
+    ],
+    "minimumRadiusClearance": 0.04999995231628418,
+    "rotatedVertexSweep": {
+      "durationSeconds": 86400,
+      "stepSeconds": 0.1,
+      "minimumClearance": 0.11626861539243727
+    }
+  },
+  "finiteRGB": {
+    "resolution": [
+      640,
+      360
+    ],
+    "pixelFormat": "rgba32Float",
+    "method": "Remove only the final wrapper clamp in diagnostic source to detect invalid body results before clamping",
+    "timesSeconds": [
+      0,
+      3,
+      3.25,
+      10,
+      39.67,
+      40.6,
+      640.6,
+      1240.6,
+      1819.999,
+      1820,
+      1820.001,
+      3739.999,
+      3740,
+      3740.001,
+      7679.999,
+      7680,
+      7680.001,
+      12440.6,
+      86399.99,
+      86400
+    ],
+    "nonfiniteValues": {
+      "ember-drift": 0,
+      "matrix-corridor": 0,
+      "holodeck-grid": 0
+    },
+    "matrixSeedBounds": "The existing tf - 4096 * floor(tf / 4096) reduction remains before rune hashing; glyphTime is independent of the wrapped route clock."
+  },
+  "performance": {
+    "resolution": [
+      3840,
+      2160
+    ],
+    "pixelFormat": "bgra8Unorm_srgb",
+    "method": "Metal command-buffer GPU timestamps; alternate baseline and corrected sources every frame, 10 warmup pairs followed by 60 measured pairs per time; app closed; excludes compilation, CPU submission, readback and presentation",
+    "reviewBaselineMedianRangesMilliseconds": {
+      "ember-drift": [
+        5.55,
+        6.03
+      ],
+      "matrix-corridor": [
+        5.47,
+        6.51
+      ],
+      "holodeck-grid": [
+        1.18,
+        2.17
+      ]
+    },
+    "pairedMeasurementsMilliseconds": {
+      "ember-drift": [
+        {
+          "timeSeconds": 3.0,
+          "beforeMedian": 3.602,
+          "afterMedian": 3.603,
+          "beforeP95": 5.328,
+          "afterP95": 5.974
+        },
+        {
+          "timeSeconds": 40.6,
+          "beforeMedian": 4.192,
+          "afterMedian": 3.637,
+          "beforeP95": 6.513,
+          "afterP95": 6.253
+        },
+        {
+          "timeSeconds": 640.6,
+          "beforeMedian": 3.855,
+          "afterMedian": 3.606,
+          "beforeP95": 5.883,
+          "afterP95": 5.898
+        },
+        {
+          "timeSeconds": 1240.6,
+          "beforeMedian": 3.596,
+          "afterMedian": 3.747,
+          "beforeP95": 5.906,
+          "afterP95": 5.965
+        },
+        {
+          "timeSeconds": 1820.0,
+          "beforeMedian": 3.596,
+          "afterMedian": 3.598,
+          "beforeP95": 5.628,
+          "afterP95": 5.337
+        },
+        {
+          "timeSeconds": 7680.0,
+          "beforeMedian": 3.659,
+          "afterMedian": 3.626,
+          "beforeP95": 5.968,
+          "afterP95": 5.67
+        },
+        {
+          "timeSeconds": 86400.0,
+          "beforeMedian": 3.601,
+          "afterMedian": 3.6,
+          "beforeP95": 5.942,
+          "afterP95": 5.935
+        }
+      ],
+      "matrix-corridor": [
+        {
+          "timeSeconds": 3.0,
+          "beforeMedian": 4.125,
+          "afterMedian": 4.126,
+          "beforeP95": 6.307,
+          "afterP95": 6.091
+        },
+        {
+          "timeSeconds": 40.6,
+          "beforeMedian": 4.284,
+          "afterMedian": 4.354,
+          "beforeP95": 6.538,
+          "afterP95": 6.67
+        },
+        {
+          "timeSeconds": 640.6,
+          "beforeMedian": 3.486,
+          "afterMedian": 3.489,
+          "beforeP95": 5.503,
+          "afterP95": 5.854
+        },
+        {
+          "timeSeconds": 1240.6,
+          "beforeMedian": 3.776,
+          "afterMedian": 3.779,
+          "beforeP95": 5.912,
+          "afterP95": 6.07
+        },
+        {
+          "timeSeconds": 1820.0,
+          "beforeMedian": 3.457,
+          "afterMedian": 3.458,
+          "beforeP95": 5.598,
+          "afterP95": 5.754
+        },
+        {
+          "timeSeconds": 7680.0,
+          "beforeMedian": 3.963,
+          "afterMedian": 3.962,
+          "beforeP95": 6.224,
+          "afterP95": 6.157
+        },
+        {
+          "timeSeconds": 86400.0,
+          "beforeMedian": 3.959,
+          "afterMedian": 4.153,
+          "beforeP95": 5.823,
+          "afterP95": 6.229
+        }
+      ],
+      "holodeck-grid": [
+        {
+          "timeSeconds": 3.0,
+          "beforeMedian": 1.145,
+          "afterMedian": 1.145,
+          "beforeP95": 2.277,
+          "afterP95": 2.162
+        },
+        {
+          "timeSeconds": 40.6,
+          "beforeMedian": 1.143,
+          "afterMedian": 1.143,
+          "beforeP95": 2.469,
+          "afterP95": 2.673
+        },
+        {
+          "timeSeconds": 640.6,
+          "beforeMedian": 1.157,
+          "afterMedian": 1.155,
+          "beforeP95": 1.843,
+          "afterP95": 2.116
+        },
+        {
+          "timeSeconds": 1240.6,
+          "beforeMedian": 1.409,
+          "afterMedian": 1.319,
+          "beforeP95": 3.167,
+          "afterP95": 2.715
+        },
+        {
+          "timeSeconds": 1820.0,
+          "beforeMedian": 1.328,
+          "afterMedian": 1.327,
+          "beforeP95": 3.685,
+          "afterP95": 3.274
+        },
+        {
+          "timeSeconds": 7680.0,
+          "beforeMedian": 2.596,
+          "afterMedian": 2.62,
+          "beforeP95": 5.148,
+          "afterP95": 4.789
+        },
+        {
+          "timeSeconds": 86400.0,
+          "beforeMedian": 1.749,
+          "afterMedian": 1.672,
+          "beforeP95": 4.091,
+          "afterP95": 3.66
+        }
+      ]
+    },
+    "interpretation": "Matched measurements show no material systematic regression: largest per-time median increases are 4.2% for Ember, 4.9% for Matrix and 0.92% for Holodeck. Absolute timings differ from the earlier review, so use paired results to isolate the patch impact. These are offscreen GPU times, not sustained app frame pacing."
+  },
+  "scenes": [
+    {
+      "id": "force-shield",
+      "sourceSHA256": "95ed392aebdd466770b59af1207489cdc7f70bb12586ecb19abb1cef6944be17",
+      "reuse": {
+        "references": [
+          "flow-shield-effect",
+          "ashima-webgl-noise"
+        ],
+        "snippets": [
+          "simplex-noise-3d",
+          "hex-grid",
+          "sphere-shell",
+          "impact-ripple",
+          "noise-dissolve"
+        ]
+      }
+    },
+    {
+      "id": "apollonian-twist",
+      "sourceSHA256": "2c98a513317fb081001511a3c5cca7762b255add9cd31d9c2a44b408cbcedf63",
+      "reuse": {
+        "references": [
+          "swiftui-new-metal-shaders"
+        ],
+        "snippets": [
+          "color-ramps"
+        ]
+      }
+    },
+    {
+      "id": "light-grid",
+      "sourceSHA256": "b80ac5b4cc3c718033d5f2ce9e480b9ad005febc2c26f52fc09237ebb9ca903d",
+      "reuse": {
+        "references": [
+          "inferno"
+        ],
+        "snippets": [
+          "cosine-palette",
+          "value-noise"
+        ]
+      }
+    },
+    {
+      "id": "sonar-pulse",
+      "sourceSHA256": "113fb1efe0312074e337afff488cfbf9853343fa9664baba22424978c0b7d9ea",
+      "reuse": {
+        "references": [
+          "inferno"
+        ],
+        "snippets": [
+          "cosine-palette",
+          "fbm"
+        ]
+      }
+    },
+    {
+      "id": "sunlit-shallows",
+      "sourceSHA256": "39734f0cf34cd0d805e17dabf7f265b6df6f82dc788f8b701bd41ae309aca5da",
+      "reuse": {
+        "references": [
+          "ghostty-shaders",
+          "swiftshaders"
+        ],
+        "snippets": [
+          "voronoi",
+          "god-rays",
+          "value-noise"
+        ]
+      }
+    },
+    {
+      "id": "ember-drift",
+      "sourceSHA256": "2089c64e2cdc34c9656aab1b8a11ab203459e86b4ec8a11f6ef4f61a600a2595",
+      "reuse": {
+        "references": [
+          "sparks-from-fire",
+          "ghostty-shaders"
+        ],
+        "snippets": [
+          "ember-sparks",
+          "value-noise"
+        ]
+      }
+    },
+    {
+      "id": "warp-speed",
+      "sourceSHA256": "4dcc2f9cddc6ef7f8e5f374c882e8398bd3af489393dfbc762daa2675c43d5dd",
+      "reuse": {
+        "references": [
+          "warp-speed-2"
+        ],
+        "snippets": [
+          "kali-starfield"
+        ]
+      }
+    },
+    {
+      "id": "matrix-corridor",
+      "sourceSHA256": "b3af9d0e66a7aa702cdaf80fe86efc6ba27d969ba1daa02820462c33c5b90604",
+      "reuse": {
+        "references": [
+          "inside-the-matrix",
+          "ghostty-shaders"
+        ],
+        "snippets": [
+          "rune-glyph"
+        ]
+      }
+    },
+    {
+      "id": "fireworks",
+      "sourceSHA256": "2e019e615938405b18dd296eda8cc943ea2ee0b27d2e4a33b5efded62f0b82e4",
+      "reuse": {
+        "references": [
+          "bigwings-fireworks",
+          "ghostty-shaders"
+        ],
+        "snippets": [
+          "layered-stars"
+        ]
+      }
+    },
+    {
+      "id": "holodeck-grid",
+      "sourceSHA256": "f815ed95872dcdbf396ec9052586185fa50652b7e7389bafc421e80e589f1432",
+      "reuse": {
+        "references": [
+          "holodeck-scene",
+          "starship-blueprint-artstation"
+        ],
+        "snippets": [
+          "grid-lines",
+          "box-room",
+          "hologram-rim"
+        ]
+      }
+    }
+  ],
+  "samples": [
+    "ember-motion.gif",
+    "matrix-boundary.png",
+    "holodeck-clearance.png"
+  ],
+  "unverified": [
+    "Physical Apple TV playback",
+    "Minimum supported macOS/tvOS versions",
+    "Sustained app frame pacing",
+    "Actual continuous 24-hour playback; one-day timestamps and geometry sweep are sampled checks"
+  ]
+}

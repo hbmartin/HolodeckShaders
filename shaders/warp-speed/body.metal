@@ -10,6 +10,8 @@
 // This adaptation is licensed CC BY-NC-SA 3.0.
 
 // Recipe: snippets/kali-starfield (RGB light, unbounded).
+// License terms: https://creativecommons.org/licenses/by-nc-sa/3.0/
+
 float3 hdKaliStarfield(float2 uv, float travel, int steps, float jitter) {
     float ds = 2.5 / float(steps), weight = ds * 40.0;
     float3 origin = float3(0.3 * sin(travel * 1.5707963), 0.35 - 0.3 * cos(travel * 2.4166097), travel);

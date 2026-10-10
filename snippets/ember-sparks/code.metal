@@ -1,6 +1,8 @@
 // Derived from "Sparks from fire" by Jan Mróz (jaszunio15), https://www.shadertoy.com/view/wl2Gzc, CC BY 3.0.
 // Keep this attribution when adapting.
 
+// License terms: https://creativecommons.org/licenses/by/3.0/
+
 constant float hdEmberPeriod = 7680.0;   // seconds; every motion completes whole cycles over this
 
 // Hashes on a 256-cell periodic lattice (cells are wrapped before hashing).
@@ -12,8 +14,9 @@ float4 hdEmberHash4(float2 cell) {
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 
-// Drift of n/3 lattice cells per second along (0.7, 1.0), wrapped to the 256-cell lattice period.
-float2 hdEmberDrift(float phase, float n) { return 256.0 * fract(phase * n * float2(7.0, 10.0)); }
+// Sampling offset at n/3 lattice cells per second along (0.7, -1.0), wrapped to the 256-cell lattice.
+// Adding this to Y-up coordinates moves the visible field in the opposite direction: left and upward.
+float2 hdEmberDrift(float phase, float n) { return 256.0 * fract(phase * n * float2(7.0, -10.0)); }
 
 float2 hdEmberRotate(float2 v, float a) {
     float s = sin(a), c = cos(a);

@@ -15,7 +15,7 @@ Canonical source: `snippets/ember-sparks/code.metal`. Example: `snippets/ember-s
 
 ## Coordinates
 
-`uv` is in lattice cells (one spark per cell): the example uses `p * 2.8125 * 1.4`, which gives about 4 cells per screen height. `screen` is the original sketch's screen position (`p * 2.8125`, vertical range about -1.4 to 1.4) and only drives the per-spark appear/disappear heights. `phase = (t mod 7680) / 7680` is the loop fraction: every drift (1/3 cell per second along (0.7, 1.0)), spin (whole turns per loop, within ±1 rad/s) and flutter (about 1.4 changes per second) completes whole cycles per loop, so the motion is seamless and stays precise at large `t`. `layerSeed` is any small number (layer index) that offsets the lattice.
+`uv` is in lattice cells (one spark per cell): the example uses `p * 2.8125 * 1.4`, which gives about 4 cells per screen height. `screen` is the original sketch's screen position (`p * 2.8125`, vertical range about -1.4 to 1.4) and only drives the per-spark appear/disappear heights. `phase = (t mod 7680) / 7680` is the loop fraction: every sampling drift (`n/3 * (0.7, -1.0)` lattice cells per second), spin (whole turns per loop, within ±1 rad/s) and flutter (about 1.4 changes per second) completes whole cycles per loop, so the motion is seamless and stays precise at large `t`. The drift is added to Y-up sampling coordinates, so visible sparks move in the opposite direction, left and upward. `layerSeed` is any small number (layer index) that offsets the lattice.
 
 ## Tuning
 

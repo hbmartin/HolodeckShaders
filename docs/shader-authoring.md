@@ -2,7 +2,7 @@
 
 1. Search the library and inspect relevant contracts and complete shaders.
 2. Scaffold with `python3 tools/library.py new shader my-scene` or `new snippet my-technique`. Commands refuse overwrites. Refine names, descriptions, code and contracts before reuse.
-3. Copy and adapt recipe functions into the shader body; use canonical shared helpers where appropriate. Record related snippet/reference IDs in metadata.reuse.
+3. Copy and adapt recipe functions and their required license notices into the shader body; use canonical shared helpers where appropriate. Retain attribution and describe changes. Follow the Licensing section of `docs/shader-library.md`; metadata and references do not accompany published sources. Record related snippet/reference IDs in metadata.reuse.
 4. Run `python3 tools/library.py validate --compile`. This validates all authoring assets and compiles all snippet examples for macOS and tvOS.
 5. Render samples with `python3 tools/library.py render shader my-scene --times 0,3,10` (or `render snippet my-technique`). Optional `--width`/`--height` select dimensions. Artifacts go to ignored `.cache/library/`. Review actual animation and target-device performance in the app before selecting a scene.
 6. When editorially ready, add the finished shader ID to the ordered index.shaders array and any appropriate collections. Generate publication previews, commit source/metadata/previews, and run publication validation as described in the root README.

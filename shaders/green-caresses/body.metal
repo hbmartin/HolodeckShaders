@@ -12,22 +12,31 @@ float3 shade(float2 p, float time, float2 pixel) {
     color = mix(color, float3(0.68, 1.0, 0.76), cloud * 0.23);
 
     // A hanging U-shaped fold, open above the screen, and a diagonal caress.
-    float bend = -0.19 + 0.54 * pow(q.x * 1.6, 2.0);
+    float bendCoordinate = q.x * 1.6;
+    float bend = -0.19 + 0.54 * (bendCoordinate * bendCoordinate);
     float2 bowl = (q - float2(0.01, 0.41)) / float2(0.26, 0.60);
     float fold = (length(bowl) - 1.0) * 0.23;
-    float rim = exp(-pow(fold / 0.020, 2.0));
-    float rimHalo = exp(-pow(fold / 0.060, 2.0));
+    float rimDistance = fold / 0.020;
+    float rimHaloDistance = fold / 0.060;
+    float rim = exp(-(rimDistance * rimDistance));
+    float rimHalo = exp(-(rimHaloDistance * rimHaloDistance));
     color = mix(color, float3(0.58, 0.99, 1.0), rimHalo * 0.25 + rim * 0.66);
-    float inside = exp(-pow((q.y - bend) / 0.11, 2.0))
-                 * exp(-pow(q.x / 0.27, 4.0));
+    float insideDistance = (q.y - bend) / 0.11;
+    float insideCoordinate = q.x / 0.27;
+    float insideSquare = insideCoordinate * insideCoordinate;
+    float inside = exp(-(insideDistance * insideDistance))
+                 * exp(-(insideSquare * insideSquare));
     color = mix(color, float3(0.72, 1.0, 0.89), inside * 0.44);
 
     float diagonal = q.y - 0.75 * q.x - 0.08
                    - 0.04 * sin(q.x * 4.0 + phase);
-    float sweep = exp(-pow(diagonal / 0.092, 2.0));
+    float sweepDistance = diagonal / 0.092;
+    float sweep = exp(-(sweepDistance * sweepDistance));
     color = mix(color, float3(0.49, 1.0, 1.0), sweep * 0.70);
     float rightFold = q.x - 0.39 - 0.12 * sin(q.y * 4.0 - phase);
-    color = mix(color, float3(0.58, 0.99, 0.98), exp(-pow(rightFold / 0.075, 2.0)) * 0.48);
+    float rightFoldDistance = rightFold / 0.075;
+    color = mix(color, float3(0.58, 0.99, 0.98),
+                exp(-(rightFoldDistance * rightFoldDistance)) * 0.48);
     color += (hash21(pixel) - 0.5) / 255.0;
     return pow(clamp(color, 0.0, 1.0), float3(2.2));
 }

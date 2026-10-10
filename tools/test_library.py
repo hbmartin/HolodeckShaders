@@ -69,12 +69,38 @@ class LibraryTests(unittest.TestCase):
             destination = library.import_reference("test-source", source, "GLSL")
             self.assertEqual((destination / "original/nested/input.frag").read_bytes(), original)
             spec = catalog.read_json(destination / "reference.json")
-            self.assertEqual(spec["origin"]["importedFrom"], str(source))
+            self.assertEqual(spec["origin"]["importedFrom"], "test-source")
             self.assertTrue(spec["origin"]["importedAt"].endswith("Z"))
             library.validate()
             with self.assertRaises(ValueError): library.import_reference("test-source", source, "GLSL")
             (destination / "original/nested/input.frag").write_bytes(b"modified")
             with self.assertRaisesRegex(ValueError, "checksum"): library.validate()
+
+    def test_import_metadata_uses_public_label_without_private_paths(self):
+        with tempfile.TemporaryDirectory() as temp:
+            private = pathlib.Path(temp) / "private-contributor/private-project"
+            directory = private / "private-reference-directory"
+            (directory / "nested").mkdir(parents=True)
+            original = b"\x00\xff\noriginal shader bytes"
+            file = private / "input.frag"
+            file.write_bytes(original)
+            (directory / "nested/input.frag").write_bytes(original)
+            for kind, source, filename in (("file", file, "input.frag"), ("directory", directory, "nested/input.frag")):
+                for form in ("absolute", "relative"):
+                    with self.subTest(kind=kind, form=form):
+                        asset_id = f"test-{kind}-{form}"
+                        argument = source if form == "absolute" else os.path.relpath(source)
+                        destination = library.import_reference(asset_id, argument, "GLSL")
+                        metadata = (destination / "reference.json").read_text()
+                        spec = json.loads(metadata)
+                        self.assertEqual(spec["origin"]["importedFrom"], asset_id)
+                        self.assertNotIn(str(source), metadata)
+                        self.assertNotIn(str(source.parent), metadata)
+                        for marker in ("private-contributor", "private-project", "private-reference-directory"):
+                            self.assertNotIn(marker, metadata)
+                        self.assertEqual((destination / "original" / filename).read_bytes(), original)
+                        self.assertEqual(spec["files"], {filename: catalog.digest(original)})
+            library.validate()
 
     def test_broken_specs_links_and_paths(self):
         file = self.root / "snippets/polar-fold/snippet.json"

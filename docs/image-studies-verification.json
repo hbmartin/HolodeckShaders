@@ -1,0 +1,142 @@
+{
+  "verifiedOn": "2026-10-10",
+  "device": "Apple M2 Pro",
+  "operatingSystem": "macOS 27.0.1",
+  "checks": {
+    "library": "python3 tools/library.py validate --compile: 65 authoring assets; all 28 snippet examples compiled for macOS and tvOS",
+    "publication": "python3 tools/catalog.py generate and validate: 23 scenes, preview fingerprints and hashes verified, tvOS sources compiled",
+    "newShaderCompilation": "All five complete runtime sources also compiled directly for macOS and tvOS",
+    "samples": {
+      "timesSeconds": [
+        0,
+        3,
+        10,
+        60
+      ],
+      "sizes": [
+        [
+          1032,
+          774
+        ],
+        [
+          1131,
+          707
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "notes": "First four scenes sampled at 1032x774; ocean at 1131x707; all five also sampled at 1280x720 (publication preview at 3s)."
+    },
+    "app": "Existing Debug HolodeckMac, offline catalog fixture with the exact new sources, in-memory preferences; every scene selected and compared during active playback.",
+    "unitTests": "python3 -m unittest discover -s tools -p 'test_*.py': 33 tests run; 32 passed, one opt-in Metal compilation/rendering test skipped"
+  },
+  "performance": {
+    "method": "Metal command-buffer GPU start/end timestamps; sequential offscreen renders; HolodeckMac also open; excludes compilation, CPU submission, display presentation and readback",
+    "resolution": [
+      3840,
+      2160
+    ],
+    "pixelFormat": "bgra8Unorm_srgb",
+    "warmupFrames": 20,
+    "measuredFrames": 120,
+    "sampleTimeSeconds": "3 + frame / 30",
+    "results": {
+      "dramamine-sunset": {
+        "medianMilliseconds": 1.016,
+        "p95Milliseconds": 3.846
+      },
+      "evening-and-morning": {
+        "medianMilliseconds": 1.982,
+        "p95Milliseconds": 4.999
+      },
+      "green-caresses": {
+        "medianMilliseconds": 0.843,
+        "p95Milliseconds": 3.321
+      },
+      "orange-flow": {
+        "medianMilliseconds": 1.995,
+        "p95Milliseconds": 5.165
+      },
+      "side-view-of-the-ocean": {
+        "medianMilliseconds": 0.604,
+        "p95Milliseconds": 2.415
+      }
+    }
+  },
+  "scenes": [
+    {
+      "id": "dramamine-sunset",
+      "name": "Dramamine Sunset",
+      "imageReference": "dramamine sunset.jpg",
+      "sourceSHA256": "d05dc71f468ca7f823a6631f2d8329d7ac49c745067acc0c4316d1dfc8b047e4",
+      "reuse": {
+        "references": [],
+        "snippets": [
+          "glowing-ribbons",
+          "value-noise"
+        ]
+      },
+      "visualObservation": "Violet field, coral outer arc, pale luminous core, attached drifting flare and turquoise lower band."
+    },
+    {
+      "id": "evening-and-morning",
+      "name": "Evening and Morning",
+      "imageReference": "evening and morning.jpg",
+      "sourceSHA256": "edf13f39003b2a570b20cffb8cfe7d47199f6cde8dc170c21eec503fefc1687b",
+      "reuse": {
+        "references": [],
+        "snippets": [
+          "value-noise"
+        ]
+      },
+      "visualObservation": "Warm scarlet/gold left, cyan/cobalt right, wine seam and soft evolving concentric ripples."
+    },
+    {
+      "id": "green-caresses",
+      "name": "Green Caresses",
+      "imageReference": "green caresses.jpg",
+      "sourceSHA256": "108582856c90e6c6ec7f661b3f08d2dd2d73f26e5f0afaec39dccd0bb197fdaf",
+      "reuse": {
+        "references": [],
+        "snippets": [
+          "value-noise"
+        ]
+      },
+      "visualObservation": "Lime fields, pale mint background, hanging cyan fold and slowly drifting diagonal caress."
+    },
+    {
+      "id": "orange-flow",
+      "name": "Orange Flow",
+      "imageReference": "orange flow.jpg",
+      "sourceSHA256": "6b7954fa9c539efb2edf5448b74c7f93b5f9363c18423e0645158352f3f47ae3",
+      "reuse": {
+        "references": [],
+        "snippets": [
+          "value-noise"
+        ]
+      },
+      "visualObservation": "Orange/gold background, broad bright right sheet and overlapping translucent amber folds."
+    },
+    {
+      "id": "side-view-of-the-ocean",
+      "name": "Side View of the Ocean",
+      "imageReference": "side view of the ocean.jpg",
+      "sourceSHA256": "c6493bcca6d3170a95783a3d31deb4eedfa51a966ab4ef12b157e4256de45fee",
+      "reuse": {
+        "references": [],
+        "snippets": [
+          "value-noise"
+        ]
+      },
+      "visualObservation": "Lavender-to-blue-to-teal vertical depth gradient with subtle moving diffuse currents."
+    }
+  ],
+  "unverified": [
+    "Physical Apple TV playback and GPU performance",
+    "Minimum supported macOS and tvOS runtime versions",
+    "TV/HDR display colour appearance",
+    "Instrumented app frame pacing and sustained thermal performance"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.46,
+      0,
+      0.79
+    ],
+    [
+      0,
+      0.64,
+      0.65
+    ]
+  ],
+  "description": "A pearl of light glides along a violet and coral arc above a turquoise dusk.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "violet",
+      "sunset",
+      "glow",
+      "ribbons"
+    ]
+  },
+  "id": "dramamine-sunset",
+  "name": "Dramamine Sunset",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "glowing-ribbons",
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

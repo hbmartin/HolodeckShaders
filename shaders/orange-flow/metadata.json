@@ -1,0 +1,41 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.96,
+      0.49,
+      0
+    ],
+    [
+      0.91,
+      0.86,
+      0
+    ]
+  ],
+  "description": "Translucent amber sheets turn and flow through a quiet field of orange and gold.",
+  "discovery": {
+    "moods": [
+      "calm",
+      "dreamy"
+    ],
+    "motion": "slow",
+    "tags": [
+      "amber",
+      "orange",
+      "gold",
+      "folds"
+    ]
+  },
+  "id": "orange-flow",
+  "name": "Orange Flow",
+  "reuse": {
+    "references": [],
+    "snippets": [
+      "value-noise"
+    ]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

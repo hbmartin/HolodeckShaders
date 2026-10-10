@@ -20,7 +20,8 @@
         "starfield",
         "ember-drift",
         "sunlit-shallows",
-        "fireworks"
+        "fireworks",
+        "side-view-of-the-ocean"
       ]
     },
     {
@@ -33,7 +34,12 @@
         "kaleidoscope",
         "apollonian-twist",
         "light-grid",
-        "sonar-pulse"
+        "sonar-pulse",
+        "dramamine-sunset",
+        "evening-and-morning",
+        "green-caresses",
+        "orange-flow",
+        "side-view-of-the-ocean"
       ]
     },
     {
@@ -77,6 +83,11 @@
     "sonar-pulse",
     "ember-drift",
     "sunlit-shallows",
-    "fireworks"
+    "fireworks",
+    "dramamine-sunset",
+    "evening-and-morning",
+    "green-caresses",
+    "orange-flow",
+    "side-view-of-the-ocean"
   ]
 }

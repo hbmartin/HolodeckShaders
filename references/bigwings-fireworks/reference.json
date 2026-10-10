@@ -1,0 +1,29 @@
+{
+  "adaptationNotes": "Metadata only: non-commercial share-alike source. Original: https://www.shadertoy.com/view/lscGRl. Adapted to shaders/fireworks with fewer particles, y-up gravity, NaN guards, tonemapping and a night sky; the adaptation carries CC BY-NC-SA 3.0.",
+  "files": {},
+  "id": "bigwings-fireworks",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "Fireworks (BigWings)",
+  "origin": {
+    "author": "Martijn Steinrucken (BigWings), 2015",
+    "license": "CC BY-NC-SA 3.0 (stated in shader header)",
+    "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/fireworks.glsl"
+  },
+  "requirements": [
+    "iChannel0 terminal texture used only for final blending",
+    "3 bursts x 42 particles per pixel"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "firework bursts",
+    "particle explosions"
+  ],
+  "summary": "Martijn Steinrucken's 2015 fireworks (Shadertoy lscGRl, CC BY-NC-SA 3.0) via Ghostty; adapted as fireworks.",
+  "tags": [
+    "fireworks",
+    "particles",
+    "night",
+    "celebration",
+    "cc-by-nc-sa"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "adaptationNotes": "Original Shadertoy: https://www.shadertoy.com/view/wl2Gzc. Ported to shaders/ember-drift and snippets/ember-sparks: terminal blending removed, width-normalized coordinates converted to height units, uninitialized locals zeroed, output tonemapped. Attribution kept in the body header.",
+  "files": {
+    "sparks-from-fire.glsl": "7ed7da77f8ffd64330fa1711d1082ac30b54b81b4c82f5d21d74e4acd2e8abae"
+  },
+  "id": "sparks-from-fire",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "Sparks From Fire",
+  "origin": {
+    "author": "Jan Mr\u00f3z (jaszunio15); Ghostty adaptation by Alex Sherwin",
+    "importedAt": "2026-10-10T18:51:45.731748Z",
+    "license": "CC BY 3.0",
+    "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/sparks-from-fire.glsl"
+  },
+  "requirements": [
+    "Shadertoy mainImage with iResolution/iTime",
+    "iChannel0 terminal texture used only for final blending (removable)"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "rising sparks",
+    "fire particles",
+    "smoke layers"
+  ],
+  "summary": "Jan Mr\u00f3z's CC BY 3.0 rising embers and smoke (Shadertoy wl2Gzc) via the Ghostty adaptation; source of the ember-drift scene.",
+  "tags": [
+    "fire",
+    "sparks",
+    "embers",
+    "smoke",
+    "particles",
+    "cc-by"
+  ]
+}

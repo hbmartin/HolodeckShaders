@@ -1,0 +1,32 @@
+{
+  "adaptationNotes": "Metadata only; no code copied. shaders/holodeck-grid is an original single-pass implementation: analytic ray-box room, two-level amber grid with analytic antialiasing, distance fade, and a few analytic hologram objects on bounce paths instead of physics. Related snippets: grid-lines, box-room, hologram-rim.",
+  "files": {},
+  "id": "holodeck-scene",
+  "language": "WGSL (WebGPU) + JavaScript",
+  "name": "Holodeck Scene",
+  "origin": {
+    "author": "Chris Lane Jones",
+    "license": "None stated (all rights reserved)",
+    "url": "https://github.com/chrislanejones/holodeck-scene/tree/571c41beda036d1a28c8254a73f4df74cefb4730"
+  },
+  "requirements": [
+    "Mesh geometry from three.js, instancing and depth buffer",
+    "Rapier rigid-body physics for 28 objects",
+    "HTML text overlay"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "amber grid room",
+    "star trek holodeck",
+    "grid walls"
+  ],
+  "summary": "Chris Lane Jones' WebGPU holodeck room with amber grid walls and floating physics objects (no license); clean-room inspiration for holodeck-grid.",
+  "tags": [
+    "holodeck",
+    "grid",
+    "room",
+    "sci-fi",
+    "webgpu",
+    "unlicensed"
+  ]
+}

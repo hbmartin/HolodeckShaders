@@ -1,0 +1,35 @@
+{
+  "adaptationNotes": "Only ApollonianGasket.metal and LICENSE are preserved (commit 6315085). The file is an uncredited direct port of mrange's Shadertoy Wl3fzM (header: License CC0). Adapted to shaders/apollonian-twist in float math with fwidth-based antialiasing. Other files are not preserved: several are uncredited Shadertoy ports with unknown or non-commercial licenses (see README).",
+  "files": {
+    "LICENSE": "5c6e0dd79c0b46f16dfb7507f2a5fae4f9356785f2dc80c229b46c205227c1ff",
+    "SUIMetal/Shaders/ApollonianGasket.metal": "aece98cd7579bd3c91310b05593d8ed9c17494c3d7607dbaf08aef4e64941d75"
+  },
+  "id": "swiftui-new-metal-shaders",
+  "language": "Metal (SwiftUI stitchable)",
+  "name": "SwiftUI New Metal Shaders",
+  "origin": {
+    "author": "Astemir Eleev (Metal port); mrange (original Apollian with a twist)",
+    "importedAt": "2026-10-10T18:51:45.398914Z",
+    "license": "MIT (port, Copyright (c) 2023 Astemir Eleev); original shader CC0",
+    "url": "https://github.com/eleev/swiftui-new-metal-shaders/tree/63150854f43c54a61e2f202bd4e413027efd569b"
+  },
+  "requirements": [
+    "SwiftUI [[stitchable]] colorEffect signature with bounds and time uniforms",
+    "position in points with y down"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "apollonian gasket",
+    "circle packing fractal",
+    "apollian with a twist"
+  ],
+  "summary": "Astemir Eleev's MIT SwiftUI shader demos; the Apollonian gasket (a port of mrange's CC0 'Apollian with a twist') became a catalog scene.",
+  "tags": [
+    "swiftui",
+    "fractal",
+    "apollonian",
+    "generator",
+    "mit",
+    "cc0"
+  ]
+}

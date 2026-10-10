@@ -1,0 +1,45 @@
+{
+  "adaptationNotes": "Selected files only, pinned to commit a40c7a0. Generators were ported to float math with time wrapped at the true period: LightGrid -> shaders/light-grid, CircleWaveTransformation -> shaders/sonar-pulse. Sinebow, Transition/CircleWave, Water, Infrared and Shimmer were reduced to snippets (sinebow-lines, dot-curtain, sine-warp, color-ramps). SwiftUI points become height-relative units; input color/alpha handling is dropped.",
+  "files": {
+    "LICENSE": "bf367dc5c26c4adc7c696647e870c40bd4b04405a7558a0fb8eaa1ce6e5e8bed",
+    "Sources/Inferno/Shaders/Generation/LightGrid.metal": "f24ac0c4df8015577a981cc9654249c31dc5cd50d15670dc163a8774e78e3d32",
+    "Sources/Inferno/Shaders/Generation/Sinebow.metal": "2a4a76cc17e4b99476aefcacaf9275d73398fb9c95ecd0df1cfb70738fd695b4",
+    "Sources/Inferno/Shaders/Transformation/CircleWaveTransformation.metal": "26fa22ea45939f2dad3cffebfad739098271464913526c841967c4356d523ebf",
+    "Sources/Inferno/Shaders/Transformation/Infrared.metal": "5fa16dd58fd0e6c991023dea61ca24f6ef8bdd21e2d6ed052b19ad198b9ba86b",
+    "Sources/Inferno/Shaders/Transformation/Shimmer.metal": "77a1d07491c4bec7787507b9ff08baeb6966497cad61eb010b105e431c037c04",
+    "Sources/Inferno/Shaders/Transformation/Water.metal": "134291ffd74e90e8a10664507b3cb89b99ed6e86369ced7659ff2704b40fbd45",
+    "Sources/Inferno/Shaders/Transition/CircleWave.metal": "a823395c129a09c247fe5756b1b3400eb323aae7cb2ab4fc7ec04ab7c60bce5d"
+  },
+  "id": "inferno",
+  "language": "Metal (SwiftUI stitchable)",
+  "name": "Inferno",
+  "origin": {
+    "author": "Paul Hudson and other authors (credits in original LICENSE)",
+    "importedAt": "2026-10-10T18:51:45.269948Z",
+    "license": "MIT",
+    "url": "https://github.com/twostraws/Inferno/tree/a40c7a0bdec03aae1bd0b96c41d6a75451bafd2c"
+  },
+  "requirements": [
+    "SwiftUI [[stitchable]] colorEffect, distortionEffect or layerEffect signature",
+    "position in points with y down; size passed as a uniform",
+    "most effects sample the layer or input color; only generators port as backgrounds",
+    "half-precision math in several files"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "light grid",
+    "sinebow",
+    "circle wave",
+    "polka dot curtain",
+    "shimmer",
+    "infrared"
+  ],
+  "summary": "Paul Hudson's MIT SwiftUI shader collection; LightGrid and CircleWave became catalog scenes, other techniques became snippets.",
+  "tags": [
+    "swiftui",
+    "generator",
+    "transition",
+    "color",
+    "mit"
+  ]
+}

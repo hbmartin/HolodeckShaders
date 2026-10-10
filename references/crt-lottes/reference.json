@@ -1,0 +1,33 @@
+{
+  "adaptationNotes": "The full filter needs a source image, which the Holodeck runtime does not provide. Only the procedural pieces (shadow mask, scanline weighting) were extracted into snippets/crt-overlay to multiply over a scene's own colour.",
+  "files": {
+    "crt.glsl": "a963689b984b204bf300db7b3b66e79be7d174d2860b42e800e4399c202c07dd"
+  },
+  "id": "crt-lottes",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "CRT (Lottes)",
+  "origin": {
+    "author": "Timothy Lottes; Ghostty adaptation by Qwerasd",
+    "importedAt": "2026-10-10T18:51:45.879413Z",
+    "license": "Unlicense (public domain)",
+    "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/crt.glsl"
+  },
+  "requirements": [
+    "post-process: samples iChannel0 terminal texture (multi-tap)",
+    "pixel-scale mask tied to display resolution"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "aperture grille",
+    "crt mask",
+    "scanline"
+  ],
+  "summary": "Timothy Lottes' public-domain CRTS scanline, shadow-mask and warp shader as adapted for Ghostty; source of the crt-overlay snippet.",
+  "tags": [
+    "crt",
+    "scanlines",
+    "shadow-mask",
+    "retro",
+    "public-domain"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "adaptationNotes": "Metadata only: non-commercial share-alike source, original not redistributed here. Forks Hoskins' 'Warp speed' (Msl3WH), which credits Kali's fractal. Adapted to shaders/warp-speed and snippets/kali-starfield with aspect-correct framing, fewer iterations, slower precision-safe travel; those adaptations carry CC BY-NC-SA 3.0.",
+  "files": {},
+  "id": "warp-speed-2",
+  "language": "GLSL (Shadertoy)",
+  "name": "Warp Speed 2",
+  "origin": {
+    "author": "Dave Hoskins (David Hoskins), 2015",
+    "license": "CC BY-NC-SA 3.0 (stated in shader header)",
+    "url": "https://www.shadertoy.com/view/4tjSDt"
+  },
+  "requirements": [
+    "Single Image pass",
+    "iChannel0 is an unused SoundCloud music stream",
+    "100 x 10 fractal iterations per pixel (heavy)"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "kali fold",
+    "star cloud",
+    "hyperspace"
+  ],
+  "summary": "Dave Hoskins' Kali-fractal star-cloud fly-through (Shadertoy 4tjSDt, CC BY-NC-SA 3.0); adapted as warp-speed.",
+  "tags": [
+    "kali",
+    "fractal",
+    "starfield",
+    "volumetric",
+    "warp",
+    "cc-by-nc-sa"
+  ]
+}

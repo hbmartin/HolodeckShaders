@@ -1,0 +1,33 @@
+{
+  "adaptationNotes": "Metadata only; no code copied. shaders/force-shield is an original single-pass implementation: analytic ray-sphere hit, hex lattice, fresnel rim, Ashima simplex flow, time-scheduled impacts instead of clicks and a closest-approach halo instead of bloom. Related snippets: hex-grid, sphere-shell, impact-ripple, noise-dissolve, simplex-noise-3d.",
+  "files": {},
+  "id": "flow-shield-effect",
+  "language": "TypeScript + GLSL (React Three Fiber)",
+  "name": "Flow Shield Effect",
+  "origin": {
+    "author": "Christian Ortiz (cortiz2894)",
+    "license": "None stated (all rights reserved)",
+    "url": "https://github.com/cortiz2894/flow-shield-effect/tree/bf34d9ea48fd4333f5b42ef3e3772c89de2adccb"
+  },
+  "requirements": [
+    "Sphere mesh with view-space normals",
+    "Mouse clicks feed a six-slot hit buffer",
+    "Additive blending plus bloom and film-noise post passes",
+    "HDRI environment and grid floor"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "force field",
+    "energy bubble",
+    "impact ripple"
+  ],
+  "summary": "Christian Ortiz's R3F hexagonal energy-shield demo (no license); clean-room inspiration for force-shield.",
+  "tags": [
+    "shield",
+    "hexagon",
+    "fresnel",
+    "energy",
+    "three-js",
+    "unlicensed"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "adaptationNotes": "Metadata only (mixed provenance). Adapted to shaders/matrix-corridor and snippets/rune-glyph with the mouse path removed, a seamless time wrap instead of a 300 s reset and reduced traversal cost; the adaptation is treated as CC BY-NC-SA 3.0. Exact header text is quoted in the shader body.",
+  "files": {},
+  "id": "inside-the-matrix",
+  "language": "GLSL (Ghostty/Shadertoy)",
+  "name": "Inside The Matrix",
+  "origin": {
+    "author": "Modified by pkazmier; runes after FabriceNeyret2 (4ltyDM) and otaviogood (MsXSRn)",
+    "license": "Header grants broad reuse; rune lineage treated as CC BY-NC-SA 3.0",
+    "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/inside-the-matrix.glsl"
+  },
+  "requirements": [
+    "iChannel0 terminal texture used only for final blending",
+    "optional iMouse camera control",
+    "40-step grid traversal per pixel (heavy)"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "digital rain",
+    "green code",
+    "rune glyph"
+  ],
+  "summary": "Ghostty glyph-rain city fly-through with rune glyphs from a Shadertoy lineage; adapted as matrix-corridor under CC BY-NC-SA 3.0.",
+  "tags": [
+    "matrix",
+    "glyphs",
+    "digital-rain",
+    "city",
+    "cc-by-nc-sa"
+  ]
+}

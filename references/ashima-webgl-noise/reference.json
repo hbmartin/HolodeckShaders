@@ -1,0 +1,31 @@
+{
+  "adaptationNotes": "Ported to Metal in snippets/simplex-noise-3d (hdSimplex3) with the copyright line retained; the same port is copied into shaders/force-shield.",
+  "files": {
+    "LICENSE": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916",
+    "src/noise3D.glsl": "bf18982b8edd25218b5096cba6f7838a0508416be51acd1fd88d0ba8acb5169e"
+  },
+  "id": "ashima-webgl-noise",
+  "language": "GLSL",
+  "name": "Ashima WebGL Noise",
+  "origin": {
+    "author": "Ian McEwan, Ashima Arts; Stefan Gustavson",
+    "importedAt": "2026-10-10T18:51:46.120658Z",
+    "license": "MIT",
+    "url": "https://github.com/ashima/webgl-noise/blob/6abed1e77ed1e18b181627c35f688eb30c9fe75e/src/noise3D.glsl"
+  },
+  "requirements": [
+    "GLSL; no textures or uniforms"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "3d simplex noise",
+    "textureless noise"
+  ],
+  "summary": "Ashima Arts / Stefan Gustavson MIT textureless 3D simplex noise; ported to the simplex-noise-3d snippet and force-shield.",
+  "tags": [
+    "noise",
+    "simplex",
+    "3d",
+    "mit"
+  ]
+}

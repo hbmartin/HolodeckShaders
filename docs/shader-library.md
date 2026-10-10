@@ -21,7 +21,7 @@ Shared-helper snippets link to the existing implementation. Recipe snippets have
 
 ## References and provenance
 
-Use `python3 tools/library.py import-reference my-source --source /absolute/path --language GLSL` to preserve a local file or directory. Imports reject symlinks and overwrites, record the local source path, UTC import time and every original file's SHA-256, and never convert source or add it to the app. Fill in the original URL, author, license, requirements and adaptation notes. Unknown provenance stays explicitly unknown. `validate` checks the inventory and bytes against recorded checksums. Keep originals unchanged and adapt into a separate finished shader or snippet.
+Use `python3 tools/library.py import-reference my-source --source /absolute/path --language GLSL` to preserve a local file or directory. Imports reject symlinks and overwrites, record the public reference ID as `origin.importedFrom`, UTC import time and every original file's SHA-256, and never convert source or add it to the app. Absolute source paths are discarded after importing and are not retained in metadata or a local record. Fill in the original URL, author, license, requirements and adaptation notes. Unknown provenance stays explicitly unknown. `validate` checks the inventory and bytes against recorded checksums. Keep originals unchanged and adapt into a separate finished shader or snippet.
 
 Initial examples are the eight canonical shaders under `shaders/`; their originals are not duplicated in `references/`.
 

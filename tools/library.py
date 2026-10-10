@@ -217,7 +217,7 @@ def import_reference(asset_id, source, language):
             shutil.copy2(source, original / source.name)
         spec = catalog.read_json(destination / "reference.json")
         spec["language"] = language
-        spec["origin"]["importedFrom"] = str(source)
+        spec["origin"]["importedFrom"] = asset_id
         spec["origin"]["importedAt"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         spec["files"] = {str(p.relative_to(original)): catalog.digest(p.read_bytes()) for p in sorted(original.rglob("*")) if p.is_file()}
         if not spec["files"]:

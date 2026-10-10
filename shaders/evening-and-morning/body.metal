@@ -9,7 +9,8 @@ float3 shade(float2 p, float time, float2 pixel) {
     float3 warm = mix(float3(0.81, 0.025, 0.01), float3(1.0, 0.79, 0.015), lower);
     float3 cool = mix(float3(0.045, 0.79, 0.70), float3(0.02, 0.27, 0.85), lower);
     float3 color = mix(warm, cool, split);
-    float seam = exp(-pow((q.x - 0.025) / (0.047 + lower * 0.016), 2.0));
+    float seamDistance = (q.x - 0.025) / (0.047 + lower * 0.016);
+    float seam = exp(-(seamDistance * seamDistance));
     color = mix(color, float3(0.51, 0.025, 0.29), seam * (0.5 + lower * 0.35));
 
     float radius = length(q * float2(1.0, 1.13));
@@ -28,7 +29,8 @@ float3 shade(float2 p, float time, float2 pixel) {
     mist *= smoothstep(-0.12, 0.42, q.y) * 0.57;
     float cloud = noise2(q * 3.0 + float2(sin(phase), cos(phase)) * 0.15);
     color = mix(color, float3(0.52, 0.52, 0.40), mist * (0.82 + cloud * 0.18));
-    float side = exp(-pow((abs(q.x) - 0.72) / 0.10, 2.0));
+    float sideDistance = (abs(q.x) - 0.72) / 0.10;
+    float side = exp(-(sideDistance * sideDistance));
     color = mix(color, float3(0.53, 0.045, 0.24), side * 0.42);
     color += (hash21(pixel) - 0.5) / 255.0;
     return pow(clamp(color, 0.0, 1.0), float3(2.2));

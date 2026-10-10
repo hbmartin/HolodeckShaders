@@ -19,9 +19,11 @@ float3 shade(float2 p, float time, float2 pixel) {
                 * (1.0 - smoothstep(-0.01, 0.013, q.y - lip));
     float3 silk = mix(float3(1.0, 0.78, 0.075), float3(0.91, 0.86, 0.0), lower);
     color = mix(color, silk, sheet * 0.80);
-    float lipGlow = exp(-pow((q.y - lip + 0.025) / 0.057, 2.0)) * sheet;
+    float lipDistance = (q.y - lip + 0.025) / 0.057;
+    float lipGlow = exp(-(lipDistance * lipDistance)) * sheet;
     color = mix(color, float3(1.0, 0.77, 0.22), lipGlow * 0.42);
-    float turn = exp(-pow((q.x - edge + 0.055) / 0.084, 2.0));
+    float turnDistance = (q.x - edge + 0.055) / 0.084;
+    float turn = exp(-(turnDistance * turnDistance));
     color *= 1.0 - turn * 0.10;
 
     // Overlapping, low-contrast translucent ribbons keep the image airy.
@@ -30,7 +32,8 @@ float3 shade(float2 p, float time, float2 pixel) {
                * (1.0 - smoothstep(0.12, 0.25, q.x - backEdge));
     color = mix(color, float3(0.61, 0.57, 0.005), back * lower * 0.38);
     float veilEdge = -0.03 + 0.12 * sin(q.y * 7.0 - phase);
-    float veil = exp(-pow((q.x - veilEdge) / 0.08, 2.0));
+    float veilDistance = (q.x - veilEdge) / 0.08;
+    float veil = exp(-(veilDistance * veilDistance));
     color = mix(color, float3(1.0, 0.68, 0.04), veil * 0.17);
     float frontEdge = -0.16 + 0.15 * sin(q.y * 5.0 - phase) + lower * 0.22;
     float front = smoothstep(-0.004, 0.008, q.x - frontEdge)
@@ -38,7 +41,8 @@ float3 shade(float2 p, float time, float2 pixel) {
                 * (1.0 - smoothstep(0.17, 0.26, q.y));
     color = mix(color, float3(0.95, 0.70, 0.02), front * 0.27);
     float diagonal = q.y + 0.52 * q.x + 0.02 + 0.11 * sin(q.x * 4.0 + phase);
-    float overlap = exp(-pow(diagonal / 0.048, 2.0));
+    float overlapDistance = diagonal / 0.048;
+    float overlap = exp(-(overlapDistance * overlapDistance));
     color *= 1.0 - overlap * sheet * 0.045;
     color += (hash21(pixel) - 0.5) / 255.0;
     return pow(clamp(color, 0.0, 1.0), float3(2.2));

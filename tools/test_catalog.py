@@ -17,7 +17,8 @@ class CatalogValidationTests(unittest.TestCase):
         shutil.copytree(catalog.ROOT / "snippets", self.root / "snippets")
         shutil.copytree(catalog.ROOT / "references", self.root / "references")
         (self.root / "tools").mkdir()
-        shutil.copyfile(catalog.ROOT / "tools/render-preview.swift", self.root / "tools/render-preview.swift")
+        for path in catalog.renderer_sources("render-preview.swift"):
+            shutil.copyfile(path, self.root / "tools" / path.name)
         shutil.copyfile(catalog.ROOT / "index.json", self.root / "index.json")
         self.root_patch = patch.object(catalog, "ROOT", self.root)
         self.root_patch.start()
@@ -49,7 +50,7 @@ class CatalogValidationTests(unittest.TestCase):
                 catalog.entries()
 
     def test_stale_source_and_renderer_fingerprints_block_publication(self):
-        for path in ("shaders/plasma/body.metal", "shared/common.metal", "tools/render-preview.swift"):
+        for path in ("shaders/plasma/body.metal", "shared/common.metal", "tools/render-preview.swift", "tools/metal-render-support.swift"):
             original = (self.root / path).read_text()
             (self.root / path).write_text(original + "\n// changed\n")
             with patch.object(catalog, "git", return_value="a" * 40), self.assertRaisesRegex(ValueError, "Stale preview"):

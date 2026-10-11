@@ -227,7 +227,8 @@ def fixture_root():
         for folder in ("shaders", "shared", "snippets", "references"):
             shutil.copytree(catalog.ROOT / folder, root / folder)
         (root / "tools").mkdir()
-        shutil.copyfile(catalog.ROOT / "tools/render-preview.swift", root / "tools/render-preview.swift")
+        for path in catalog.renderer_sources("render-preview.swift"):
+            shutil.copyfile(path, root / "tools" / path.name)
         shutil.copyfile(catalog.ROOT / "index.json", root / "index.json")
         with patch.object(catalog, "ROOT", root):
             yield root

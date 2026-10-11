@@ -1,0 +1,1251 @@
+{
+  "appInspection": {
+    "continuousUptimeSimulated": false,
+    "diagnosticWrapperOffsetsSeconds": {
+      "holodeck-grid": [
+        1240
+      ],
+      "matrix-corridor": [
+        1815,
+        130967,
+        1728000
+      ]
+    },
+    "exactSourceIDs": [
+      "matrix-corridor",
+      "holodeck-grid"
+    ],
+    "fixtureSHA256": "b3c2782d598e2759f9ee14a8e5246f8906ad916d7e13ae6be161ff68231acae0",
+    "isolatedPreferences": "in memory",
+    "liveMetalCompilation": true,
+    "observations": "Visible camera/rain and hologram motion in successive app observations; offscreen renders separately sample exact wrap boundaries.",
+    "platform": "macOS"
+  },
+  "artifactSHA256": {
+    "holodeck-grid.png": "b98aaeb3c02a78d0704ccf1a861e7a1d266ceb65d480a5a967c2a998c8d2cf5e",
+    "matrix-corridor.png": "384578faf2d4c28cdd419e1b7e4256164acbbbe0fab33aa19a59ad562aadaa51"
+  },
+  "baselineRevision": "e5bb6270486230ed8879d9dcdba3e0203576a770",
+  "changedMetalTokens": {
+    "shaders/ember-drift/body.metal": true,
+    "shaders/fireworks/body.metal": true,
+    "shaders/holodeck-grid/body.metal": false,
+    "shaders/matrix-corridor/body.metal": false,
+    "shaders/sunlit-shallows/body.metal": true,
+    "shared/common.metal": true,
+    "snippets/box-room/code.metal": true,
+    "snippets/color-ramps/code.metal": true,
+    "snippets/crt-overlay/code.metal": true,
+    "snippets/dot-curtain/code.metal": true,
+    "snippets/ember-sparks/code.metal": true,
+    "snippets/rune-glyph/code.metal": true,
+    "snippets/rune-glyph/example.metal": false,
+    "snippets/voronoi/code.metal": true
+  },
+  "checks": {
+    "completeSourcesCompiledPerPlatform": 23,
+    "gpuTestsEnabled": true,
+    "inventorySources": 78,
+    "libraryAssets": 67,
+    "platforms": [
+      "macOS",
+      "tvOS"
+    ],
+    "publicationValidatedLocally": true,
+    "published": false,
+    "pythonTestSeconds": 16.157,
+    "pythonTests": 46,
+    "regeneratedPreviews": 23,
+    "snippetExamplesCompiledPerPlatform": 28,
+    "upstreamRequirements": 11
+  },
+  "environment": {
+    "device": "Apple M2 Pro",
+    "macOS": "27.0.1",
+    "macOSBuild": "26A434",
+    "macOSSDK": "27.0",
+    "tvOSSDK": "27.0",
+    "xcode": "27.0 (27A266a)"
+  },
+  "existingReferenceOriginalSHA256": {
+    "references/ashima-webgl-noise/original/LICENSE": "bdafce1bb01517c9ae6c4f3620c01340790b5e9d039ae9e356347d1174250916",
+    "references/ashima-webgl-noise/original/src/noise3D.glsl": "bf18982b8edd25218b5096cba6f7838a0508416be51acd1fd88d0ba8acb5169e",
+    "references/crt-lottes/original/crt.glsl": "a963689b984b204bf300db7b3b66e79be7d174d2860b42e800e4399c202c07dd",
+    "references/inferno/original/LICENSE": "bf367dc5c26c4adc7c696647e870c40bd4b04405a7558a0fb8eaa1ce6e5e8bed",
+    "references/inferno/original/Sources/Inferno/Shaders/Generation/LightGrid.metal": "f24ac0c4df8015577a981cc9654249c31dc5cd50d15670dc163a8774e78e3d32",
+    "references/inferno/original/Sources/Inferno/Shaders/Generation/Sinebow.metal": "2a4a76cc17e4b99476aefcacaf9275d73398fb9c95ecd0df1cfb70738fd695b4",
+    "references/inferno/original/Sources/Inferno/Shaders/Transformation/CircleWaveTransformation.metal": "26fa22ea45939f2dad3cffebfad739098271464913526c841967c4356d523ebf",
+    "references/inferno/original/Sources/Inferno/Shaders/Transformation/Infrared.metal": "5fa16dd58fd0e6c991023dea61ca24f6ef8bdd21e2d6ed052b19ad198b9ba86b",
+    "references/inferno/original/Sources/Inferno/Shaders/Transformation/Shimmer.metal": "77a1d07491c4bec7787507b9ff08baeb6966497cad61eb010b105e431c037c04",
+    "references/inferno/original/Sources/Inferno/Shaders/Transformation/Water.metal": "134291ffd74e90e8a10664507b3cb89b99ed6e86369ced7659ff2704b40fbd45",
+    "references/inferno/original/Sources/Inferno/Shaders/Transition/CircleWave.metal": "a823395c129a09c247fe5756b1b3400eb323aae7cb2ab4fc7ec04ab7c60bce5d",
+    "references/sparks-from-fire/original/sparks-from-fire.glsl": "7ed7da77f8ffd64330fa1711d1082ac30b54b81b4c82f5d21d74e4acd2e8abae",
+    "references/swiftshaders/original/LICENSE": "b24736b7c093ad8882679db1d4466fb809e76de5d5d5dd8ac9351128c74ecdb3",
+    "references/swiftshaders/original/Sources/SwiftShaders/Shaders/Noise/NoiseShader.metal": "04cce0c6f3e3bc3de50b0540e26bb01308b713091246000025fd23d762069a6f",
+    "references/swiftshaders/original/Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal": "d0be28345e96de32ca2c69c62164105dbd7c2eb2a5d51adf658c04b4242c4be5",
+    "references/swiftshaders/original/Sources/SwiftShaders/Shaders/Water/WaterShader.metal": "ec0a9ec49076873d2c37df6db03ff188bee0eda87b55ebfcf5f35cb9ac247445",
+    "references/swiftui-new-metal-shaders/original/LICENSE": "5c6e0dd79c0b46f16dfb7507f2a5fae4f9356785f2dc80c229b46c205227c1ff",
+    "references/swiftui-new-metal-shaders/original/SUIMetal/Shaders/ApollonianGasket.metal": "aece98cd7579bd3c91310b05593d8ed9c17494c3d7607dbaf08aef4e64941d75",
+    "references/vhs-overlay/original/vhs.glsl": "bf0f3e4ecfc32c733dc4fb6faf06e1cf433cae8972150e3637de1ae27b17bbe8"
+  },
+  "gpuTimings": {
+    "configuration": "3840x2160 bgra8Unorm_srgb; ten warmup pairs, then 60 measured pairs; before/after alternated; verification app and render jobs stopped",
+    "limitations": "Offscreen command buffer GPU times exclude presentation and do not establish sustained app frame rate or target-device performance.",
+    "samples": [
+      {
+        "afterMedianMilliseconds": 4.133,
+        "afterP95Milliseconds": 4.138,
+        "beforeMedianMilliseconds": 4.121,
+        "beforeP95Milliseconds": 4.125,
+        "scene": "matrix-corridor",
+        "time": 3.0
+      },
+      {
+        "afterMedianMilliseconds": 3.464,
+        "afterP95Milliseconds": 3.469,
+        "beforeMedianMilliseconds": 3.455,
+        "beforeP95Milliseconds": 3.46,
+        "scene": "matrix-corridor",
+        "time": 1820.0
+      },
+      {
+        "afterMedianMilliseconds": 3.495,
+        "afterP95Milliseconds": 3.498,
+        "beforeMedianMilliseconds": 3.485,
+        "beforeP95Milliseconds": 3.491,
+        "scene": "matrix-corridor",
+        "time": 130972.0
+      },
+      {
+        "afterMedianMilliseconds": 3.976,
+        "afterP95Milliseconds": 4.606,
+        "beforeMedianMilliseconds": 3.961,
+        "beforeP95Milliseconds": 4.567,
+        "scene": "matrix-corridor",
+        "time": 1728000.0
+      },
+      {
+        "afterMedianMilliseconds": 1.145,
+        "afterP95Milliseconds": 1.146,
+        "beforeMedianMilliseconds": 1.145,
+        "beforeP95Milliseconds": 1.146,
+        "scene": "holodeck-grid",
+        "time": 3.0
+      },
+      {
+        "afterMedianMilliseconds": 1.173,
+        "afterP95Milliseconds": 1.174,
+        "beforeMedianMilliseconds": 1.173,
+        "beforeP95Milliseconds": 1.174,
+        "scene": "holodeck-grid",
+        "time": 1820.0
+      },
+      {
+        "afterMedianMilliseconds": 1.132,
+        "afterP95Milliseconds": 1.133,
+        "beforeMedianMilliseconds": 1.132,
+        "beforeP95Milliseconds": 1.133,
+        "scene": "holodeck-grid",
+        "time": 130972.0
+      },
+      {
+        "afterMedianMilliseconds": 1.131,
+        "afterP95Milliseconds": 1.132,
+        "beforeMedianMilliseconds": 1.131,
+        "beforeP95Milliseconds": 1.132,
+        "scene": "holodeck-grid",
+        "time": 1728000.0
+      }
+    ]
+  },
+  "holodeckGeometry": {
+    "axesChecked": 12,
+    "clearance": 0.05,
+    "guardRemovalNegativeControlFailedFixtures": 4,
+    "invalidExtentKinds": [
+      "authored lane",
+      "available room"
+    ],
+    "invalidExtents": [
+      0,
+      -1
+    ],
+    "octahedronAvailableY": 3.6591034656191335,
+    "octahedronLaneY": 3.65,
+    "preBounceSentinelUnreachable": true,
+    "rawRenderMatchesSkippedObject": true,
+    "times": [
+      0,
+      3,
+      1240.6,
+      86400
+    ]
+  },
+  "implementationFilesSHA256": {
+    "index.json": "4c02d9f6638b3f5b50fa50609a94f96202f8cefb5b50892d302e2e8a61c0430c",
+    "shaders/holodeck-grid/body.metal": "52447cbf7ea3c881dc1936f9c799c14207362eb85841c969239d42a5f90a3742",
+    "shaders/matrix-corridor/body.metal": "764b077951da4c8ed54eaf53c3c5f92869bc40b771013b25d6aca2a53e040e5c",
+    "shared/common.metal": "933df7c2112735f911914bdacee96651c525b63f8e395cec07093beb8458b5ac",
+    "shared/fragment.metal": "b46a4fc664916103f1979fff94fdc8b9da54e93a325a94f78941536fccb1d736",
+    "snippets/rune-glyph/example.metal": "bd3c39fe9a6fc442e4dc2ac5f1d25df73743218252fe34be132d6926e2617902",
+    "tools/shader-regression-probe.swift": "f265fe2e54d797b3628384aa3f0536f58489332a72a0ac0fd1ccd51cce2044e6",
+    "tools/test_licenses.py": "ba4da47483692f11b45bf1e57a8b3a0b5038c46601cb859a2e292ba008229a40",
+    "tools/test_shader_regressions.py": "7737f42ca73eae8ce773f3d2b3bd226db4cbf70545c84ba85ab74d75c632a085"
+  },
+  "matrixOracle": {
+    "adjacentBoundaryCases": 96000,
+    "cases": 196000,
+    "finalMismatches": 0,
+    "incomingFloatSpacingSeconds": {
+      "20days": 0.125,
+      "365days": 2.0,
+      "78days": 0.5
+    },
+    "initialFloatFractionProductMismatches": 1107,
+    "longTimestampCases": 100000,
+    "maxTimestampSeconds": 31536000.5,
+    "minimumRateClampMaxChangeHz": 0.03125,
+    "oracle": "floor(float32(float32(t)+100)*rateSteps/32) modulo 4096, evaluated in Python double precision without a wrapped or split clock",
+    "physicalRateRoundingMaxHz": 0.015625,
+    "rateSteps": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80
+    ],
+    "routeWrapSeconds": 1920,
+    "seedWrapSeconds": 131072,
+    "ticksPerRate": 400
+  },
+  "newUpstreamEvidence": {
+    "glTransitions": {
+      "commit": "b2dfdcfbec079af4a05306d32b9366aa495c5155",
+      "originalSHA256": {
+        "LICENSE": "0db684e0150546743ae96d8ecf083be716786d834af7dbf8170ee8b6c247978d",
+        "PolkaDotsCurtain.glsl": "1a11af446cf3c50bf58d1a2b1547092e386bdcf1b7dff71179661f6a4c71d29a"
+      }
+    },
+    "hoskins": {
+      "implementationImported": false,
+      "noticeEvidenceSHA256": "db0cd1f1f3f5ea351b85e31fb86ce50a1d605470399929d544cdc2849d68b39a",
+      "noticeEvidenceURL": "https://gist.github.com/davidar/5f9677a0ccfbd63d7a8657ad9af3a856/f3619046080c1f8ff07c54f6658ed215ef5f9638",
+      "noticeSHA256": "a27022b0e9c4a4bdd7be738cb2ae656d8ffd89dd4d32ead713fedbc3f9197ad7",
+      "originalURL": "https://www.shadertoy.com/view/4djSRW"
+    }
+  },
+  "publishedSources": {
+    "apollonian-twist": {
+      "baseline": {
+        "previewSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+        "sourceSHA256": "2c98a513317fb081001511a3c5cca7762b255add9cd31d9c2a44b408cbcedf63"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+      "sourceSHA256": "c83ed8386bc84fa447eb6ef8304747d4dd285cb6e3d7f28bcfb6cb4802d33486"
+    },
+    "aurora": {
+      "baseline": {
+        "previewSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+        "sourceSHA256": "a469fcdff1e66ee6cb9137fc486a07637838b6fd1addfcb86206b264dca9db8d"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+      "sourceSHA256": "a746e3e5b650bef75e81d3059494284b7296947a4562fa1b1752d4df8c1021fc"
+    },
+    "brushed-gold": {
+      "baseline": {
+        "previewSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+        "sourceSHA256": "745570a1dc512e6d20e8abbfebb561cfb65b0b2694e4573045057f2f0af3e00e"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+      "sourceSHA256": "028557f93700112b37d3379497da2a04dc220c377e24c18d9487fe9da3582638"
+    },
+    "chrome": {
+      "baseline": {
+        "previewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+        "sourceSHA256": "e38e15ed044c38be482446abd16b761f15721211ab42a4bd49f2734f29016038"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "sourceSHA256": "b8e3959fe3de5d33536047930b85781ed5f718e9dc467854baac4ee811a54ac8"
+    },
+    "dramamine-sunset": {
+      "baseline": {
+        "previewSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+        "sourceSHA256": "3d06fc930360beec5a771ff1755b12d02572b34277609ac6003e2f968073f05b"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+      "sourceSHA256": "ea9c999f0782e816441a8e185fdb2de981cba5f29b993b748f39305e2a52b6f5"
+    },
+    "ember-drift": {
+      "baseline": {
+        "previewSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+        "sourceSHA256": "2089c64e2cdc34c9656aab1b8a11ab203459e86b4ec8a11f6ef4f61a600a2595"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+      "sourceSHA256": "5f103693b682c695046c3cdd987b60a6c60ed7de00c645cd9d268cc591c4a488"
+    },
+    "evening-and-morning": {
+      "baseline": {
+        "previewSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+        "sourceSHA256": "8c62abffc9baac9a028b6b4df34b5570de708d8502d2dc01d27b1a09eaca938c"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+      "sourceSHA256": "acee9168ac671359d8a06110f67c36cc737378974898432b8a62674e961401e7"
+    },
+    "fireworks": {
+      "baseline": {
+        "previewSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+        "sourceSHA256": "2e019e615938405b18dd296eda8cc943ea2ee0b27d2e4a33b5efded62f0b82e4"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+      "sourceSHA256": "a5a03cf2790acde02efe41e152cd7f48732d6b11b17b67d7b1e996b4bb82e997"
+    },
+    "force-shield": {
+      "baseline": {
+        "previewSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+        "sourceSHA256": "95ed392aebdd466770b59af1207489cdc7f70bb12586ecb19abb1cef6944be17"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+      "sourceSHA256": "7174b76faba885de3a7920f5d3aed7ade63fd9fdfd8bcb5205f7a7da14674007"
+    },
+    "green-caresses": {
+      "baseline": {
+        "previewSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+        "sourceSHA256": "bf82d322f18b6386e079bb6805ef16205c1b167e44d1de90a74071b8d94c08d4"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+      "sourceSHA256": "81ce2a4a1054d790516a6110f97f71acc78750db58916b8fcc936e24e82feefd"
+    },
+    "holodeck-grid": {
+      "baseline": {
+        "previewSHA256": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+        "sourceSHA256": "f815ed95872dcdbf396ec9052586185fa50652b7e7389bafc421e80e589f1432"
+      },
+      "executableTokensUnchanged": false,
+      "previewBytesUnchanged": false,
+      "previewSHA256": "646bdc76927be4112f05349d7cb6cfc0db1fffaebc7465d5971898940070524c",
+      "sourceSHA256": "485e980614b0a45e9f2b4b6d47dd30084530a516fe4b32a4a28f8be8068fd51e"
+    },
+    "iridescent": {
+      "baseline": {
+        "previewSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+        "sourceSHA256": "7a40900e31b781b3d6fdff789db07cab31fb13a752776b93de61c169b186f419"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+      "sourceSHA256": "88b12e10cde87376a18feb1a084cc2626e52449721b39a563d7c813f49711662"
+    },
+    "kaleidoscope": {
+      "baseline": {
+        "previewSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+        "sourceSHA256": "2b833a9de09e3a8c2abacedb77f259cc332c4ba7165495f449bb43ed145e3549"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+      "sourceSHA256": "2aac5d045d3a06615fd15da5a5d3d73654c9ff666126c85f5a4881c52824ff49"
+    },
+    "light-grid": {
+      "baseline": {
+        "previewSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+        "sourceSHA256": "b80ac5b4cc3c718033d5f2ce9e480b9ad005febc2c26f52fc09237ebb9ca903d"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+      "sourceSHA256": "4e801d3b4290542588beaf260d8eb0535e6af87e6bda83cc9da935892292e3f9"
+    },
+    "matrix-corridor": {
+      "baseline": {
+        "previewSHA256": "174f1261573d62967bfe97d0cfdb046badb2664cbb86930c814dbf12f68294fb",
+        "sourceSHA256": "b3af9d0e66a7aa702cdaf80fe86efc6ba27d969ba1daa02820462c33c5b90604"
+      },
+      "executableTokensUnchanged": false,
+      "previewBytesUnchanged": false,
+      "previewSHA256": "93c368b1900f08c24156831bc8640482045a8b7ab0e545bca29ca22f473dfb52",
+      "sourceSHA256": "5eba41c9a1adb8fe0895bb89a98bfc6425c47a46dc4c427d9f1fce21da676315"
+    },
+    "orange-flow": {
+      "baseline": {
+        "previewSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+        "sourceSHA256": "bef70f50a1e27717fc87cc48e1173ff0dd56ffa2aeaa4f8985bc8bb5e5440c6e"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+      "sourceSHA256": "7359e9d8490fdae5502ba3a62cdb801b776c5e7891f67082338a232f62195191"
+    },
+    "plasma": {
+      "baseline": {
+        "previewSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+        "sourceSHA256": "e05061d4f18a102682fa8caa5aac6641c3824a0a51e20de222059312558dab48"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+      "sourceSHA256": "4e369e5324fcd083c9cf08e74fd250504dcdba35a3d18ca61a870b2c9afb8aa6"
+    },
+    "side-view-of-the-ocean": {
+      "baseline": {
+        "previewSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+        "sourceSHA256": "9ccbaefcc739a5894fecb34457e28dc260eb0a3396aba24c652f96373570b512"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+      "sourceSHA256": "dd7ef26caae595332a47607c9624aee923c343fb824b540dcd3911a26d67542a"
+    },
+    "sonar-pulse": {
+      "baseline": {
+        "previewSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+        "sourceSHA256": "113fb1efe0312074e337afff488cfbf9853343fa9664baba22424978c0b7d9ea"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+      "sourceSHA256": "5e899f4b082e4d4ddf9fd8df9ae8cb8da126cb39155e89217f7d2569f00bb920"
+    },
+    "starfield": {
+      "baseline": {
+        "previewSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+        "sourceSHA256": "1ddd39408b837603c721288a36ed94fb82df5994bf9636cd7c60b5ea41b5c867"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+      "sourceSHA256": "44b39cc3048479f9f58afbe87d0d5b0d00f6b5f387300cb6bdec38f23d02008d"
+    },
+    "sunlit-shallows": {
+      "baseline": {
+        "previewSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+        "sourceSHA256": "39734f0cf34cd0d805e17dabf7f265b6df6f82dc788f8b701bd41ae309aca5da"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+      "sourceSHA256": "5ff3f1ef5ee597fc335a8a5106230e01816ddfbf2e9a2dbeb8b6638709f0a284"
+    },
+    "warp-speed": {
+      "baseline": {
+        "previewSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+        "sourceSHA256": "4dcc2f9cddc6ef7f8e5f374c882e8398bd3af489393dfbc762daa2675c43d5dd"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+      "sourceSHA256": "be4e739304ad8aa90bb8812e29074ed6b8c6617b7b8618121f3cd85f558dc38f"
+    },
+    "waves": {
+      "baseline": {
+        "previewSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+        "sourceSHA256": "c5ab7d48c1bdcb9eaabc8744d7c49795591baf5080c5a6af4aa9157c80af86b6"
+      },
+      "executableTokensUnchanged": true,
+      "previewBytesUnchanged": true,
+      "previewSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+      "sourceSHA256": "93bc50323ed50c5941068a2a1217849766071b2cf33aed0e6863ac8bf567f7f8"
+    }
+  },
+  "rawFiniteRenderConfiguration": {
+    "clampRemoved": true,
+    "format": "rgba32Float",
+    "nonfiniteValues": 0,
+    "size": [
+      160,
+      90
+    ]
+  },
+  "rawFiniteRenderTimes": [
+    0,
+    3,
+    10,
+    1819.875,
+    1820,
+    1820.125,
+    3740,
+    130971.875,
+    130972,
+    130972.125,
+    86400,
+    1728000,
+    6739200,
+    31536000
+  ],
+  "recordNotes": [
+    "Run logs and individual render samples are locally available in ignored .cache/license-fixes; this record preserves their results and source hashes.",
+    "Rune Glyph samples match baseline at 3, 8191.875 and 8192.125 seconds; the exact 8192-second frame differs because the bounded timer avoids the former large tick-plus-cell-phase addition."
+  ],
+  "renderConfiguration": {
+    "comparison": "per-pixel maximum absolute RGB 8-bit channel difference",
+    "size": [
+      1280,
+      720
+    ]
+  },
+  "renderMeasurements": {
+    "beforeAfter": {
+      "holodeck-grid": {
+        "0": {
+          "meanMaxChannelDelta": 0.0,
+          "pixelsOver100": 0,
+          "pixelsOver20": 0
+        },
+        "10": {
+          "meanMaxChannelDelta": 2.604166666666667e-05,
+          "pixelsOver100": 0,
+          "pixelsOver20": 0
+        },
+        "1240.6": {
+          "meanMaxChannelDelta": 1.9011089409722222,
+          "pixelsOver100": 8838,
+          "pixelsOver20": 17639
+        },
+        "1728000": {
+          "meanMaxChannelDelta": 0.8010980902777778,
+          "pixelsOver100": 3187,
+          "pixelsOver20": 6467
+        },
+        "3": {
+          "meanMaxChannelDelta": 4.8828125e-05,
+          "pixelsOver100": 0,
+          "pixelsOver20": 0
+        },
+        "31536000": {
+          "meanMaxChannelDelta": 5.008804253472222,
+          "pixelsOver100": 27719,
+          "pixelsOver20": 30383
+        },
+        "86400": {
+          "meanMaxChannelDelta": 6.297459852430555,
+          "pixelsOver100": 37029,
+          "pixelsOver20": 37079
+        }
+      },
+      "matrix-corridor": {
+        "0": {
+          "meanMaxChannelDelta": 6.910125868055555,
+          "pixelsOver100": 26722,
+          "pixelsOver20": 67529
+        },
+        "10": {
+          "meanMaxChannelDelta": 7.342827690972222,
+          "pixelsOver100": 27867,
+          "pixelsOver20": 74555
+        },
+        "130971.75": {
+          "meanMaxChannelDelta": 6.261947699652778,
+          "pixelsOver100": 23401,
+          "pixelsOver20": 63763
+        },
+        "130971.875": {
+          "meanMaxChannelDelta": 5.765738932291667,
+          "pixelsOver100": 21299,
+          "pixelsOver20": 59313
+        },
+        "130972": {
+          "meanMaxChannelDelta": 5.86828125,
+          "pixelsOver100": 21044,
+          "pixelsOver20": 61360
+        },
+        "130972.125": {
+          "meanMaxChannelDelta": 6.162588975694445,
+          "pixelsOver100": 23012,
+          "pixelsOver20": 64008
+        },
+        "130972.25": {
+          "meanMaxChannelDelta": 6.555279947916667,
+          "pixelsOver100": 24726,
+          "pixelsOver20": 66875
+        },
+        "1728000": {
+          "meanMaxChannelDelta": 10.555987413194444,
+          "pixelsOver100": 40560,
+          "pixelsOver20": 103635
+        },
+        "1819.75": {
+          "meanMaxChannelDelta": 4.994725477430555,
+          "pixelsOver100": 15911,
+          "pixelsOver20": 54231
+        },
+        "1819.875": {
+          "meanMaxChannelDelta": 4.895209418402778,
+          "pixelsOver100": 16028,
+          "pixelsOver20": 53051
+        },
+        "1820": {
+          "meanMaxChannelDelta": 4.428381076388889,
+          "pixelsOver100": 13811,
+          "pixelsOver20": 49040
+        },
+        "1820.125": {
+          "meanMaxChannelDelta": 4.549329427083333,
+          "pixelsOver100": 14171,
+          "pixelsOver20": 50351
+        },
+        "1820.25": {
+          "meanMaxChannelDelta": 4.592409939236111,
+          "pixelsOver100": 14259,
+          "pixelsOver20": 51178
+        },
+        "3": {
+          "meanMaxChannelDelta": 4.556623263888889,
+          "pixelsOver100": 15741,
+          "pixelsOver20": 48699
+        },
+        "31536000": {
+          "meanMaxChannelDelta": 9.563844401041667,
+          "pixelsOver100": 36172,
+          "pixelsOver20": 95842
+        },
+        "6739200": {
+          "meanMaxChannelDelta": 10.315889756944445,
+          "pixelsOver100": 39424,
+          "pixelsOver20": 102179
+        }
+      }
+    },
+    "matrixWraps": {
+      "130972": {
+        "after": [
+          {
+            "meanMaxChannelDelta": 12.273506944444444,
+            "pixelsOver100": 45634,
+            "pixelsOver20": 124526
+          },
+          {
+            "meanMaxChannelDelta": 12.427664930555556,
+            "pixelsOver100": 46023,
+            "pixelsOver20": 125405
+          },
+          {
+            "meanMaxChannelDelta": 12.346323784722221,
+            "pixelsOver100": 45932,
+            "pixelsOver20": 124228
+          },
+          {
+            "meanMaxChannelDelta": 12.660687934027777,
+            "pixelsOver100": 47705,
+            "pixelsOver20": 127376
+          }
+        ],
+        "before": [
+          {
+            "meanMaxChannelDelta": 12.260830078125,
+            "pixelsOver100": 45844,
+            "pixelsOver20": 124160
+          },
+          {
+            "meanMaxChannelDelta": 12.298151041666667,
+            "pixelsOver100": 45772,
+            "pixelsOver20": 123330
+          },
+          {
+            "meanMaxChannelDelta": 12.486295572916667,
+            "pixelsOver100": 46556,
+            "pixelsOver20": 125411
+          },
+          {
+            "meanMaxChannelDelta": 12.707119140625,
+            "pixelsOver100": 48118,
+            "pixelsOver20": 127424
+          }
+        ]
+      },
+      "1820": {
+        "after": [
+          {
+            "meanMaxChannelDelta": 11.760313585069444,
+            "pixelsOver100": 38111,
+            "pixelsOver20": 127051
+          },
+          {
+            "meanMaxChannelDelta": 11.681475694444444,
+            "pixelsOver100": 38671,
+            "pixelsOver20": 124237
+          },
+          {
+            "meanMaxChannelDelta": 9.7898828125,
+            "pixelsOver100": 32705,
+            "pixelsOver20": 103480
+          },
+          {
+            "meanMaxChannelDelta": 9.513626302083333,
+            "pixelsOver100": 30908,
+            "pixelsOver20": 102811
+          }
+        ],
+        "before": [
+          {
+            "meanMaxChannelDelta": 11.716609157986111,
+            "pixelsOver100": 38209,
+            "pixelsOver20": 125790
+          },
+          {
+            "meanMaxChannelDelta": 11.632535807291667,
+            "pixelsOver100": 38856,
+            "pixelsOver20": 123022
+          },
+          {
+            "meanMaxChannelDelta": 9.652379557291667,
+            "pixelsOver100": 32397,
+            "pixelsOver20": 102154
+          },
+          {
+            "meanMaxChannelDelta": 9.437017144097222,
+            "pixelsOver100": 30849,
+            "pixelsOver20": 102240
+          }
+        ]
+      }
+    }
+  },
+  "reusedAssets": [
+    "common hash21",
+    "rune-glyph",
+    "box-room",
+    "grid-lines",
+    "hologram-rim",
+    "ember-sparks",
+    "voronoi",
+    "color-ramps",
+    "crt-overlay",
+    "dot-curtain",
+    "value-noise",
+    "fbm"
+  ],
+  "snippetRenders": [
+    {
+      "afterPreviewSHA256": "2a5b5675fa92b3cf8432d5e4c0187738362432f0f4e290a17ba819462dc71f74",
+      "beforePreviewSHA256": "2a5b5675fa92b3cf8432d5e4c0187738362432f0f4e290a17ba819462dc71f74",
+      "id": "aurora-curtains",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "cfa8dfe6120434fcf05d629024a653e665f480ac9e1e43ac12ab1e5e107ac309",
+      "beforePreviewSHA256": "cfa8dfe6120434fcf05d629024a653e665f480ac9e1e43ac12ab1e5e107ac309",
+      "id": "box-room",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "cb4ef6f8a70f4cba38883da2453b262d8413a5bedf74b4d4f1ae7779f10636c5",
+      "beforePreviewSHA256": "cb4ef6f8a70f4cba38883da2453b262d8413a5bedf74b4d4f1ae7779f10636c5",
+      "id": "color-ramps",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "5ed2e10406bc2e0511121aabe3c1c2588e4179f00ddf8eeaddbef933954d0ab3",
+      "beforePreviewSHA256": "5ed2e10406bc2e0511121aabe3c1c2588e4179f00ddf8eeaddbef933954d0ab3",
+      "id": "cosine-palette",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "d65d0a3220ef224ff33153bb4e59f4db95b57719e6cbd14ca00bb8484cc5d209",
+      "beforePreviewSHA256": "d65d0a3220ef224ff33153bb4e59f4db95b57719e6cbd14ca00bb8484cc5d209",
+      "id": "crt-overlay",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "3db010463bec7dc41eae554b4c82077806eacaee65c7665a863e2e2d91617595",
+      "beforePreviewSHA256": "3db010463bec7dc41eae554b4c82077806eacaee65c7665a863e2e2d91617595",
+      "id": "dot-curtain",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "e024a3febcaccde0eedf3bc08099090010f4f41a4e1d4535f48a9ec0613b3512",
+      "beforePreviewSHA256": "e024a3febcaccde0eedf3bc08099090010f4f41a4e1d4535f48a9ec0613b3512",
+      "id": "ember-sparks",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "015d7353d6dd895c398741e34648c0145b30b4fdaa0876771bf31728356d34bd",
+      "beforePreviewSHA256": "015d7353d6dd895c398741e34648c0145b30b4fdaa0876771bf31728356d34bd",
+      "id": "fbm",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "d2490fc738bfddff4a68482eacc6edfdadf20f732ddbdca50a19d6c241877744",
+      "beforePreviewSHA256": "d2490fc738bfddff4a68482eacc6edfdadf20f732ddbdca50a19d6c241877744",
+      "id": "glowing-ribbons",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "75c224c27d0a973e9fc4de049bbe923dfc161c7cd69172a1186302fa6ab55d56",
+      "beforePreviewSHA256": "75c224c27d0a973e9fc4de049bbe923dfc161c7cd69172a1186302fa6ab55d56",
+      "id": "god-rays",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "1966811b9e727b848db88608b113754e6d65737fae90ed83da6dfc86f2fb8c40",
+      "beforePreviewSHA256": "1966811b9e727b848db88608b113754e6d65737fae90ed83da6dfc86f2fb8c40",
+      "id": "gradient-noise",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "1a5220142e4026e10cb1c319f807b61419862aa073a6c56fccbe819af5a2fab7",
+      "beforePreviewSHA256": "1a5220142e4026e10cb1c319f807b61419862aa073a6c56fccbe819af5a2fab7",
+      "id": "grid-lines",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "4a6737044d697640f9ec3366a4d3cc4ed2cf369ee3ea48eb0d969ba026e7e2ca",
+      "beforePreviewSHA256": "4a6737044d697640f9ec3366a4d3cc4ed2cf369ee3ea48eb0d969ba026e7e2ca",
+      "id": "hex-grid",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "c47c304f764a81859d04081aef443d1b16bc7ceb2a181962576c16939900f1dc",
+      "beforePreviewSHA256": "c47c304f764a81859d04081aef443d1b16bc7ceb2a181962576c16939900f1dc",
+      "id": "hologram-rim",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "72ae55cfb1f062a82c7070893ef0293bcb63afaa5167fa1b49ac447ef62aa6a8",
+      "beforePreviewSHA256": "72ae55cfb1f062a82c7070893ef0293bcb63afaa5167fa1b49ac447ef62aa6a8",
+      "id": "impact-ripple",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "770a160e4533969a7f3587f8a314306b89f5d75433f9a075fef5d0066dec75c6",
+      "beforePreviewSHA256": "770a160e4533969a7f3587f8a314306b89f5d75433f9a075fef5d0066dec75c6",
+      "id": "kali-starfield",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "d22089572f1c65318859f627539a50f3c4e19daf332dc160b5c49e60e6119c5d",
+      "beforePreviewSHA256": "d22089572f1c65318859f627539a50f3c4e19daf332dc160b5c49e60e6119c5d",
+      "id": "layered-stars",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "1a8d183c759c4e0c59834c1939e36f879e6308b65de4e70e66558fa53952792f",
+      "beforePreviewSHA256": "1a8d183c759c4e0c59834c1939e36f879e6308b65de4e70e66558fa53952792f",
+      "id": "noise-dissolve",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "50ec1025c130aa1d018d3b3bbe2664026cab9b4c8f1b55e47d8a9997a79e0641",
+      "beforePreviewSHA256": "50ec1025c130aa1d018d3b3bbe2664026cab9b4c8f1b55e47d8a9997a79e0641",
+      "id": "polar-fold",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "f56ef70f8d54b193f463e711786389c5caf5df0978c07a29a6f42d7dd8ea8989",
+      "beforePreviewSHA256": "f56ef70f8d54b193f463e711786389c5caf5df0978c07a29a6f42d7dd8ea8989",
+      "id": "rain-ripples",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "790695f40d92c84540f81cf4f7655066a691781e1d496e8dd7a003b1c5704d00",
+      "beforePreviewSHA256": "790695f40d92c84540f81cf4f7655066a691781e1d496e8dd7a003b1c5704d00",
+      "id": "rune-glyph",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": false
+    },
+    {
+      "afterPreviewSHA256": "0c92aefe6f5df8541aa4448aae74e9f1332317621e0e298cb6947cfd745e3c08",
+      "beforePreviewSHA256": "0c92aefe6f5df8541aa4448aae74e9f1332317621e0e298cb6947cfd745e3c08",
+      "id": "rune-glyph",
+      "pixelsUnchanged": true,
+      "time": 8191.875,
+      "tokensUnchanged": false
+    },
+    {
+      "afterPreviewSHA256": "3c96b97ec388239e8672944ce3926a4e82149180e38cd3845bdcd90870861936",
+      "beforePreviewSHA256": "494a810e9c59a12acb6d86b296632180601c5bf8b260365df5912a2beb95a75e",
+      "id": "rune-glyph",
+      "pixelsUnchanged": false,
+      "time": 8192,
+      "tokensUnchanged": false
+    },
+    {
+      "afterPreviewSHA256": "1dd472389d97a19817d9b37addec87acd569a367e46df421691b31c2e98a143d",
+      "beforePreviewSHA256": "1dd472389d97a19817d9b37addec87acd569a367e46df421691b31c2e98a143d",
+      "id": "rune-glyph",
+      "pixelsUnchanged": true,
+      "time": 8192.125,
+      "tokensUnchanged": false
+    },
+    {
+      "afterPreviewSHA256": "1425ffd1a44e868d2abfd4edf72468af3527b73f79f5b913fe760a95594d2309",
+      "beforePreviewSHA256": "1425ffd1a44e868d2abfd4edf72468af3527b73f79f5b913fe760a95594d2309",
+      "id": "simplex-noise-3d",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "edce7ba798fe96aa6935494a6458dc305ec21f45d7fb1cc58bfbdcfce51895fd",
+      "beforePreviewSHA256": "edce7ba798fe96aa6935494a6458dc305ec21f45d7fb1cc58bfbdcfce51895fd",
+      "id": "sine-warp",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "dabe49f1c0f9e332fb701069cb144d92d38c6352a64ee0bb7e3d8e62fe0b0f6a",
+      "beforePreviewSHA256": "dabe49f1c0f9e332fb701069cb144d92d38c6352a64ee0bb7e3d8e62fe0b0f6a",
+      "id": "sinebow-lines",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "449f5694e0e66dbba3b563ae1847f944247062b701f98b747fa592ac1e1a3a2e",
+      "beforePreviewSHA256": "449f5694e0e66dbba3b563ae1847f944247062b701f98b747fa592ac1e1a3a2e",
+      "id": "sphere-shell",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "beforePreviewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "id": "studio-material",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "e305d4b363bfec5b127bb62148167a5edadb3047140cb56bca468099487e9990",
+      "beforePreviewSHA256": "e305d4b363bfec5b127bb62148167a5edadb3047140cb56bca468099487e9990",
+      "id": "value-noise",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    },
+    {
+      "afterPreviewSHA256": "41311229690539e7dd79a4d84dda0a00f8d5d7e0161a3c57211431079c612141",
+      "beforePreviewSHA256": "41311229690539e7dd79a4d84dda0a00f8d5d7e0161a3c57211431079c612141",
+      "id": "voronoi",
+      "pixelsUnchanged": true,
+      "time": 3,
+      "tokensUnchanged": true
+    }
+  ],
+  "target": "working tree; final source SHA-256 identifies the verified implementation",
+  "unchangedContracts": [
+    "index.json catalog selection",
+    "shared/fragment.metal entry points and 16-byte uniform layout",
+    "existing reference originals",
+    "library/catalog validation behavior",
+    "informational reuse links"
+  ],
+  "unverified": [
+    "Physical Apple TV runtime/performance",
+    "Minimum supported OS execution",
+    "Continuous long-duration playback",
+    "Sustained app frame rate",
+    "Automated access to original Hoskins Shadertoy page"
+  ],
+  "upstreamOrigins": {
+    "ashima-webgl-noise": {
+      "author": "Ian McEwan, Ashima Arts; Stefan Gustavson",
+      "license": "MIT",
+      "url": "https://github.com/ashima/webgl-noise/blob/6abed1e77ed1e18b181627c35f688eb30c9fe75e/src/noise3D.glsl"
+    },
+    "bigwings-fireworks": {
+      "author": "Martijn Steinrucken (BigWings), 2015",
+      "license": "CC BY-NC-SA 3.0 (stated in shader header)",
+      "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/fireworks.glsl"
+    },
+    "gl-transitions-polka": {
+      "author": "bobylito; gl-transitions contributors",
+      "license": "MIT (Copyright (c) 2017-present gl-transitions contributors)",
+      "url": "https://github.com/gl-transitions/gl-transitions/tree/b2dfdcfbec079af4a05306d32b9366aa495c5155"
+    },
+    "hoskins-hash": {
+      "author": "David Hoskins (Dave Hoskins)",
+      "license": "MIT (Copyright (c) 2014 David Hoskins)",
+      "noticeVerifiedFrom": "https://gist.github.com/davidar/5f9677a0ccfbd63d7a8657ad9af3a856/f3619046080c1f8ff07c54f6658ed215ef5f9638",
+      "url": "https://www.shadertoy.com/view/4djSRW"
+    },
+    "inferno": {
+      "author": "Paul Hudson and other authors (credits in original LICENSE)",
+      "license": "MIT",
+      "url": "https://github.com/twostraws/Inferno/tree/a40c7a0bdec03aae1bd0b96c41d6a75451bafd2c"
+    },
+    "inside-the-matrix": {
+      "author": "Modified by pkazmier; runes after FabriceNeyret2 (4ltyDM) and otaviogood (MsXSRn)",
+      "license": "Header grants broad reuse; rune lineage treated as CC BY-NC-SA 3.0",
+      "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/inside-the-matrix.glsl"
+    },
+    "sparks-from-fire": {
+      "author": "Jan Mr\u00f3z (jaszunio15); Ghostty adaptation by Alex Sherwin",
+      "license": "CC BY 3.0",
+      "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/sparks-from-fire.glsl"
+    },
+    "swiftshaders": {
+      "author": "Muhittin Camdali",
+      "license": "MIT (Copyright (c) 2024 Muhittin Camdali)",
+      "url": "https://github.com/muhittincamdali/SwiftShaders/tree/4acb3a91c44b474a5fc8a994195e8b8c16af4e8f"
+    },
+    "swiftui-new-metal-shaders": {
+      "author": "Astemir Eleev (Metal port); mrange (original Apollian with a twist)",
+      "license": "MIT (port, Copyright (c) 2023 Astemir Eleev); original shader CC0",
+      "url": "https://github.com/eleev/swiftui-new-metal-shaders/tree/63150854f43c54a61e2f202bd4e413027efd569b"
+    },
+    "vhs-overlay": {
+      "author": "Alex Brinsmead",
+      "license": "MIT (Copyright (c) 2026 Alex Brinsmead)",
+      "url": "https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/vhs.glsl"
+    },
+    "warp-speed-2": {
+      "author": "Dave Hoskins (David Hoskins), 2015",
+      "license": "CC BY-NC-SA 3.0 (stated in shader header)",
+      "url": "https://www.shadertoy.com/view/4tjSDt"
+    }
+  },
+  "upstreamRequirements": {
+    "ashima-webgl-noise": {
+      "license": "MIT",
+      "noticePath": "references/ashima-webgl-noise/original/LICENSE"
+    },
+    "bigwings-fireworks": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    },
+    "gl-transitions-polka": {
+      "license": "MIT",
+      "noticePath": "references/gl-transitions-polka/original/LICENSE"
+    },
+    "hoskins-hash": {
+      "license": "MIT",
+      "noticePath": "references/hoskins-hash/NOTICE"
+    },
+    "inferno": {
+      "license": "MIT",
+      "noticePath": "references/inferno/original/LICENSE"
+    },
+    "inside-the-matrix": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    },
+    "sparks-from-fire": {
+      "license": "CC BY 3.0",
+      "uri": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    "swiftshaders": {
+      "license": "MIT",
+      "noticePath": "references/swiftshaders/original/LICENSE"
+    },
+    "swiftui-new-metal-shaders": {
+      "license": "MIT",
+      "noticePath": "references/swiftui-new-metal-shaders/original/LICENSE"
+    },
+    "vhs-overlay": {
+      "license": "MIT",
+      "noticePath": "references/vhs-overlay/original/vhs.glsl"
+    },
+    "warp-speed-2": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    }
+  },
+  "validationEvidence": {
+    "complete-compilation": [
+      "Compiled plasma for macOS and tvOS",
+      "Compiled aurora for macOS and tvOS",
+      "Compiled waves for macOS and tvOS",
+      "Compiled kaleidoscope for macOS and tvOS",
+      "Compiled starfield for macOS and tvOS",
+      "Compiled chrome for macOS and tvOS",
+      "Compiled brushed-gold for macOS and tvOS",
+      "Compiled iridescent for macOS and tvOS",
+      "Compiled force-shield for macOS and tvOS",
+      "Compiled holodeck-grid for macOS and tvOS",
+      "Compiled warp-speed for macOS and tvOS",
+      "Compiled matrix-corridor for macOS and tvOS",
+      "Compiled apollonian-twist for macOS and tvOS",
+      "Compiled light-grid for macOS and tvOS",
+      "Compiled sonar-pulse for macOS and tvOS",
+      "Compiled ember-drift for macOS and tvOS",
+      "Compiled sunlit-shallows for macOS and tvOS",
+      "Compiled fireworks for macOS and tvOS",
+      "Compiled dramamine-sunset for macOS and tvOS",
+      "Compiled evening-and-morning for macOS and tvOS",
+      "Compiled green-caresses for macOS and tvOS",
+      "Compiled orange-flow for macOS and tvOS",
+      "Compiled side-view-of-the-ocean for macOS and tvOS"
+    ],
+    "finalMatrixCompilation": "Final working-tree Matrix source separately recompiled with xcrun metal for macOS and tvOS after the fractional-floor correction.",
+    "library-validation": [
+      "Compiled aurora-curtains for macOS and tvOS",
+      "Compiled box-room for macOS and tvOS",
+      "Compiled color-ramps for macOS and tvOS",
+      "Compiled cosine-palette for macOS and tvOS",
+      "Compiled crt-overlay for macOS and tvOS",
+      "Compiled dot-curtain for macOS and tvOS",
+      "Compiled ember-sparks for macOS and tvOS",
+      "Compiled fbm for macOS and tvOS",
+      "Compiled glowing-ribbons for macOS and tvOS",
+      "Compiled god-rays for macOS and tvOS",
+      "Compiled gradient-noise for macOS and tvOS",
+      "Compiled grid-lines for macOS and tvOS",
+      "Compiled hex-grid for macOS and tvOS",
+      "Compiled hologram-rim for macOS and tvOS",
+      "Compiled impact-ripple for macOS and tvOS",
+      "Compiled kali-starfield for macOS and tvOS",
+      "Compiled layered-stars for macOS and tvOS",
+      "Compiled noise-dissolve for macOS and tvOS",
+      "Compiled polar-fold for macOS and tvOS",
+      "Compiled rain-ripples for macOS and tvOS",
+      "Compiled rune-glyph for macOS and tvOS",
+      "Compiled simplex-noise-3d for macOS and tvOS",
+      "Compiled sine-warp for macOS and tvOS",
+      "Compiled sinebow-lines for macOS and tvOS",
+      "Compiled sphere-shell for macOS and tvOS",
+      "Compiled studio-material for macOS and tvOS",
+      "Compiled value-noise for macOS and tvOS",
+      "Compiled voronoi for macOS and tvOS",
+      "Validated 67 authoring assets"
+    ],
+    "publication-validation": [
+      "Validated publication at /Users/haroldmartin/Downloads/HolodeckShaders/dist"
+    ],
+    "pythonSuite": [
+      "test_authored_lanes_fit_with_positive_extents_and_clearance (test_shader_regressions.SceneGeometryTests.test_authored_lanes_fit_with_positive_extents_and_clearance) ... ok",
+      "",
+      "----------------------------------------------------------------------",
+      "Ran 46 tests in 16.157s",
+      "",
+      "OK"
+    ]
+  },
+  "verifiedAt": "2026-10-11T00:31:40.419422+00:00"
+}

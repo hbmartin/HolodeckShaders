@@ -38,3 +38,5 @@ Measured: in `shaders/sunlit-shallows` two evaluations per floor pixel (about 60
 ## Reuse and origin
 
 Adapted from SwiftShaders by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91, `Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal`; reference copy in `references/swiftshaders/`), MIT License, Copyright (c) 2024 Muhittin Camdali. That upstream code was never verified to build. Changes: the sin-based hash was replaced with a Hoskins hash, jitter is centered on the cell, the per-cell `sin` animation became a rotation of a random vector, and the scale and time arguments were folded into the inputs. Keep the MIT notice when adapting. Copy and adapt recipe functions; shared helpers remain canonical. Compile and render the example after changes. See `docs/shader-authoring.md` for the runtime and publication contract.
+
+The hash adaptation also uses David Hoskins' "Hash without Sine", MIT, Copyright (c) 2014 David Hoskins; see `references/hoskins-hash`. Retain its complete notice with the hash code.

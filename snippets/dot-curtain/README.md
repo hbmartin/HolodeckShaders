@@ -35,3 +35,5 @@ Estimate: one fract, one length (or two abs), one smoothstep per call.
 ## Reuse and origin
 
 Adapted from Inferno's Circle Wave transition (`Transition/CircleWave.metal`) and its Diamond Wave variant by Paul Hudson and other authors (MIT, Copyright (c) 2023), both based on gl-transitions PolkaDotsCurtain by bobylito (MIT). The circle source is preserved in `references/inferno`; the diamond variant uses the L1 distance as Inferno's Diamond transitions do (not imported here). Changes: anti-aliased mask output, selectable diamond metric and an exact 0/1 reach. Copy and adapt recipe functions; shared helpers remain canonical. Compile and render the example after changes. See `docs/shader-authoring.md` for the runtime and publication contract.
+
+The secondary MIT notice is preserved in `references/gl-transitions-polka`; copy it alongside the Inferno notice.

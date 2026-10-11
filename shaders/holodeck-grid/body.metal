@@ -23,6 +23,7 @@ float4 hdRoomHit(float3 ro, float3 rd, float3 halfExtents) {
     return float4(n, t);
 }
 
+// halfExtents must be strictly positive on every axis; start must be inside the box.
 float3 hdBounceInBox(float3 start, float3 velocity, float3 halfExtents, float t) {
     float3 rate = velocity / (4.0 * halfExtents);
     float whole = floor(t);
@@ -102,7 +103,7 @@ float3 shade(float2 p, float t, float2 pixel) {
 
     // floating holograms: sphere, cube, octahedron, small sphere
     float3 laneCentres[4] = {float3(-3.0, -3.0, -7.0), float3(3.0, -3.2, -2.0), float3(2.0, -3.0, -9.0), float3(-2.5, -3.4, 0.5)};
-    float3 laneHalves[4] = {float3(8.0, 4.0, 4.0), float3(7.5, 4.0, 3.5), float3(9.0, 4.0, 3.0), float3(7.0, 3.8, 3.0)};
+    float3 laneHalves[4] = {float3(8.0, 4.0, 4.0), float3(7.5, 4.0, 3.5), float3(9.0, 3.65, 3.0), float3(7.0, 3.8, 3.0)};
     float3 starts[4] = {float3(-2.0, 1.0, 0.0), float3(2.0, -1.0, 1.0), float3(1.0, 2.5, -1.0), float3(-4.0, -2.0, 1.0)};
     float3 speeds[4] = {float3(0.31, 0.17, 0.23), float3(-0.26, 0.21, -0.19), float3(0.2, -0.16, 0.28), float3(-0.33, 0.24, -0.17)};
     float sizes[4] = {2.1, 1.45, 1.9, 1.2};
@@ -118,6 +119,7 @@ float3 shade(float2 p, float t, float2 pixel) {
         float bound = (k == 1 || k == 2) ? sizes[k] * 1.7320508 : sizes[k];
         // Keep the entire rotated object inside the room, with a small clearance from every wall.
         float3 bounceHalf = min(laneHalves[k], kRoomHalf - abs(laneCentres[k]) - bound - 0.05);
+        if (any(bounceHalf <= 0.0)) continue;  // Invalid geometry cannot be repaired with an epsilon.
         float3 centre = laneCentres[k] + hdBounceInBox(starts[k], speeds[k], bounceHalf, t);
         float3 local = ro - centre;
         float b = dot(local, rd);

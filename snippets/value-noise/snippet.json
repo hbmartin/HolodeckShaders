@@ -4,8 +4,8 @@
   "kind": "shared-helper",
   "name": "Value Noise",
   "origin": {
-    "attribution": "Holodeck repository shader source",
-    "license": "See repository provenance; no additional license inferred",
+    "attribution": "Original Holodeck noise composition using the canonical David Hoskins hash (https://www.shadertoy.com/view/4djSRW), see references/hoskins-hash",
+    "license": "Original Holodeck composition; hash MIT (Copyright (c) 2014 David Hoskins)",
     "shaderIDs": [
       "aurora",
       "starfield"

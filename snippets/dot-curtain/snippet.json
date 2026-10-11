@@ -4,8 +4,8 @@
   "kind": "recipe",
   "name": "Dot Curtain",
   "origin": {
-    "attribution": "Inferno Circle Wave and Diamond Wave transitions by Paul Hudson and other authors (https://github.com/twostraws/Inferno), after gl-transitions PolkaDotsCurtain by bobylito; see references/inferno",
-    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors; PolkaDotsCurtain MIT)",
+    "attribution": "Inferno Circle Wave and Diamond Wave transitions by Paul Hudson and other authors (https://github.com/twostraws/Inferno), after gl-transitions PolkaDotsCurtain by bobylito; see references/inferno and references/gl-transitions-polka",
+    "license": "MIT (Copyright (c) 2023 Paul Hudson and other authors; Copyright (c) 2017-present gl-transitions contributors)",
     "shaderIDs": []
   },
   "requiredShared": [

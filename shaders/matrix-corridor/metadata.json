@@ -31,7 +31,8 @@
   "reuse": {
     "references": [
       "inside-the-matrix",
-      "ghostty-shaders"
+      "ghostty-shaders",
+      "hoskins-hash"
     ],
     "snippets": [
       "rune-glyph"

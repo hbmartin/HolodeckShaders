@@ -1,0 +1,31 @@
+{
+  "adaptationNotes": "Pinned to gl-transitions commit b2dfdcfbec079af4a05306d32b9366aa495c5155. Original transition and repository LICENSE are preserved byte-for-byte. Inferno ports this transition; Dot Curtain reduces that lineage to an anti-aliased mask with a selectable circle/diamond metric. Preserve this contributor notice alongside Inferno's notice.",
+  "files": {
+    "LICENSE": "0db684e0150546743ae96d8ecf083be716786d834af7dbf8170ee8b6c247978d",
+    "PolkaDotsCurtain.glsl": "1a11af446cf3c50bf58d1a2b1547092e386bdcf1b7dff71179661f6a4c71d29a"
+  },
+  "id": "gl-transitions-polka",
+  "language": "GLSL",
+  "name": "PolkaDotsCurtain",
+  "origin": {
+    "author": "bobylito; gl-transitions contributors",
+    "importedAt": "2026-10-11T00:14:12.389585Z",
+    "license": "MIT (Copyright (c) 2017-present gl-transitions contributors)",
+    "url": "https://github.com/gl-transitions/gl-transitions/tree/b2dfdcfbec079af4a05306d32b9366aa495c5155"
+  },
+  "requirements": [
+    "Two input images and a progress uniform in the original GLSL transition"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "bobylito",
+    "PolkaDotsCurtain",
+    "dot curtain"
+  ],
+  "summary": "bobylito's MIT polka-dot transition underlying Inferno Circle Wave and the Dot Curtain recipe.",
+  "tags": [
+    "transition",
+    "dots",
+    "mit"
+  ]
+}

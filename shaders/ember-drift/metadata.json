@@ -31,7 +31,8 @@
   "reuse": {
     "references": [
       "sparks-from-fire",
-      "ghostty-shaders"
+      "ghostty-shaders",
+      "hoskins-hash"
     ],
     "snippets": [
       "ember-sparks",

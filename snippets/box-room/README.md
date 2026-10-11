@@ -15,7 +15,7 @@ Canonical source: `snippets/box-room/code.metal`. Example: `snippets/box-room/ex
 
 ## Coordinates
 
-Room space: the box is centred at the origin, so pass `ro - roomCentre`. `ro` must be inside the box and `rd` normalised; zero direction components are guarded. For a face with normal on axis i, use the other two components of the hit point as grid coordinates. `start` is the position at t = 0 and must lie inside the box; `velocity` is in units per second; `t` is seconds.
+Room space: the box is centred at the origin, so pass `ro - roomCentre`. `ro` must be inside the box and `rd` normalised; zero direction components are guarded. For a face with normal on axis i, use the other two components of the hit point as grid coordinates. `start` is the position at t = 0 and must lie inside the box; every component of `halfExtents` must be strictly positive. Skip an object whose room clearance leaves a nonpositive bounce extent before calling `hdBounceInBox`; replacing it with an epsilon cannot make an oversized object fit. `velocity` is in units per second; `t` is seconds.
 
 ## Tuning
 

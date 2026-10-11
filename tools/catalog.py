@@ -84,11 +84,12 @@ def validate_collections(collections, shader_ids):
         seen.add(cid)
 
 
-def shader_entry(shader_id, *, renderer_digest=None):
+def shader_entry(shader_id, *, renderer_digest=None, metadata=None):
     if not valid_id(shader_id):
         raise ValueError("Invalid shader ID")
     directory = ROOT / "shaders" / shader_id
-    metadata = read_json(directory / "metadata.json")
+    if metadata is None:
+        metadata = read_json(directory / "metadata.json")
     validate_metadata(metadata, shader_id)
     shared = metadata["shared"]
     dependencies = [directory / "metadata.json", directory / "body.metal"] + [ROOT / "shared" / f"{part}.metal" for part in shared]
@@ -120,14 +121,15 @@ def git(*args):
     return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
 
 
-def entries():
+def entries(*, renderer_digest=None):
     index = read_json(ROOT / "index.json")
     ids = index["shaders"]
     if not isinstance(ids, list) or not 1 <= len(ids) <= 500 or any(not valid_id(i) for i in ids) or len(ids) != len(set(ids)) or index["defaultShaderID"] not in ids:
         raise ValueError("Catalog must be nonempty with unique IDs and an existing default")
     if "collections" in index:
         validate_collections(index["collections"], ids)
-    renderer_digest = renderer_fingerprint()
+    if renderer_digest is None:
+        renderer_digest = renderer_fingerprint()
     result = [shader_entry(shader_id, renderer_digest=renderer_digest) for shader_id in ids]
     if sum(len(entry[1].encode()) for entry in result) > 16_777_216:
         raise ValueError("Catalog sources exceed 16 MiB")

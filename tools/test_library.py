@@ -1,4 +1,5 @@
 import contextlib
+from collections import Counter
 import io
 import json
 import os
@@ -87,6 +88,45 @@ class LibraryTests(unittest.TestCase):
         self.assertNotIn("new-scene", [v[0]["id"] for v in catalog.entries()[1]])
         with self.assertRaises(ValueError): library.scaffold("shader", "new-scene")
         with self.assertRaises(ValueError): library.scaffold("shader", "../escape")
+
+    def test_validation_reuses_renderer_and_shader_inputs(self):
+        library.scaffold("shader", "unlisted-scene")
+        shader_ids = {item["id"] for item in library.assets("shader")}
+        with patch.object(catalog, "renderer_fingerprint", wraps=catalog.renderer_fingerprint) as fingerprint, \
+             patch.object(catalog, "shader_entry", wraps=catalog.shader_entry) as entry, \
+             patch.object(catalog, "read_json", wraps=catalog.read_json) as read:
+            items = library.validate()
+        self.assertEqual(len(items), self.asset_count + 1)
+        fingerprint.assert_called_once_with()
+        self.assertEqual(Counter(call.args[0] for call in entry.call_args_list), Counter({shader_id: 1 for shader_id in shader_ids}))
+        shader_reads = Counter(call.args[0].parent.name for call in read.call_args_list
+                               if call.args[0].name == "metadata.json" and call.args[0].parent.parent == self.root / "shaders")
+        self.assertEqual(shader_reads, Counter({shader_id: 1 for shader_id in shader_ids}))
+        for call in entry.call_args_list:
+            shader_id = call.args[0]
+            self.assertEqual(catalog.shader_entry(shader_id, **call.kwargs)[2], catalog.shader_entry(shader_id)[2])
+
+    def test_validation_observes_later_changes_and_checks_unpublished_shaders(self):
+        library.scaffold("shader", "unlisted-scene")
+        library.validate()
+        support = self.root / "tools/metal-render-support.swift"
+        support.write_bytes(support.read_bytes() + b"\n// later renderer edit\n")
+        with patch.object(catalog, "shader_entry", wraps=catalog.shader_entry) as entry:
+            library.validate()
+        current = catalog.renderer_fingerprint()
+        self.assertTrue(all(call.kwargs["renderer_digest"] == current for call in entry.call_args_list))
+        metadata_path = self.root / "shaders/unlisted-scene/metadata.json"
+        metadata = catalog.read_json(metadata_path)
+        original_category = metadata["category"]
+        metadata["category"] = "UNKNOWN"
+        catalog.write_json(metadata_path, metadata)
+        with self.assertRaises(ValueError):
+            library.validate()
+        metadata["category"] = original_category
+        catalog.write_json(metadata_path, metadata)
+        (metadata_path.parent / "body.metal").unlink()
+        with self.assertRaises(FileNotFoundError):
+            library.validate()
 
     def test_import_bytes_checksums_and_inventory(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -57,6 +57,36 @@ class CatalogValidationTests(unittest.TestCase):
                 catalog.build(self.root / "dist")
             (self.root / path).write_text(original)
 
+    def test_renderer_file_boundaries_change_fingerprint_and_block_publication(self):
+        support, entry = catalog.renderer_sources("render-preview.swift")
+        original_parts = support.read_bytes(), entry.read_bytes()
+        original_fingerprint = catalog.shader_entry("plasma")[2]
+        moved, remaining = original_parts[1].split(b"\n", 1)
+        support.write_bytes(original_parts[0] + moved + b"\n")
+        entry.write_bytes(remaining)
+        self.assertEqual(support.read_bytes() + entry.read_bytes(), b"".join(original_parts))
+        self.assertNotEqual(catalog.shader_entry("plasma")[2], original_fingerprint)
+        with patch.object(catalog, "git", return_value="a" * 40), self.assertRaisesRegex(ValueError, "Stale preview"):
+            catalog.build(self.root / "dist")
+
+    def test_catalog_reads_renderer_once_without_caching_later_changes(self):
+        reads = dict.fromkeys(catalog.renderer_sources("render-preview.swift"), 0)
+        original_read = pathlib.Path.read_bytes
+
+        def read_bytes(path):
+            if path in reads:
+                reads[path] += 1
+            return original_read(path)
+
+        with patch.object(pathlib.Path, "read_bytes", read_bytes):
+            _, entries = catalog.entries()
+        self.assertEqual(list(reads.values()), [1, 1])
+        first = entries[0]
+        self.assertEqual(catalog.shader_entry(first[0]["id"])[2], first[2])
+        support = next(iter(reads))
+        support.write_bytes(original_read(support) + b"\n// changed between operations\n")
+        self.assertNotEqual(catalog.entries()[1][0][2], first[2])
+
     def test_corrupt_png_blocks_publication(self):
         (self.root / "shaders/plasma/preview.png").write_bytes(b"broken")
         with patch.object(catalog, "git", return_value="a" * 40), self.assertRaisesRegex(ValueError, "Stale preview"):

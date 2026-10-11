@@ -1,4 +1,6 @@
 // Test harness for actual assembled Metal sources. Outputs are temporary verification artifacts.
+// Build from the repository root with the shared support source:
+// xcrun swiftc -parse-as-library tools/metal-render-support.swift tools/shader-regression-probe.swift -o /tmp/shader-regression-probe
 import Foundation
 import Metal
 
@@ -11,10 +13,17 @@ enum RegressionProbe {
         guard args.count == 5, ["compute", "render"].contains(args[1]) else {
             throw ToolError("Usage: shader-regression-probe compute|render source.metal samples.json result.json")
         }
+        let inputData = try Data(contentsOf: URL(fileURLWithPath: args[3]))
+        var times: [Float] = []
+        if args[1] == "render" {
+            do { times = try JSONDecoder().decode([Float].self, from: inputData) }
+            catch { throw ToolError("Invalid render samples: \(error)") }
+            for time in times { try validateRenderTime(time) }
+        }
         let context = try MetalContext(sourcePath: args[2])
-        let input = try JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: args[3])))
         var result: [String: Any] = ["device": context.device.name]
         if args[1] == "compute" {
+            let input = try JSONSerialization.jsonObject(with: inputData)
             guard let rows = input as? [[NSNumber]], !rows.isEmpty, rows.allSatisfy({ $0.count == 2 }),
                   let function = context.library.makeFunction(name: "regressionProbe") else {
                 throw ToolError("Missing compute samples or function")
@@ -39,11 +48,10 @@ enum RegressionProbe {
             let pointer = outputBuffer.contents().bindMemory(to: UInt32.self, capacity: rows.count)
             result["seeds"] = Array(UnsafeBufferPointer(start: pointer, count: rows.count))
         } else {
-            guard let times = input as? [NSNumber] else { throw ToolError("Invalid render samples") }
             let renderer = try OffscreenRenderer(context: context, width: 160, height: 90, pixelFormat: .rgba32Float)
             var frames: [[String: Any]] = []
             for (index, time) in times.enumerated() {
-                let frame = try renderer.render(time: time.floatValue)
+                let frame = try renderer.render(time: time)
                 let file = URL(fileURLWithPath: args[4]).deletingPathExtension().appendingPathExtension("\(index).rgba32")
                 try frame.pixels.write(to: file)
                 let nonfinite = frame.pixels.withUnsafeBytes { bytes in
@@ -51,7 +59,7 @@ enum RegressionProbe {
                         $0 + (bytes.loadUnaligned(fromByteOffset: $1, as: Float.self).isFinite ? 0 : 1)
                     }
                 }
-                frames.append(["time": time.floatValue, "path": file.path,
+                frames.append(["time": time, "path": file.path,
                                "nonfinite": nonfinite, "gpuMilliseconds": frame.gpuMilliseconds])
             }
             result["frames"] = frames

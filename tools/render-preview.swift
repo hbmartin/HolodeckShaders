@@ -1,3 +1,5 @@
+// Build from the repository root with the shared support source:
+// xcrun swiftc -parse-as-library tools/metal-render-support.swift tools/render-preview.swift -o /tmp/render-preview
 import Foundation
 import Metal
 import CoreGraphics
@@ -18,18 +20,19 @@ enum PreviewTool {
         for index in stride(from: 3, to: args.count, by: 2) {
             switch args[index] {
             case "--width":
-                guard let value = Int(args[index + 1]), (1...8192).contains(value) else { throw ToolError("Invalid width") }
+                guard let value = Int(args[index + 1]) else { throw ToolError("Invalid width") }
                 width = value
             case "--height":
-                guard let value = Int(args[index + 1]), (1...8192).contains(value) else { throw ToolError("Invalid height") }
+                guard let value = Int(args[index + 1]) else { throw ToolError("Invalid height") }
                 height = value
             case "--time":
-                guard let value = Float(args[index + 1]), value.isFinite, value >= 0 else { throw ToolError("Invalid time") }
+                guard let value = Float(args[index + 1]) else { throw ToolError("Invalid time") }
                 time = value
             default: throw ToolError("Unknown option: \(args[index])")
             }
         }
-        guard width * height <= 16_777_216 else { throw ToolError("Render exceeds 16 megapixels") }
+        try validateRenderDimensions(width: width, height: height)
+        try validateRenderTime(time)
         let context = try MetalContext(sourcePath: args[1])
         let renderer = try OffscreenRenderer(context: context, width: width, height: height, pixelFormat: .bgra8Unorm_srgb)
         let frame = try renderer.render(time: time)

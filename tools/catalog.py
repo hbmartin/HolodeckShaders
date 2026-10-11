@@ -21,8 +21,17 @@ def renderer_sources(entry_point):
 
 
 def compile_renderer(entry_point, output):
-    subprocess.run(["xcrun", "swiftc", *(str(path) for path in renderer_sources(entry_point)),
+    subprocess.run(["xcrun", "swiftc", "-parse-as-library", *(str(path) for path in renderer_sources(entry_point)),
                     "-o", str(output)], check=True)
+
+
+def json_digest(value):
+    return digest(json.dumps(value, sort_keys=True, separators=(",", ":")).encode())
+
+
+def renderer_fingerprint(entry_point="render-preview.swift"):
+    return json_digest([{"path": path.relative_to(ROOT).as_posix(), "sha256": digest(path.read_bytes())}
+                        for path in renderer_sources(entry_point)])
 
 
 def valid_id(value):
@@ -75,7 +84,7 @@ def validate_collections(collections, shader_ids):
         seen.add(cid)
 
 
-def shader_entry(shader_id):
+def shader_entry(shader_id, *, renderer_digest=None):
     if not valid_id(shader_id):
         raise ValueError("Invalid shader ID")
     directory = ROOT / "shaders" / shader_id
@@ -85,8 +94,10 @@ def shader_entry(shader_id):
     dependencies = [directory / "metadata.json", directory / "body.metal"] + [ROOT / "shared" / f"{part}.metal" for part in shared]
     # Preserve the original assembly bytes for existing publications.
     source = "".join((ROOT / "shared" / f"{part}.metal").read_text() for part in shared[:-1]) + (directory / "body.metal").read_text() + (ROOT / "shared" / "fragment.metal").read_text()
-    renderer = b"".join(path.read_bytes() for path in renderer_sources("render-preview.swift"))
-    fingerprint = digest(source.encode() + renderer + json.dumps(SETTINGS, sort_keys=True).encode())
+    if renderer_digest is None:
+        renderer_digest = renderer_fingerprint()
+    fingerprint = json_digest({"version": 2, "sourceSHA256": digest(source.encode()),
+                               "rendererSHA256": renderer_digest, "settings": SETTINGS})
     if not source or len(source.encode()) > 1_048_576:
         raise ValueError(f"Invalid source size for {shader_id}")
     return metadata, source, fingerprint, dependencies, directory
@@ -116,7 +127,8 @@ def entries():
         raise ValueError("Catalog must be nonempty with unique IDs and an existing default")
     if "collections" in index:
         validate_collections(index["collections"], ids)
-    result = [shader_entry(shader_id) for shader_id in ids]
+    renderer_digest = renderer_fingerprint()
+    result = [shader_entry(shader_id, renderer_digest=renderer_digest) for shader_id in ids]
     if sum(len(entry[1].encode()) for entry in result) > 16_777_216:
         raise ValueError("Catalog sources exceed 16 MiB")
     return index, result

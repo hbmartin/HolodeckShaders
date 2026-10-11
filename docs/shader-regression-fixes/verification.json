@@ -1,0 +1,583 @@
+{
+  "appInspection": {
+    "app": "Debug HolodeckMac",
+    "appExecutableSHA256": "23ede99328314d6479531348c0384f39aa5375a695fb1a7a72f8adb88e329ed1",
+    "compilationOrSelectionErrorsObserved": false,
+    "inMemoryPreferences": true,
+    "offlineFixture": true,
+    "offsetSeconds": [
+      0,
+      1240
+    ],
+    "sourcesSHA256": {
+      "holodeck-grid": "891340a2dea71d3b10bde0941f4d2ed03c91b38368724d6ba806dd35637340d3",
+      "holodeck-grid-late": "6c0915f2061b53178da829ee3a7971db444f1b6f68331cb155e51322fccb9dd5"
+    },
+    "successiveNormalAndOffsetWindowFramesDiffer": true,
+    "visibleMotionAndGridInspected": true
+  },
+  "baselineHead": "b1805bb77a7157a0125dd8de33e63dc6da177000",
+  "compilation": {
+    "catalogValidationPassed": true,
+    "holodeckGridCompiledFor": [
+      "macosx",
+      "appletvos"
+    ],
+    "libraryAssetsValidated": 67,
+    "publicationSourcesCompiledForTvOS": 23,
+    "snippetExamplesCompiledForBothSDKs": 28
+  },
+  "environment": {
+    "device": "Apple M2 Pro",
+    "macOS": "27.0.1 (26A434)",
+    "macOSSDK": "27.0",
+    "tvOSSDK": "27.0",
+    "xcode": "27.0 (27A266a)"
+  },
+  "geometry": {
+    "axesChecked": 12,
+    "boundingFactor": 1.7320508,
+    "clearance": 0.05,
+    "guardRemovalDetectedFixtures": 4,
+    "independentBoundingFactor": 1.7320508075688772,
+    "invalidExtentTimes": [
+      0,
+      3,
+      1240.6,
+      86400
+    ],
+    "octahedronAuthoredY": 4.0,
+    "octahedronEffectiveYModel": 3.6591034800000006,
+    "worldUnitTolerance": 1e-05
+  },
+  "implementationFilesSHA256": {
+    "index.json": "4c02d9f6638b3f5b50fa50609a94f96202f8cefb5b50892d302e2e8a61c0430c",
+    "shaders/holodeck-grid/body.metal": "409f29134da070d2fa6b4243843b9d32b223cf8193acadc55c2d2f587eca7449",
+    "shared/common.metal": "933df7c2112735f911914bdacee96651c525b63f8e395cec07093beb8458b5ac",
+    "shared/fragment.metal": "b46a4fc664916103f1979fff94fdc8b9da54e93a325a94f78941536fccb1d736",
+    "tools/catalog.py": "2a7a726ba37f122052c7fe5d3e5810353c40b2781ccd39d69a8758d45bfebcdc",
+    "tools/library.py": "a28aee8c48c2a352efad67d055d8d3ebcda76d9c4f11a76a08fd920dab2d63e5",
+    "tools/metal-render-support.swift": "1bce19545f2a5fa2bc38434ae5b696d705c0898a8e42a486021752f4e5d9c7e3",
+    "tools/render-preview.swift": "1b5c8031b97d35500f446c0c7731a8125822899c128aba7c6fb870837d3da6a3",
+    "tools/shader-regression-probe.swift": "59369710d697a6c10c0cbdced8e668c67e2d985fcfaf4fbaeac6ec39449ed665",
+    "tools/test_catalog.py": "f7fb6a9ade3532708627264cfd9ef5e1e496d63602dac3bee5781b9a42fca09c",
+    "tools/test_licenses.py": "0795fc4bf3c4ce8c1bcee1a4fbdd7b31ff9f1dc5dbcf3d94d02645a58580f0b5",
+    "tools/test_shader_regressions.py": "c78fb487451f9f36555a97aebc88fa76a90ff040f71ae81a99957eb91d698c79"
+  },
+  "motionReference": {
+    "historicalPreGuardBodyCommit": "e5bb6270486230ed8879d9dcdba3e0203576a770",
+    "historicalPreGuardBodySHA256": "77204bf3d29a0c0fd4c18966d49bef10b937b312be4084c30d06c81252e9bb72",
+    "method": "b1805bb assembled source, with only the authored octahedron Y extent changed from 3.65 back to 4.0; original numeric literals and existing guard retained",
+    "sourceSHA256": "f16b62e3857f27fa210b2871640c516acbdffa97d68c72aea1b35ff2ad52a02c"
+  },
+  "preGuardHistoricalComparison": [
+    {
+      "changedChannels": 0,
+      "maxAbsoluteDifference": 0,
+      "time": 0
+    },
+    {
+      "changedChannels": 0,
+      "maxAbsoluteDifference": 0,
+      "time": 3
+    },
+    {
+      "changedChannels": 120,
+      "maxAbsoluteDifference": 1.2293457984924316e-07,
+      "time": 40.599998474121094
+    },
+    {
+      "changedChannels": 1129,
+      "maxAbsoluteDifference": 4.91999089717865e-05,
+      "time": 640.5999755859375
+    },
+    {
+      "changedChannels": 490,
+      "maxAbsoluteDifference": 5.960464477539062e-07,
+      "time": 1240.5999755859375
+    },
+    {
+      "changedChannels": 0,
+      "maxAbsoluteDifference": 0,
+      "time": 12440.599609375
+    },
+    {
+      "changedChannels": 134,
+      "maxAbsoluteDifference": 4.500150680541992e-06,
+      "time": 86400
+    }
+  ],
+  "previewRendererParity": [
+    {
+      "identicalPNG": true,
+      "pngSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+      "shader": "plasma",
+      "sourceSHA256": "4e369e5324fcd083c9cf08e74fd250504dcdba35a3d18ca61a870b2c9afb8aa6"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+      "shader": "aurora",
+      "sourceSHA256": "a746e3e5b650bef75e81d3059494284b7296947a4562fa1b1752d4df8c1021fc"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+      "shader": "waves",
+      "sourceSHA256": "93bc50323ed50c5941068a2a1217849766071b2cf33aed0e6863ac8bf567f7f8"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+      "shader": "kaleidoscope",
+      "sourceSHA256": "2aac5d045d3a06615fd15da5a5d3d73654c9ff666126c85f5a4881c52824ff49"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+      "shader": "starfield",
+      "sourceSHA256": "44b39cc3048479f9f58afbe87d0d5b0d00f6b5f387300cb6bdec38f23d02008d"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "shader": "chrome",
+      "sourceSHA256": "b8e3959fe3de5d33536047930b85781ed5f718e9dc467854baac4ee811a54ac8"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+      "shader": "brushed-gold",
+      "sourceSHA256": "028557f93700112b37d3379497da2a04dc220c377e24c18d9487fe9da3582638"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+      "shader": "iridescent",
+      "sourceSHA256": "88b12e10cde87376a18feb1a084cc2626e52449721b39a563d7c813f49711662"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+      "shader": "force-shield",
+      "sourceSHA256": "7174b76faba885de3a7920f5d3aed7ade63fd9fdfd8bcb5205f7a7da14674007"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "646bdc76927be4112f05349d7cb6cfc0db1fffaebc7465d5971898940070524c",
+      "shader": "holodeck-grid",
+      "sourceSHA256": "485e980614b0a45e9f2b4b6d47dd30084530a516fe4b32a4a28f8be8068fd51e"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+      "shader": "warp-speed",
+      "sourceSHA256": "be4e739304ad8aa90bb8812e29074ed6b8c6617b7b8618121f3cd85f558dc38f"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "93c368b1900f08c24156831bc8640482045a8b7ab0e545bca29ca22f473dfb52",
+      "shader": "matrix-corridor",
+      "sourceSHA256": "5eba41c9a1adb8fe0895bb89a98bfc6425c47a46dc4c427d9f1fce21da676315"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+      "shader": "apollonian-twist",
+      "sourceSHA256": "c83ed8386bc84fa447eb6ef8304747d4dd285cb6e3d7f28bcfb6cb4802d33486"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+      "shader": "light-grid",
+      "sourceSHA256": "4e801d3b4290542588beaf260d8eb0535e6af87e6bda83cc9da935892292e3f9"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+      "shader": "sonar-pulse",
+      "sourceSHA256": "5e899f4b082e4d4ddf9fd8df9ae8cb8da126cb39155e89217f7d2569f00bb920"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+      "shader": "ember-drift",
+      "sourceSHA256": "5f103693b682c695046c3cdd987b60a6c60ed7de00c645cd9d268cc591c4a488"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+      "shader": "sunlit-shallows",
+      "sourceSHA256": "5ff3f1ef5ee597fc335a8a5106230e01816ddfbf2e9a2dbeb8b6638709f0a284"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+      "shader": "fireworks",
+      "sourceSHA256": "a5a03cf2790acde02efe41e152cd7f48732d6b11b17b67d7b1e996b4bb82e997"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+      "shader": "dramamine-sunset",
+      "sourceSHA256": "ea9c999f0782e816441a8e185fdb2de981cba5f29b993b748f39305e2a52b6f5"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+      "shader": "evening-and-morning",
+      "sourceSHA256": "acee9168ac671359d8a06110f67c36cc737378974898432b8a62674e961401e7"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+      "shader": "green-caresses",
+      "sourceSHA256": "81ce2a4a1054d790516a6110f97f71acc78750db58916b8fcc936e24e82feefd"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+      "shader": "orange-flow",
+      "sourceSHA256": "7359e9d8490fdae5502ba3a62cdb801b776c5e7891f67082338a232f62195191"
+    },
+    {
+      "identicalPNG": true,
+      "pngSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+      "shader": "side-view-of-the-ocean",
+      "sourceSHA256": "dd7ef26caae595332a47607c9624aee923c343fb824b540dcd3911a26d67542a"
+    }
+  ],
+  "rawRendererParity": [
+    {
+      "frames": [
+        {
+          "rgba32SHA256": "fb27e6f1cf31fdd167c7df433e10ef239c5ad5d0c703580ff852aa04c384c6d8",
+          "time": 0
+        },
+        {
+          "rgba32SHA256": "a414699e4f6e517061eb78d4cc5c1428f9d5447e35f4206fd2ceb5a3c3e5d3d5",
+          "time": 3
+        },
+        {
+          "rgba32SHA256": "a24e7400f1f3221df770323d21784f524e1cb576608dba7def90393652d7659a",
+          "time": 10
+        },
+        {
+          "rgba32SHA256": "a9e06f6a0819274ccb7811f829bd82183f2f96facd5184064d52a306618855b9",
+          "time": 1819.875
+        },
+        {
+          "rgba32SHA256": "2a6810a917fde977e4b97d88cf21897f27023f39fde7b1f81ef6b59a64327831",
+          "time": 1820
+        },
+        {
+          "rgba32SHA256": "ff0ee8c3f39de7164b5371a6310f9f83b4a92161c274aa5048d51717b4cc2c1a",
+          "time": 1820.125
+        },
+        {
+          "rgba32SHA256": "aa5275708604120c2754bfd6618de4e757bea5ae9aa3a4a415caa760cca5a6b0",
+          "time": 3740
+        },
+        {
+          "rgba32SHA256": "30f26eb0c7e5684ac007efcdc1061d7124dadac16aa0f5fe80450d8b9809fa90",
+          "time": 130971.875
+        },
+        {
+          "rgba32SHA256": "d1f3737a9d14785c7db10d6c3a18cd6795b7618831e1d711e04e1c763bddbf9a",
+          "time": 130972
+        },
+        {
+          "rgba32SHA256": "54d1989ab9cc699e56099b73cd5c364d23125d26e132473205134f58bb1eae09",
+          "time": 130972.125
+        },
+        {
+          "rgba32SHA256": "3cac9eeaf518c527ce4e9282dab23d676d3d89230bb174165de6451b67265390",
+          "time": 86400
+        },
+        {
+          "rgba32SHA256": "0e46f12d8938fab2d4e06e924a4df2679b5c925a623c97d1df790327f1309896",
+          "time": 1728000
+        },
+        {
+          "rgba32SHA256": "bb81365fe36daecbbb2cc8830e3aa534a1644e683ce9a760ed03596d904f5e81",
+          "time": 6739200
+        },
+        {
+          "rgba32SHA256": "8e3ce62dd6abf4f90a9a71a8a842a67bf4f66b1a75d8a39c9940eac5f39dbcd4",
+          "time": 31536000
+        }
+      ],
+      "height": 90,
+      "identicalRawPixels": true,
+      "shader": "matrix-corridor",
+      "width": 160
+    },
+    {
+      "frames": [
+        {
+          "rgba32SHA256": "2c6753eb9a8a405cc246ce9739b57fdae9b844b84e69e30163c19dce075b78fb",
+          "time": 0
+        },
+        {
+          "rgba32SHA256": "76271a90de3fdd120146c791005fe81e4fcc20dfbb4a55630537455ed3f9223e",
+          "time": 3
+        },
+        {
+          "rgba32SHA256": "a35013ca9b65d9baba03926d894094414603d5f91d4fc31a2a45e3310a454acd",
+          "time": 10
+        },
+        {
+          "rgba32SHA256": "15bf671453bfdff10151975c9da7cece1d6925741214b0136941afa24abf8f12",
+          "time": 1819.875
+        },
+        {
+          "rgba32SHA256": "408a5bdaf0664751c86299d5b29aacadd4c932d734fd4fbda049fffac46124c3",
+          "time": 1820
+        },
+        {
+          "rgba32SHA256": "313eed8aa58a246a54f6ea005419770a18bfab8572749da3cda761c2085816d3",
+          "time": 1820.125
+        },
+        {
+          "rgba32SHA256": "fe1b800f2ca3b48cafbf91ae98918d7924c091d2210f9082c46bf5c8ab19af55",
+          "time": 3740
+        },
+        {
+          "rgba32SHA256": "cb0acee7b6c436f4cb3a3bbec77c27d8dc54aacce0b60283b7261cd0b377a102",
+          "time": 130971.875
+        },
+        {
+          "rgba32SHA256": "ed3e83b53075c3cd5cf274dbb80998a60c4db5bd7bba1cda67d06d774b076128",
+          "time": 130972
+        },
+        {
+          "rgba32SHA256": "6ae2f9a21ce74643db303a26ccd298ee202c9cbce1431ac690c3df348ce3e745",
+          "time": 130972.125
+        },
+        {
+          "rgba32SHA256": "e8cb44f0a616bf2653904370bb26007cde9528c753f199ad24588c93adc8c720",
+          "time": 86400
+        },
+        {
+          "rgba32SHA256": "18d40f6627ae542941704d95293d90c60301b50392740a303dc9a6dcd354b093",
+          "time": 1728000
+        },
+        {
+          "rgba32SHA256": "a05199d1833e55ac8ad5fbf5806c0b5d5ec30a440419feb0e968af631edea000",
+          "time": 6739200
+        },
+        {
+          "rgba32SHA256": "a168d9701a5838286cf8777f1fd7d70d64499e13ae53274bfc764cfab9564ae4",
+          "time": 31536000
+        }
+      ],
+      "height": 90,
+      "identicalRawPixels": true,
+      "shader": "holodeck-grid",
+      "width": 160
+    }
+  ],
+  "regeneratedPreviews": [
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+      "shader": "plasma"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+      "shader": "aurora"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+      "shader": "waves"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+      "shader": "kaleidoscope"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+      "shader": "starfield"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "shader": "chrome"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+      "shader": "brushed-gold"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+      "shader": "iridescent"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+      "shader": "force-shield"
+    },
+    {
+      "identicalToBaselinePNG": false,
+      "pngSHA256": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+      "shader": "holodeck-grid"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+      "shader": "warp-speed"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "93c368b1900f08c24156831bc8640482045a8b7ab0e545bca29ca22f473dfb52",
+      "shader": "matrix-corridor"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+      "shader": "apollonian-twist"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+      "shader": "light-grid"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+      "shader": "sonar-pulse"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+      "shader": "ember-drift"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+      "shader": "sunlit-shallows"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+      "shader": "fireworks"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+      "shader": "dramamine-sunset"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+      "shader": "evening-and-morning"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+      "shader": "green-caresses"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+      "shader": "orange-flow"
+    },
+    {
+      "identicalToBaselinePNG": true,
+      "pngSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+      "shader": "side-view-of-the-ocean"
+    }
+  ],
+  "restoredMotion": [
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "2c6753eb9a8a405cc246ce9739b57fdae9b844b84e69e30163c19dce075b78fb",
+      "time": 0
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "f25684c0367a053b03c427d50f994db3a822fa3b28b1c7b29b67813df4f2d78e",
+      "time": 3
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "120762f650daf161c73ec9f1ce53e1b0dcc87b979fe9d795e90da8cb7cfd4e98",
+      "time": 40.599998474121094
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "c359d020d9244c669682c96c9a6652ba556d534763c979afa93982d05ac48cab",
+      "time": 640.5999755859375
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "692c64d124fff24d7cf62599293ac41fd8c7c4820dc722e61c4b0082604137d7",
+      "time": 1240.5999755859375
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "390d3c442b6b798d1d6661fba46547ecc6d09b9d23fc593cad7bed76a51b5765",
+      "time": 12440.599609375
+    },
+    {
+      "identicalRawPixels": true,
+      "rgba32SHA256": "714a2bad45c9dd0fc4ad28bd9ded2dff02cc932eb5a3ad8f7a718e43afc176fb",
+      "time": 86400
+    }
+  ],
+  "reusedAssets": {
+    "newExternalCodeCopied": false,
+    "references": [
+      "holodeck-scene",
+      "starship-blueprint-artstation"
+    ],
+    "snippets": [
+      "box-room",
+      "grid-lines",
+      "hologram-rim"
+    ]
+  },
+  "sampleRenders": {
+    "1280x720-t0.png": "8e0ef4d4c37aa8ff9fb7fbb3d7df8def55a7b273b251f8d734135816c3960ae6",
+    "1280x720-t1240.6.png": "75385e8d6f63cc8275df1a39722c9c55ae4aca144ce6db479e58044d9281d618",
+    "1280x720-t12440.6.png": "2582db28dc9fea92c7dcb0fc3937c51d267c3140830d6f451c748117543b3fc5",
+    "1280x720-t3.png": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+    "1280x720-t40.6.png": "86d827a348b20baa2d53bad1d8f3a085bcd002e244286158f9b8bce1cb686104",
+    "1280x720-t640.6.png": "735642ced1609e969e1898e730f33b9732779957b4ee99f92ba93041b3e363a4",
+    "1280x720-t86400.png": "52c9b482c5b3824a804daf514a7fc1bebc66e4caa8a4b7280c19ac566b4322aa"
+  },
+  "tests": {
+    "clampedNanDiagnosticNonfiniteChannels": 0,
+    "command": "HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py' -v",
+    "count": 53,
+    "logSHA256": "bd2b4880ef80723ed141061ef8cb87997174d46e53c3a082679c2c26c141b24c",
+    "matrixSeedOracleCases": 196000,
+    "nanDiagnosticNonfiniteChannels": 43200,
+    "passed": true,
+    "seconds": 14.383,
+    "uniformDiagnosticTimes": [
+      0,
+      3.25
+    ],
+    "uniformLayout": {
+      "paddingOffset": 12,
+      "resolutionOffset": 0,
+      "size": 16,
+      "stride": 16,
+      "timeOffset": 8
+    }
+  },
+  "unverified": [
+    "Physical Apple TV rendering and performance",
+    "Minimum supported OS playback",
+    "Continuous long-duration uptime",
+    "Sustained app frame rate"
+  ],
+  "verifiedOn": "2026-10-11"
+}

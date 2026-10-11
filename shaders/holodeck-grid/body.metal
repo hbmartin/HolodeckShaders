@@ -49,6 +49,8 @@ float3 hdHologramRim(float3 n, float3 v, float3 position, float t, float footpri
 
 // --- scene ---
 constant float3 kRoomHalf = float3(15.0, 10.0, 25.0);
+constant float kRoomClearance = 0.05;
+constant float kRotatedBoundScale = 1.7320508;
 constant float3 kAmber = float3(1.0, 0.48, 0.035);
 
 // Ray against a convex polytope made of up to four symmetric slabs; returns tNear, tFar and the entry slab index.
@@ -103,7 +105,7 @@ float3 shade(float2 p, float t, float2 pixel) {
 
     // floating holograms: sphere, cube, octahedron, small sphere
     float3 laneCentres[4] = {float3(-3.0, -3.0, -7.0), float3(3.0, -3.2, -2.0), float3(2.0, -3.0, -9.0), float3(-2.5, -3.4, 0.5)};
-    float3 laneHalves[4] = {float3(8.0, 4.0, 4.0), float3(7.5, 4.0, 3.5), float3(9.0, 3.65, 3.0), float3(7.0, 3.8, 3.0)};
+    float3 laneHalves[4] = {float3(8.0, 4.0, 4.0), float3(7.5, 4.0, 3.5), float3(9.0, 4.0, 3.0), float3(7.0, 3.8, 3.0)};
     float3 starts[4] = {float3(-2.0, 1.0, 0.0), float3(2.0, -1.0, 1.0), float3(1.0, 2.5, -1.0), float3(-4.0, -2.0, 1.0)};
     float3 speeds[4] = {float3(0.31, 0.17, 0.23), float3(-0.26, 0.21, -0.19), float3(0.2, -0.16, 0.28), float3(-0.33, 0.24, -0.17)};
     float sizes[4] = {2.1, 1.45, 1.9, 1.2};
@@ -116,9 +118,9 @@ float3 shade(float2 p, float t, float2 pixel) {
     float layerAlpha[4];
     int layers = 0;
     for (int k = 0; k < 4; ++k) {
-        float bound = (k == 1 || k == 2) ? sizes[k] * 1.7320508 : sizes[k];
+        float bound = (k == 1 || k == 2) ? sizes[k] * kRotatedBoundScale : sizes[k];
         // Keep the entire rotated object inside the room, with a small clearance from every wall.
-        float3 bounceHalf = min(laneHalves[k], kRoomHalf - abs(laneCentres[k]) - bound - 0.05);
+        float3 bounceHalf = min(laneHalves[k], kRoomHalf - abs(laneCentres[k]) - bound - kRoomClearance);
         if (any(bounceHalf <= 0.0)) continue;  // Invalid geometry cannot be repaired with an epsilon.
         float3 centre = laneCentres[k] + hdBounceInBox(starts[k], speeds[k], bounceHalf, t);
         float3 local = ro - centre;

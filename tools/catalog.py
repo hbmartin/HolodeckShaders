@@ -16,6 +16,15 @@ MOODS = {"calm", "dreamy", "energetic"}
 MOTIONS = {"slow", "steady", "fast"}
 
 
+def renderer_sources(entry_point):
+    return [ROOT / "tools/metal-render-support.swift", ROOT / "tools" / entry_point]
+
+
+def compile_renderer(entry_point, output):
+    subprocess.run(["xcrun", "swiftc", *(str(path) for path in renderer_sources(entry_point)),
+                    "-o", str(output)], check=True)
+
+
 def valid_id(value):
     return isinstance(value, str) and len(value) <= 100 and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", value) is not None
 
@@ -76,7 +85,8 @@ def shader_entry(shader_id):
     dependencies = [directory / "metadata.json", directory / "body.metal"] + [ROOT / "shared" / f"{part}.metal" for part in shared]
     # Preserve the original assembly bytes for existing publications.
     source = "".join((ROOT / "shared" / f"{part}.metal").read_text() for part in shared[:-1]) + (directory / "body.metal").read_text() + (ROOT / "shared" / "fragment.metal").read_text()
-    fingerprint = digest(source.encode() + (ROOT / "tools/render-preview.swift").read_bytes() + json.dumps(SETTINGS, sort_keys=True).encode())
+    renderer = b"".join(path.read_bytes() for path in renderer_sources("render-preview.swift"))
+    fingerprint = digest(source.encode() + renderer + json.dumps(SETTINGS, sort_keys=True).encode())
     if not source or len(source.encode()) > 1_048_576:
         raise ValueError(f"Invalid source size for {shader_id}")
     return metadata, source, fingerprint, dependencies, directory
@@ -117,7 +127,7 @@ def generate():
     cache = ROOT / ".cache"
     cache.mkdir(exist_ok=True)
     renderer = cache / "render-preview"
-    subprocess.run(["xcrun", "swiftc", str(ROOT / "tools/render-preview.swift"), "-o", str(renderer)], check=True)
+    compile_renderer("render-preview.swift", renderer)
     for metadata, source, fingerprint, _, directory in shaders:
         source_path = cache / f"{metadata['id']}.metal"
         source_path.write_text(source)

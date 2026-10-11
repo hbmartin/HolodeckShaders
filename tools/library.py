@@ -327,7 +327,7 @@ def render(kind, asset_id, times, width=1280, height=720):
     output = catalog.ROOT / ".cache/library" / f"{kind}-{asset_id}"
     output.mkdir(parents=True, exist_ok=True)
     renderer = catalog.ROOT / ".cache/render-preview"
-    subprocess.run(["xcrun", "swiftc", str(catalog.ROOT / "tools/render-preview.swift"), "-o", str(renderer)], check=True)
+    catalog.compile_renderer("render-preview.swift", renderer)
     file = output / "source.metal"
     file.write_text(source)
     for sample in samples:

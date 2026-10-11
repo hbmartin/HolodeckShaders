@@ -26,7 +26,7 @@ def path(relative):
     return value
 
 
-def assets(kind=None):
+def assets(kind=None, *, shader_metadata=None):
     result = []
     for asset_kind, (folder, filename) in KINDS.items():
         if kind and asset_kind != kind:
@@ -35,7 +35,9 @@ def assets(kind=None):
             if not directory.is_dir() or directory.name.startswith("."):
                 continue
             file = path(f"{folder}/{directory.name}/{filename}")
-            spec = catalog.read_json(file)
+            spec = shader_metadata.get(directory.name) if asset_kind == "shader" and shader_metadata is not None else None
+            if spec is None:
+                spec = catalog.read_json(file)
             if not isinstance(spec, dict) or not catalog.valid_id(spec.get("id")) or spec["id"] != file.parent.name:
                 raise ValueError(f"Invalid or duplicate asset ID: {file}")
             result.append({"kind": asset_kind, "id": spec["id"], "name": spec.get("name", ""),
@@ -168,11 +170,14 @@ def compile_source(source, label):
 
 
 def validate(compile_metal=False):
-    catalog.entries()
-    items = assets()
+    renderer_digest = catalog.renderer_fingerprint()
+    _, shaders = catalog.entries(renderer_digest=renderer_digest)
+    shader_metadata = {entry[0]["id"]: entry[0] for entry in shaders}
+    items = assets(shader_metadata=shader_metadata)
     for item in items:
         if item["kind"] == "shader":
-            catalog.shader_entry(item["id"])
+            if item["id"] not in shader_metadata:
+                catalog.shader_entry(item["id"], renderer_digest=renderer_digest, metadata=item["specification"])
         elif item["kind"] == "snippet":
             source = snippet_source(item)
             if compile_metal:

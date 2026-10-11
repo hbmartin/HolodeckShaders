@@ -56,11 +56,14 @@ def values(text, count, name):
     for part in parts:
         suffix = part[-1] if part[-1] in "fFhH" else ""
         value = float(part[:-1] if suffix else part)
-        if suffix in ("h", "H"):
-            try:
+        precision = "half" if suffix in ("h", "H") else "float"
+        try:
+            if precision == "half":
                 value = struct.unpack("e", struct.pack("e", value))[0]
-            except OverflowError as error:
-                raise AssertionError(f"Invalid scene data {name}: half literal out of range") from error
+            else:
+                value = float32(value)
+        except OverflowError as error:
+            raise AssertionError(f"Invalid scene data {name}: {precision} literal out of range ({part})") from error
         result.append(value)
     if not all(math.isfinite(value) for value in result):
         raise AssertionError(f"Invalid scene data {name}: values must be finite")
@@ -175,8 +178,10 @@ class MetalProbeCase(unittest.TestCase):
 class RegressionHarnessTests(unittest.TestCase):
     def test_scene_parsers_accept_metal_suffixes_and_half_rounding(self):
         half = struct.unpack("e", struct.pack("e", 0.05))[0]
-        for literal, expected in (("0.05f", 0.05), (".05F", 0.05), ("5e-2f", 0.05),
-                                  ("0.05h", half), ("5e-2H", half), ("1.F", 1.0)):
+        for literal, expected in (("0.05f", float32(0.05)), (".05F", float32(0.05)), ("5e-2f", float32(0.05)),
+                                  ("0.05", float32(0.05)), ("0.05h", half), ("5e-2H", half), ("1.F", 1.0),
+                                  ("2", 2.0), ("3.4028235e38f", float32(3.4028235e38)),
+                                  ("1e-50f", 0.0), ("1e-400", 0.0), ("1e-50h", 0.0)):
             with self.subTest(literal=literal):
                 self.assertEqual(scalar_constant(f"constant float clearance = {literal};", "clearance"), expected)
                 self.assertEqual(vector_constant(f"constant float3 room = float3({literal}, 2, 3);", "room"), (expected, 2, 3))
@@ -186,6 +191,13 @@ class RegressionHarnessTests(unittest.TestCase):
         for literal in ("1f", "1h", "0.05ff", "0.05hf", "1eH", "1e999f", "1e10h"):
             with self.subTest(literal=literal), self.assertRaisesRegex(AssertionError, "Invalid scene data"):
                 scalar_constant(f"constant float clearance = {literal};", "clearance")
+
+    def test_scene_parsers_reject_float_overflow_with_label(self):
+        for literal in ("1e39f", "1e39F", "1e39", "-1e39", "3.4028236e38f"):
+            with self.subTest(literal=literal), self.assertRaisesRegex(AssertionError, "Invalid scene data clearance: float literal out of range"):
+                scalar_constant(f"constant float clearance = {literal};", "clearance")
+        with self.assertRaisesRegex(AssertionError, "Invalid scene data clearance: half literal out of range"):
+            scalar_constant("constant float clearance = 1e10h;", "clearance")
 
     def test_source_edits_reject_missing_and_duplicate_anchors(self):
         for edit in (lambda source: replace_once(source, "anchor", "replacement", "Fixture anchor"),
@@ -305,6 +317,91 @@ class MetalSceneRegressionTests(MetalProbeCase):
         subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output_path)], check=True)
         self.assertEqual(json.loads(output_path.read_text())["frames"], [])
 
+    def test_probe_rejects_invalid_samples_before_metal_setup(self):
+        invalid_source = self.root / "invalid-input-source.metal"
+        invalid_source.write_text("not a Metal library")
+        fixtures = [
+            ("render", "{}", "Invalid render samples: expected an array"),
+            ("render", "null", "Invalid render samples"),
+            ("render", "[null]", "Invalid render samples[0]: expected a number"),
+            ("render", "[[0]]", "Invalid render samples[0]: expected a number"),
+            ("render", "[0,3.25,-1]", "Invalid render samples[2]: -1 must be nonnegative"),
+            ("render", "[0,true]", "Invalid render samples[1]: expected a number, got true"),
+            ("render", "[false]", "Invalid render samples[0]: expected a number, got false"),
+            ("render", '[0,"3"]', "Invalid render samples[1]: expected a number"),
+            ("render", "[0,1e39]", "Invalid render samples[1]"),
+            ("render", "[3.4028236e38]", "Invalid render samples[0]"),
+            ("render", "[NaN]", "Invalid render samples"),
+            ("render", "[Infinity]", "Invalid render samples"),
+            ("compute", "{}", "Invalid compute samples"),
+            ("compute", "null", "Invalid compute samples"),
+            ("compute", "[]", "Invalid compute samples: expected a nonempty array"),
+            ("compute", "[null]", "Invalid compute samples[0]: expected two numbers"),
+            ("compute", "[[0]]", "Invalid compute samples[0]: expected two numbers"),
+            ("compute", "[[0,1,2]]", "Invalid compute samples[0]: expected two numbers"),
+            ("compute", "[[true,1]]", "Invalid compute samples[0][0]: expected a number, got true"),
+            ("compute", "[[0,false]]", "Invalid compute samples[0][1]: expected a number, got false"),
+            ("compute", "[[0,null]]", "Invalid compute samples[0][1]: expected a number"),
+            ("compute", '[[0,"1"]]', "Invalid compute samples[0][1]: expected a number"),
+            ("compute", "[[1e39,0]]", "Invalid compute samples[0][0]"),
+            ("compute", "[[0,1],[0,-1e39]]", "Invalid compute samples[1][1]"),
+            ("compute", "[[3.4028236e38,0]]", "Invalid compute samples[0][0]"),
+            ("compute", "[[NaN,0]]", "Invalid compute samples"),
+            ("compute", "[[0,Infinity]]", "Invalid compute samples"),
+            ("compute", "not-json", "Invalid compute samples"),
+        ]
+        for index, (mode, payload, message) in enumerate(fixtures):
+            samples_path = self.root / f"input-validation-{index}.json"
+            samples_path.write_text(payload)
+            for source in (self.root / "missing-input-source.metal", invalid_source):
+                output = self.root / f"input-validation-{index}-{source.stem}.result.json"
+                with self.subTest(mode=mode, payload=payload, source=source.name):
+                    result = subprocess.run([str(self.probe), mode, str(source), str(samples_path), str(output)],
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn(message, result.stderr)
+                    if "1e39" in payload or "3.4028236e38" in payload:
+                        value = re.search(r": ([^ ]+) is not finite as Float", result.stderr)
+                        self.assertIsNotNone(value, result.stderr)
+                        self.assertGreater(abs(float(value[1])), float32(3.4028235e38))
+                    self.assertFalse(output.exists())
+                    self.assertFalse(list(self.root.glob(f"{output.stem}.*.rgba32")))
+
+    def test_probe_preserves_underflow_signed_zero_and_float_boundaries(self):
+        source = replace_once(unclamped(catalog.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
+                              "float3 color = float3(u.resolution, u.time);", "Expose numeric sample values")
+        source_path = self.root / "numeric-inputs.metal"
+        source_path.write_text(source)
+        samples_path = self.root / "numeric-inputs.json"
+        samples_path.write_text("[0,3.25,1e-50,1e-400,-1e-50,-1e-400,3.4028235e38,1e-45]")
+        output = self.root / "numeric-inputs.result.json"
+        subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output)], check=True)
+        frames = json.loads(output.read_text())["frames"]
+        expected = [0.0, 3.25, 0.0, 0.0, -0.0, -0.0, float32(3.4028235e38), float32(1e-45)]
+        self.assertEqual(len(frames), len(expected))
+        for frame, time in zip(frames, expected):
+            with self.subTest(time=time):
+                self.assertEqual(frame["time"], time)
+                self.assertEqual(frame["nonfinite"], 0)
+                pixels = Path(frame["path"]).read_bytes()
+                pixel = struct.pack("4f", 160, 90, time, 1)
+                self.assertEqual(pixels, pixel * (160 * 90))
+
+        source_path.write_text("""
+#include <metal_stdlib>
+using namespace metal;
+kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
+                            device uint *seeds [[buffer(1)]],
+                            uint i [[thread_position_in_grid]]) {
+    seeds[i] = as_type<uint>(samples[i].x) ^ as_type<uint>(samples[i].y);
+}
+""")
+        samples_path.write_text("[[1e-50,-2],[1e-400,1],[-1e-50,-1e-400],[3.4028235e38,-3.4028235e38],[1e-45,0]]")
+        subprocess.run([str(self.probe), "compute", str(source_path), str(samples_path), str(output)], check=True)
+        bits = lambda value: struct.unpack("I", struct.pack("f", value))[0]
+        rows = [(0.0, -2.0), (0.0, 1.0), (-0.0, -0.0), (expected[6], -expected[6]), (expected[7], 0.0)]
+        self.assertEqual(json.loads(output.read_text())["seeds"], [bits(x) ^ bits(y) for x, y in rows])
+
     def test_shared_renderer_and_cli_validate_time_and_dimensions(self):
         driver_source = self.root / "validation-driver.swift"
         driver_source.write_text("""
@@ -344,8 +441,7 @@ import Metal
 }
 """)
         driver = self.root / "validation-driver"
-        subprocess.run(["xcrun", "swiftc", "-parse-as-library", str(catalog.ROOT / "tools/metal-render-support.swift"),
-                        str(driver_source), "-o", str(driver)], check=True)
+        catalog.compile_renderer(driver_source, driver)
         metal_path = self.root / "validation.metal"
         metal_path.write_text(catalog.shader_entry("plasma")[1])
         subprocess.run([str(driver), str(metal_path)], check=True)

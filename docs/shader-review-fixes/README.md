@@ -22,3 +22,22 @@ These changes address review items 1, 2, 4, 5, 6, 7 and 9. The repeated probe sc
 The existing shared Metal renderer and compiler helper remain canonical. Holodeck Grid continues using Box Room, Grid Lines and Hologram Rim, with Holodeck Scene and Starship Blueprint as inspiration references. No new recipe implementation or external reference code was copied; production shaders, catalog selection, original references and license notices remain intact. Technical verification does not select additional shaders for publication.
 
 Physical Apple TV playback and performance, minimum supported OS playback, continuous long-duration uptime and sustained app frame rate remain unverified.
+
+## Numeric regression coverage verification — 2026-10-11
+
+The additional test-only fixes below were verified against baseline `a859a1ba0ee829646e30ebb69383367e1b901fd8` on Apple M2 Pro, macOS 27.0.1 (26A434), and Xcode 27.0 (27A266a). The earlier JSON verification reports retain their original hashes and observations.
+
+- Scene literals now parse as exact standard-library `Decimal` values and round directly to binary16 or binary32, with ties to even and the original sign preserved, including underflow to negative zero. The existing `float32()` arithmetic oracle remains unchanged. Tests cover both signs, exact and nearby midpoints, the subnormal/normal boundary, maximum finite values and the rounding-to-infinity threshold. Overflow diagnostics consistently include the scene label, precision and original literal, including `1e999f` and `1e999h`.
+- The render fixture reads the time uniform's bit pattern and encodes its two 16-bit words as ordinary float color channels. Nine input samples preserve their expected bits without requiring subnormal float-texture preservation; frame counts, reported times and nonfinite counts remain checked.
+- Compute fixtures return each sample component's bits independently, replacing the XOR check that could cancel two negative-zero signs. Ten rows cover asymmetric and paired signed zeros, positive and negative subnormals, underflow and finite limits. Temporary probe mutations that normalize zero in only `x` or only `y` each fail only that component's assertion; the repository's Swift probe remains unchanged.
+- The library read-count test uses a named-argument spy, exercises a keyword-style read and still verifies one metadata read and assembly per shader. Existing checks for unpublished shaders and later edits remain intact.
+
+Fresh checks:
+
+- `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py' -v`: all 67 tests pass, with no skips. Fourteen float/half literals match independently specified bits, the Python parser and actual compiled Metal constants; that fixture also compiles for macOS and tvOS. The existing 196,000-case Matrix seed oracle and GPU rendering regressions pass.
+- `python3 tools/library.py validate --compile`: all 67 authoring assets validate and all 28 snippet examples compile for macOS and tvOS.
+- `python3 tools/catalog.py validate`: publication validation passes, including tvOS compilation of all 23 selected shaders. All 23 assembled-source hashes, preview fingerprints, stored preview JSON hashes and PNG hashes match the baseline captured before these edits; no preview regeneration was needed.
+
+Local command logs are stored in ignored `.cache/numeric-regression-fixes/`. GPU fixtures reuse the existing Holodeck Grid assembly and canonical shared renderer. Its related Box Room, Grid Lines and Hologram Rim assets and inspiration references remain unchanged; no new recipe or external reference code was copied. Public interfaces, Swift sources, production shaders and editorial selection are unchanged.
+
+App motion was not re-inspected for this test-only change. Physical Apple TV playback and performance, minimum supported OS playback, continuous long-duration uptime and sustained app frame rate remain unverified; the earlier app observations above are historical.

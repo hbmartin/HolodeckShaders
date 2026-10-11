@@ -92,15 +92,23 @@ class LibraryTests(unittest.TestCase):
     def test_validation_reuses_renderer_and_shader_inputs(self):
         library.scaffold("shader", "unlisted-scene")
         shader_ids = {item["id"] for item in library.assets("shader")}
+        shader_reads = Counter()
+        read_json = catalog.read_json
+
+        def count_read(path):
+            if path.name == "metadata.json" and path.parent.parent == self.root / "shaders":
+                shader_reads[path.parent.name] += 1
+            return read_json(path)
+
         with patch.object(catalog, "renderer_fingerprint", wraps=catalog.renderer_fingerprint) as fingerprint, \
              patch.object(catalog, "shader_entry", wraps=catalog.shader_entry) as entry, \
-             patch.object(catalog, "read_json", wraps=catalog.read_json) as read:
+             patch.object(catalog, "read_json", side_effect=count_read):
+            # A keyword-style read must work under the same validation spy.
+            self.assertEqual(catalog.read_json(path=self.root / "index.json"), read_json(self.root / "index.json"))
             items = library.validate()
         self.assertEqual(len(items), self.asset_count + 1)
         fingerprint.assert_called_once_with()
         self.assertEqual(Counter(call.args[0] for call in entry.call_args_list), Counter({shader_id: 1 for shader_id in shader_ids}))
-        shader_reads = Counter(call.args[0].parent.name for call in read.call_args_list
-                               if call.args[0].name == "metadata.json" and call.args[0].parent.parent == self.root / "shaders")
         self.assertEqual(shader_reads, Counter({shader_id: 1 for shader_id in shader_ids}))
         for call in entry.call_args_list:
             shader_id = call.args[0]

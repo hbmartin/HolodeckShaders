@@ -1,0 +1,353 @@
+{
+  "appInspection": {
+    "app": "Debug HolodeckMac",
+    "appExecutableSHA256": "23ede99328314d6479531348c0384f39aa5375a695fb1a7a72f8adb88e329ed1",
+    "compilationOrSelectionErrorsObserved": false,
+    "inMemoryPreferences": true,
+    "method": "Existing offline fixture was verified against the running process environment. Both source strings exactly match current assembly, with a 1240-second offset only in the diagnostic wrapper. Successive foreground screenshots and visible motion were inspected through native app controls.",
+    "normalFramesDiffer": true,
+    "normalSourceSHA256": "891340a2dea71d3b10bde0941f4d2ed03c91b38368724d6ba806dd35637340d3",
+    "offlineFixture": true,
+    "offsetFramesDiffer": true,
+    "offsetSeconds": 1240,
+    "offsetSourceSHA256": "6c0915f2061b53178da829ee3a7971db444f1b6f68331cb155e51322fccb9dd5",
+    "selectionRestoredToNormalFixture": true,
+    "visibleMotionAndGridInspected": true
+  },
+  "baselineHead": "0df1042bb00ef2c84f9067b562e746229684f3d4",
+  "changes": [
+    "Shared dimension/time validation protects the renderer and rejects bad CLI inputs before Metal setup.",
+    "Typed render-sample decoding rejects booleans and Float overflow; every time is validated before any frame is written. Empty arrays and compute mode remain supported.",
+    "Both entry-point headers document two-file builds, using -parse-as-library consistently with catalog.compile_renderer.",
+    "Internal fingerprint version 2 hashes source, settings and an ordered renderer inventory of relative paths and individual hashes. Catalog operations read each renderer once without global caching.",
+    "All four single-axis invalid-extent fixtures detect both guard removal and any-to-all mutation.",
+    "Scene parsers support decimal/exponent f/F/h/H suffixes, half rounding and descriptive overflow failures.",
+    "Probe result objects are asserted before frame access; the unused subprocess mock is removed."
+  ],
+  "compilation": {
+    "holodeckCompiledFor": [
+      "macosx",
+      "appletvos"
+    ],
+    "libraryAssetsValidated": 67,
+    "libraryValidationCommand": "python3 tools/library.py validate --compile",
+    "publicationSourcesCompiledForTvOS": 23,
+    "publicationValidationCommand": "python3 tools/catalog.py validate",
+    "publicationValidationPassed": true,
+    "snippetExamplesCompiledForBothSDKs": 28,
+    "swiftEntryPointsBuilt": [
+      "render-preview.swift",
+      "shader-regression-probe.swift"
+    ],
+    "swiftFlags": [
+      "-parse-as-library"
+    ]
+  },
+  "environment": {
+    "device": "Apple M2 Pro",
+    "macOS": "27.0.1",
+    "macOSBuild": "26A434",
+    "macOSSDK": "27.0",
+    "tvOSSDK": "27.0",
+    "xcode": "Xcode 27.0\nBuild version 27A266a"
+  },
+  "existingHolodeckAssets": {
+    "references": [
+      "holodeck-scene",
+      "starship-blueprint-artstation"
+    ],
+    "snippets": [
+      "grid-lines",
+      "box-room",
+      "hologram-rim"
+    ]
+  },
+  "geometry": {
+    "anyToAllDetectedFixtures": 4,
+    "authoredOctahedronY": 4.0,
+    "effectiveOctahedronY": 3.6591034800000006,
+    "guardRemovalDetectedFixtures": 4,
+    "invalidExtentTimes": [
+      0,
+      3,
+      1240.6,
+      86400
+    ],
+    "shaderBodyUnchanged": true
+  },
+  "holodeckSamples": {
+    "allPNGAndRawFramesIdentical": true,
+    "command": "python3 tools/library.py render shader holodeck-grid --times 0,3,1240.6,86400",
+    "laterSampleImagesVisuallyInspected": [
+      1240.6,
+      86400
+    ],
+    "method": "Current PNG samples and unclamped raw-float frames compared byte for byte with renderer binaries built from immutable baseline source copies.",
+    "rawResolution": [
+      160,
+      90
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "samples": [
+      {
+        "nonfinite": 0,
+        "pngSHA256": "8e0ef4d4c37aa8ff9fb7fbb3d7df8def55a7b273b251f8d734135816c3960ae6",
+        "rawSHA256": "2c6753eb9a8a405cc246ce9739b57fdae9b844b84e69e30163c19dce075b78fb",
+        "time": 0
+      },
+      {
+        "nonfinite": 0,
+        "pngSHA256": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+        "rawSHA256": "f25684c0367a053b03c427d50f994db3a822fa3b28b1c7b29b67813df4f2d78e",
+        "time": 3
+      },
+      {
+        "nonfinite": 0,
+        "pngSHA256": "75385e8d6f63cc8275df1a39722c9c55ae4aca144ce6db479e58044d9281d618",
+        "rawSHA256": "692c64d124fff24d7cf62599293ac41fd8c7c4820dc722e61c4b0082604137d7",
+        "time": 1240.6
+      },
+      {
+        "nonfinite": 0,
+        "pngSHA256": "52c9b482c5b3824a804daf514a7fc1bebc66e4caa8a4b7280c19ac566b4322aa",
+        "rawSHA256": "714a2bad45c9dd0fc4ad28bd9ded2dff02cc932eb5a3ad8f7a718e43afc176fb",
+        "time": 86400
+      }
+    ]
+  },
+  "implementationFilesSHA256": {
+    "docs/shader-authoring.md": "3e041d3049f87cee2b689f96f8987d000522c6b0e9c517aa381cfabf64bf6b4e",
+    "index.json": "4c02d9f6638b3f5b50fa50609a94f96202f8cefb5b50892d302e2e8a61c0430c",
+    "shaders/holodeck-grid/body.metal": "409f29134da070d2fa6b4243843b9d32b223cf8193acadc55c2d2f587eca7449",
+    "shared/common.metal": "933df7c2112735f911914bdacee96651c525b63f8e395cec07093beb8458b5ac",
+    "shared/fragment.metal": "b46a4fc664916103f1979fff94fdc8b9da54e93a325a94f78941536fccb1d736",
+    "tools/catalog.py": "4388c2ed176152b12f6449f347dd6117174aabc66a4b3b379b79af242c928409",
+    "tools/metal-render-support.swift": "49dfe53af46b0d062c24f149fc91dd227e44098eb5b00d5cfd4a6c37d6bf5997",
+    "tools/render-preview.swift": "f61ffc88b95af66ac08cbfa1c1beaf8a5a0eed112c1432959644e85d2a6d1a66",
+    "tools/shader-regression-probe.swift": "d4b1147adf0b52029c30657320d54f8a95e832f2b40ec4f78a82ecc9c0fca0a6",
+    "tools/test_catalog.py": "bc61d40f9e39f32b7c2a0fbdc4863d02c98df419ad026fb1ba1969c28663455d",
+    "tools/test_shader_regressions.py": "8a0b5b5507e11bebabb47286ea4d1e93be02465d1eb4e52be3ce218dec6762e7"
+  },
+  "provenance": "Existing Box Room, Grid Lines and Hologram Rim code and inspiration references remain unchanged; no new asset implementations or reference code copied. Historical verification reports and reference originals are preserved.",
+  "publication": {
+    "allFingerprintsChanged": true,
+    "byteIdenticalAssembledSources": 23,
+    "byteIdenticalPNGs": 23,
+    "fingerprintVersion": 2,
+    "previews": [
+      {
+        "baselineFingerprint": "d2dd16559279028dd1aaa755a5ac28659493eea97bcb84cc398f77c7aed46a6b",
+        "fingerprint": "8dc2267d89930c58da351e88edc3c84ec250136136ca81ce8d66b7419f3249d5",
+        "id": "plasma",
+        "pngSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+        "sourceSHA256": "4e369e5324fcd083c9cf08e74fd250504dcdba35a3d18ca61a870b2c9afb8aa6"
+      },
+      {
+        "baselineFingerprint": "64c4b1dc651c0bb14e76db6606a9450b0ef52d1a6ce2777e3ca07a12bcd48bc6",
+        "fingerprint": "c887f789dd0339669879c55b9a0a12edae41253fb57385998fd11b12d59e62ed",
+        "id": "aurora",
+        "pngSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+        "sourceSHA256": "a746e3e5b650bef75e81d3059494284b7296947a4562fa1b1752d4df8c1021fc"
+      },
+      {
+        "baselineFingerprint": "12a6b21588813c970344e46754ed6ea17cd9937ede459898ded0f6d9b988eb5d",
+        "fingerprint": "174a868ea312d637afe88c48b50f2713e75bdba89542ff101b064ccb223f04a3",
+        "id": "waves",
+        "pngSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+        "sourceSHA256": "93bc50323ed50c5941068a2a1217849766071b2cf33aed0e6863ac8bf567f7f8"
+      },
+      {
+        "baselineFingerprint": "f3d7467685defb2443ab0e890e72cc051048d531e1120765d949b78574153eb2",
+        "fingerprint": "ec7a2e820b19cbafe1b138194ba9db87096d04bd806d1efdbd23990e38aa6434",
+        "id": "kaleidoscope",
+        "pngSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+        "sourceSHA256": "2aac5d045d3a06615fd15da5a5d3d73654c9ff666126c85f5a4881c52824ff49"
+      },
+      {
+        "baselineFingerprint": "3bc28048737233a742b91248b03b9eb6a9f06312dfe32576c99a4eb84c4ca53d",
+        "fingerprint": "4e729bfa4073f5543a87e22ffcb77e4e0ba7ab5698745dd355f9468e5a0030d7",
+        "id": "starfield",
+        "pngSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+        "sourceSHA256": "44b39cc3048479f9f58afbe87d0d5b0d00f6b5f387300cb6bdec38f23d02008d"
+      },
+      {
+        "baselineFingerprint": "c50509398074608c0a0a5bbbccd0b3d53328c1a3c8c8257f9f54166acde18676",
+        "fingerprint": "678f3e9e1edb913acb012aa2b3e42b26c1463bc954067168aad25fbd410c71c2",
+        "id": "chrome",
+        "pngSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+        "sourceSHA256": "b8e3959fe3de5d33536047930b85781ed5f718e9dc467854baac4ee811a54ac8"
+      },
+      {
+        "baselineFingerprint": "bab622b8697c31a631cf6ffda2292a3aedf94531517682d3c3fea44468404ffd",
+        "fingerprint": "55b8317fcd0302f3e9c0a1ee61c9332dc3691c7077a6c85683b0fa42531c48a8",
+        "id": "brushed-gold",
+        "pngSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+        "sourceSHA256": "028557f93700112b37d3379497da2a04dc220c377e24c18d9487fe9da3582638"
+      },
+      {
+        "baselineFingerprint": "0ba77f8cc811c909b786f137c4209eb99e992f0c9314603efc0420b3a0307cf1",
+        "fingerprint": "b5a73d4f8907ae59a88361230766a6582a3abaccef541279b69f7ee9494acbe9",
+        "id": "iridescent",
+        "pngSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+        "sourceSHA256": "88b12e10cde87376a18feb1a084cc2626e52449721b39a563d7c813f49711662"
+      },
+      {
+        "baselineFingerprint": "6ef710d3ce3a061c274c8f42b56d7e923617af130c8b6350adb8981e32bea83b",
+        "fingerprint": "a91ad67d696420f021a4ce83f5a4c12c9d2d219174258b4df0b125aedab5c217",
+        "id": "force-shield",
+        "pngSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+        "sourceSHA256": "7174b76faba885de3a7920f5d3aed7ade63fd9fdfd8bcb5205f7a7da14674007"
+      },
+      {
+        "baselineFingerprint": "27b9db6b0c2360a0b0a6afa7210932f338991e85f20ec411825bce3cf4f6a63e",
+        "fingerprint": "84cb4a642c994a01c9aeaf30eefa9b606638f2013c04f36d195c9503ce6136a2",
+        "id": "holodeck-grid",
+        "pngSHA256": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+        "sourceSHA256": "891340a2dea71d3b10bde0941f4d2ed03c91b38368724d6ba806dd35637340d3"
+      },
+      {
+        "baselineFingerprint": "86f07a82c8c1f02dbb05eb0103e9a0b0d709519cf2d010c85d02ba442aae3715",
+        "fingerprint": "a5c3d43a434087d5dd3fa3e80e2b7d62d61e4a94f5373256d9fd2c4a2a665376",
+        "id": "warp-speed",
+        "pngSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+        "sourceSHA256": "be4e739304ad8aa90bb8812e29074ed6b8c6617b7b8618121f3cd85f558dc38f"
+      },
+      {
+        "baselineFingerprint": "8267fb03ec276d7a2610d6b3311a88ecdc3b66dc0f3d212c9d304076cf3a5dea",
+        "fingerprint": "cd362d21c30cf48a3f33e3f370f4199f44ed3e70a75a5297060784204c4fa3a2",
+        "id": "matrix-corridor",
+        "pngSHA256": "93c368b1900f08c24156831bc8640482045a8b7ab0e545bca29ca22f473dfb52",
+        "sourceSHA256": "5eba41c9a1adb8fe0895bb89a98bfc6425c47a46dc4c427d9f1fce21da676315"
+      },
+      {
+        "baselineFingerprint": "7602fd42e63cb8ff7984835e3dc5a5adae6b7083f3db8b31d2dedcb9da39cd60",
+        "fingerprint": "bc6068796c955bf634f4f6ae2ee90347ddf7bd5a6e6abce797b84beeeaa26857",
+        "id": "apollonian-twist",
+        "pngSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+        "sourceSHA256": "c83ed8386bc84fa447eb6ef8304747d4dd285cb6e3d7f28bcfb6cb4802d33486"
+      },
+      {
+        "baselineFingerprint": "9b74c2104851566f9c266a62dd682d61ec34cec019a7eaf715c51b00daa46209",
+        "fingerprint": "157d6b13ebd76a00cfb01dea24e874cb8d02acac7fc372122bb88e3238a5f202",
+        "id": "light-grid",
+        "pngSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+        "sourceSHA256": "4e801d3b4290542588beaf260d8eb0535e6af87e6bda83cc9da935892292e3f9"
+      },
+      {
+        "baselineFingerprint": "c2df7d46ea281d2474e13e29ebd220211ab488bf81c3bf98bb0d461cc8a65fd6",
+        "fingerprint": "44ed91388a6bb5643564e75490c0ae16b1b540159d18da9b90cf954f791fa289",
+        "id": "sonar-pulse",
+        "pngSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+        "sourceSHA256": "5e899f4b082e4d4ddf9fd8df9ae8cb8da126cb39155e89217f7d2569f00bb920"
+      },
+      {
+        "baselineFingerprint": "3e3bb6673473131ce94bb8e21906e735c1e72709c747d43ad0039a04ddb52066",
+        "fingerprint": "bd643ddfc591a8a58956258a1760624b23cb9808205d0265a8db813272882f78",
+        "id": "ember-drift",
+        "pngSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+        "sourceSHA256": "5f103693b682c695046c3cdd987b60a6c60ed7de00c645cd9d268cc591c4a488"
+      },
+      {
+        "baselineFingerprint": "49424e4fe0a91da1d498b206e8b4d70cbf148a10b016534a8f9945cfda8ad125",
+        "fingerprint": "fa5f15a875050d1323cfc4a59f40b486af3ffc89d3e5d47fb651220afbbebba7",
+        "id": "sunlit-shallows",
+        "pngSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+        "sourceSHA256": "5ff3f1ef5ee597fc335a8a5106230e01816ddfbf2e9a2dbeb8b6638709f0a284"
+      },
+      {
+        "baselineFingerprint": "d5049ec06a8c99bbe578ec6e29bb9c7cc86079c1588a9128b6fe04a24e2eeabd",
+        "fingerprint": "bfdd52e7ac9e243f658806d609cb3baf199de063728d506edb88ca06da12c40d",
+        "id": "fireworks",
+        "pngSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+        "sourceSHA256": "a5a03cf2790acde02efe41e152cd7f48732d6b11b17b67d7b1e996b4bb82e997"
+      },
+      {
+        "baselineFingerprint": "0db64d326a5f51912f77e06982ca390c85721893d305ed3dc4dd33ab3bd7275f",
+        "fingerprint": "3bb3b249310b51c066ee056c2d3ece3465881cfec51991547593ef5f9071ac2b",
+        "id": "dramamine-sunset",
+        "pngSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+        "sourceSHA256": "ea9c999f0782e816441a8e185fdb2de981cba5f29b993b748f39305e2a52b6f5"
+      },
+      {
+        "baselineFingerprint": "3bcc072232835e3c984fa8e5c89190285edcf6d4fe324441f8500a9c884047a4",
+        "fingerprint": "ff93964e1389283a6dc418347531f4c58a914c17ee0b77ba92772c249bd724fb",
+        "id": "evening-and-morning",
+        "pngSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+        "sourceSHA256": "acee9168ac671359d8a06110f67c36cc737378974898432b8a62674e961401e7"
+      },
+      {
+        "baselineFingerprint": "9ab12171ce1ca047d527f2252ff9f3f2344fed47e519c2a13aa26979309fd55b",
+        "fingerprint": "8b8591735b2a88612d5e9f6c7b65b7c241129a36885b21323a6e1c9bd0e877a2",
+        "id": "green-caresses",
+        "pngSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+        "sourceSHA256": "81ce2a4a1054d790516a6110f97f71acc78750db58916b8fcc936e24e82feefd"
+      },
+      {
+        "baselineFingerprint": "dc9d01b91fe9136b84445ce2bd74094efaad0577b7cd74f41f91901d3a844ff5",
+        "fingerprint": "458fee2ae2edac55062f992a9bd838e23908dd350ae9e3927ccc4ce004330f8f",
+        "id": "orange-flow",
+        "pngSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+        "sourceSHA256": "7359e9d8490fdae5502ba3a62cdb801b776c5e7891f67082338a232f62195191"
+      },
+      {
+        "baselineFingerprint": "9a7b34c5409fad35dfebe8f86c2e1ace191d84054020d2ac45769011910d1f4c",
+        "fingerprint": "f6e3c6bf21005cd21466df3fbe6a21c83811e059f751d6a50e291a0a64092148",
+        "id": "side-view-of-the-ocean",
+        "pngSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+        "sourceSHA256": "dd7ef26caae595332a47607c9624aee923c343fb824b540dcd3911a26d67542a"
+      }
+    ],
+    "regeneratedPreviews": 23,
+    "schemaVersion": 1,
+    "settings": {
+      "height": 720,
+      "pixelFormat": "bgra8Unorm_srgb",
+      "time": 3,
+      "width": 1280
+    }
+  },
+  "sourceIdentity": "Final working-tree inputs are identified by implementationFilesSHA256; baselineHead identifies the comparison commit.",
+  "tests": {
+    "command": "HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py' -v",
+    "dimensionChecks": "Five valid boundaries and eleven invalid dimension pairs, including Int.min/Int.max and pixel-limit overflow; initializer exercised directly.",
+    "directRendererInvalidTimes": [
+      "negative",
+      "NaN",
+      "positive infinity",
+      "negative infinity"
+    ],
+    "emptyRenderArrayPreserved": true,
+    "halfLiteral005Value": 0.04998779296875,
+    "invalidRenderJSONCases": 11,
+    "laterRendererEditsAreObserved": true,
+    "logSHA256": "851f141a8d5eef266dfa16646cd9cb000ee0e66c29ab7acad04cff22a5e1fe50",
+    "matrixSeedOracleCases": 196000,
+    "noPartialFramesWritten": true,
+    "nonobjectProbeResultsProduceLabeledAssertions": true,
+    "parserSuffixes": [
+      "f",
+      "F",
+      "h",
+      "H"
+    ],
+    "passed": 59,
+    "rendererBoundaryOnlyChangesInvalidatePreview": true,
+    "rendererReadsPerCatalogOperation": 2,
+    "skipped": 0,
+    "standaloneShaderEntryFingerprintMatches": true,
+    "validUniformTimes": [
+      0,
+      3.25
+    ]
+  },
+  "unverifiedRequirements": [
+    "Physical Apple TV playback and performance",
+    "Minimum supported OS playback",
+    "Continuous long-duration uptime; the app offset is a source fixture",
+    "Sustained app frame rate"
+  ],
+  "verifiedDate": "2026-10-11"
+}

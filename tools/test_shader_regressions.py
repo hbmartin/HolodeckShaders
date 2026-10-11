@@ -22,7 +22,8 @@ FRAGMENT_COLOR = "float3 color = shade(p, u.time, in.position.xy);"
 BOUNCE_CALL = "float3 centre = laneCentres[k] + hdBounceInBox(starts[k], speeds[k], bounceHalf, t);"
 AVAILABLE_EXTENT = "kRoomHalf - abs(laneCentres[k]) - bound - kRoomClearance"
 GEOMETRY_TOLERANCE = 1e-5
-FLOAT_LITERAL = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+# Metal suffixes require a decimal point or exponent; plain integers remain valid.
+FLOAT_LITERAL = r"[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)[fFhH]?|[+-]?\d+"
 
 
 def require_one(count, purpose):
@@ -51,10 +52,19 @@ def values(text, count, name):
     parts = [part.strip() for part in text.split(",")]
     if len(parts) != count or any(not re.fullmatch(FLOAT_LITERAL, part) for part in parts):
         raise AssertionError(f"Invalid scene data {name}: expected {count} numeric literals")
-    result = tuple(float(part) for part in parts)
+    result = []
+    for part in parts:
+        suffix = part[-1] if part[-1] in "fFhH" else ""
+        value = float(part[:-1] if suffix else part)
+        if suffix in ("h", "H"):
+            try:
+                value = struct.unpack("e", struct.pack("e", value))[0]
+            except OverflowError as error:
+                raise AssertionError(f"Invalid scene data {name}: half literal out of range") from error
+        result.append(value)
     if not all(math.isfinite(value) for value in result):
         raise AssertionError(f"Invalid scene data {name}: values must be finite")
-    return result
+    return tuple(result)
 
 
 def array_pattern(kind, name):
@@ -90,15 +100,16 @@ def unclamped(source):
 
 
 def invalid_lane(source, kind, extent):
+    lanes = vectors(source, "laneHalves")
     if kind == "lane":
-        lanes = vectors(source, "laneHalves")
         lanes[2] = (lanes[2][0], extent, lanes[2][2])
         declaration = "float3 laneHalves[4] = {" + ", ".join(
             "float3(" + ", ".join(str(value) for value in lane) + ")" for lane in lanes) + "};"
         return sub_once(source, array_pattern("float3", "laneHalves"), lambda _: declaration, "Mutate octahedron lane")
     if kind == "available":
         return replace_once(source, AVAILABLE_EXTENT,
-                            f"(k == 2 ? float3({extent}) : {AVAILABLE_EXTENT})", "Mutate available extent")
+                            f"(k == 2 ? float3({lanes[2][0]}, {extent}, {lanes[2][2]}) : {AVAILABLE_EXTENT})",
+                            "Mutate available extent")
     raise AssertionError(f"Unknown invalid extent fixture: {kind}")
 
 
@@ -148,6 +159,7 @@ class MetalProbeCase(unittest.TestCase):
         samples_path.write_text(json.dumps(samples))
         subprocess.run([str(self.probe), mode, str(source_path), str(samples_path), str(output_path)], check=True)
         result = json.loads(output_path.read_text())
+        self.assertIsInstance(result, dict, f"{label}: probe result must be an object")
         if mode == "render":
             self.assertIsInstance(result.get("frames"), list, f"{label}: missing render frames")
             self.assertEqual(len(result["frames"]), len(samples), f"{label}: render frame count")
@@ -161,6 +173,20 @@ class MetalProbeCase(unittest.TestCase):
 
 
 class RegressionHarnessTests(unittest.TestCase):
+    def test_scene_parsers_accept_metal_suffixes_and_half_rounding(self):
+        half = struct.unpack("e", struct.pack("e", 0.05))[0]
+        for literal, expected in (("0.05f", 0.05), (".05F", 0.05), ("5e-2f", 0.05),
+                                  ("0.05h", half), ("5e-2H", half), ("1.F", 1.0)):
+            with self.subTest(literal=literal):
+                self.assertEqual(scalar_constant(f"constant float clearance = {literal};", "clearance"), expected)
+                self.assertEqual(vector_constant(f"constant float3 room = float3({literal}, 2, 3);", "room"), (expected, 2, 3))
+                self.assertEqual(scalar_array(f"float sizes[4] = {{{literal}, 2, 3, 4}};", "sizes"), (expected, 2, 3, 4))
+                source = "float3 lanes[4] = {" + ", ".join([f"float3({literal}, 2, 3)"] * 4) + "};"
+                self.assertEqual(vectors(source, "lanes"), [(expected, 2, 3)] * 4)
+        for literal in ("1f", "1h", "0.05ff", "0.05hf", "1eH", "1e999f", "1e10h"):
+            with self.subTest(literal=literal), self.assertRaisesRegex(AssertionError, "Invalid scene data"):
+                scalar_constant(f"constant float clearance = {literal};", "clearance")
+
     def test_source_edits_reject_missing_and_duplicate_anchors(self):
         for edit in (lambda source: replace_once(source, "anchor", "replacement", "Fixture anchor"),
                      lambda source: sub_once(source, r"anchor", "replacement", "Fixture anchor")):
@@ -170,9 +196,8 @@ class RegressionHarnessTests(unittest.TestCase):
                     edit(source)
         wrapper = (catalog.ROOT / "shared/fragment.metal").read_text()
         drifted = replace_once(wrapper, "clamp(color,", "clamp( color,", "Simulate wrapper drift")
-        with patch.object(subprocess, "run") as run, self.assertRaisesRegex(AssertionError, "Remove fragment clamp"):
+        with self.assertRaisesRegex(AssertionError, "Remove fragment clamp"):
             unclamped(drifted)
-        run.assert_not_called()
 
     def test_scene_parsers_reject_missing_malformed_and_wrong_length_data(self):
         vector_data = "float3 lanes[4] = {float3(1, 2, 3), float3(4, 5, 6), float3(7, 8, 9), float3(10, 11, 12)};"
@@ -229,6 +254,18 @@ class RegressionHarnessTests(unittest.TestCase):
                 case.run_probe("empty", "render", "source", [])
             run.assert_not_called()
 
+    def test_nonobject_probe_results_fail_with_label(self):
+        with tempfile.TemporaryDirectory() as directory:
+            case = MetalProbeCase()
+            case.root, case.probe = Path(directory), Path(directory) / "probe"
+            for mode in ("render", "compute"):
+                for payload in (None, [], 42):
+                    def simulate_probe(args, check):
+                        Path(args[4]).write_text(json.dumps(payload))
+                    with self.subTest(mode=mode, payload=payload), patch.object(subprocess, "run", side_effect=simulate_probe):
+                        with self.assertRaisesRegex(AssertionError, "bad-shape: probe result must be an object"):
+                            case.run_probe("bad-shape", mode, "source", [0])
+
     def test_compile_failure_still_runs_class_cleanup(self):
         class FailingProbe(MetalProbeCase):
             def test_unused(self):
@@ -245,6 +282,90 @@ class RegressionHarnessTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("HOLODECK_GPU_TESTS") == "1", "Opt in to actual Metal shader regression probes")
 class MetalSceneRegressionTests(MetalProbeCase):
+
+    def test_render_probe_rejects_invalid_times_before_any_output(self):
+        source_path = self.root / "time-validation.metal"
+        source_path.write_text(catalog.shader_entry("plasma")[1])
+        payloads = ("[-1]", "[NaN]", "[Infinity]", "[-Infinity]", "[true]", "[false]", '["3"]',
+                    "[1e39]", "[0, 3.25, -1]", "[0, true]", "[0, 1e39]")
+        for index, payload in enumerate(payloads):
+            samples_path = self.root / f"invalid-times-{index}.json"
+            output_path = self.root / f"invalid-times-{index}.result.json"
+            samples_path.write_text(payload)
+            with self.subTest(payload=payload):
+                result = subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output_path)],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn("Invalid", result.stderr)
+                self.assertFalse(output_path.exists())
+                self.assertFalse(list(self.root.glob(f"invalid-times-{index}.result.*.rgba32")))
+        samples_path = self.root / "empty-times.json"
+        output_path = self.root / "empty-times.result.json"
+        samples_path.write_text("[]")
+        subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output_path)], check=True)
+        self.assertEqual(json.loads(output_path.read_text())["frames"], [])
+
+    def test_shared_renderer_and_cli_validate_time_and_dimensions(self):
+        driver_source = self.root / "validation-driver.swift"
+        driver_source.write_text("""
+import Foundation
+import Metal
+@main enum ValidationDriver {
+    static func main() { runTool { try run() } }
+    static func reject(_ expected: String, _ body: () throws -> Void) throws {
+        do { try body() }
+        catch let error as ToolError {
+            guard error.description == expected else { throw error }
+            return
+        }
+        throw ToolError("Expected rejection: \\(expected)")
+    }
+    static func run() throws {
+        for (width, height) in [(1, 1), (8192, 1), (1, 8192), (4096, 4096), (8192, 2048)] {
+            try validateRenderDimensions(width: width, height: height)
+        }
+        let invalid = [(0, 1, "Invalid width"), (-1, 1, "Invalid width"), (8193, 1, "Invalid width"),
+                       (Int.max, 1, "Invalid width"), (Int.min, 1, "Invalid width"),
+                       (1, 0, "Invalid height"), (1, -1, "Invalid height"), (1, 8193, "Invalid height"),
+                       (1, Int.max, "Invalid height"), (1, Int.min, "Invalid height"),
+                       (4097, 4096, "Render exceeds 16 megapixels")]
+        let context = try MetalContext(sourcePath: CommandLine.arguments[1])
+        for (width, height, message) in invalid {
+            try reject(message) { try validateRenderDimensions(width: width, height: height) }
+            try reject(message) { _ = try OffscreenRenderer(context: context, width: width, height: height, pixelFormat: .rgba32Float) }
+        }
+        let renderer = try OffscreenRenderer(context: context, width: 1, height: 1, pixelFormat: .rgba32Float)
+        for time: Float in [-1, .nan, .infinity, -.infinity] {
+            try reject("Invalid time") { _ = try renderer.render(time: time) }
+        }
+        for time: Float in [0, 3.25] { _ = try renderer.render(time: time) }
+        print("Shared renderer validation passed")
+    }
+}
+""")
+        driver = self.root / "validation-driver"
+        subprocess.run(["xcrun", "swiftc", "-parse-as-library", str(catalog.ROOT / "tools/metal-render-support.swift"),
+                        str(driver_source), "-o", str(driver)], check=True)
+        metal_path = self.root / "validation.metal"
+        metal_path.write_text(catalog.shader_entry("plasma")[1])
+        subprocess.run([str(driver), str(metal_path)], check=True)
+        preview = self.root / "preview"
+        catalog.compile_renderer("render-preview.swift", preview)
+        options = [("--width", "0", "Invalid width"), ("--width", "8193", "Invalid width"),
+                   ("--width", str(2**63 - 1), "Invalid width"), ("--width", "text", "Invalid width"),
+                   ("--height", "0", "Invalid height"), ("--height", "text", "Invalid height")]
+        options += [("--time", time, "Invalid time") for time in ("-1", "nan", "inf", "-inf", "true", "1e39")]
+        for option, value, message in options:
+            with self.subTest(option=option, value=value):
+                result = subprocess.run([str(preview), str(self.root / "missing.metal"), str(self.root / "invalid.png"),
+                                         option, value], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(result.stderr.strip(), message)
+        result = subprocess.run([str(preview), str(self.root / "missing.metal"), str(self.root / "invalid.png"),
+                                 "--width", "4097", "--height", "4096"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stderr.strip(), "Render exceeds 16 megapixels")
+        self.assertFalse((self.root / "invalid.png").exists())
 
     def test_actual_matrix_seed_sequence_through_one_year(self):
         source = catalog.shader_entry("matrix-corridor")[1]
@@ -296,13 +417,15 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
                     variant = invalid_lane(source, kind, extent)
                     actual = self.run_probe(f"invalid-{kind}-{extent}", "render", variant, times)
                     self.assert_render_equal(actual, expected)
-                    # The fixture must detect removal of the real guard, even if
-                    # intersection math might otherwise conceal invalid values.
-                    no_guard = replace_once(variant, "if (any(bounceHalf <= 0.0)) continue;", "",
-                                            "Remove real geometry guard negative control")
-                    control = self.run_probe(f"invalid-{kind}-{extent}-no-guard", "render", no_guard, times)
-                    with self.assertRaises(AssertionError):
-                        self.assert_render_equal(control, expected)
+                    # Every fixture must distinguish one invalid axis from all axes,
+                    # and catch guard removal even if later math conceals invalid values.
+                    for mutation, replacement in (("no-guard", ""), ("all", "if (all(bounceHalf <= 0.0)) continue;")):
+                        with self.subTest(mutation=mutation):
+                            mutated = replace_once(variant, "if (any(bounceHalf <= 0.0)) continue;", replacement,
+                                                   "Mutate real geometry guard negative control")
+                            control = self.run_probe(f"invalid-{kind}-{extent}-{mutation}", "render", mutated, times)
+                            with self.assertRaises(AssertionError):
+                                self.assert_render_equal(control, expected)
         print(f"Metal invalid lanes: zero/negative authored and available extents skip the bounce call on {actual['device']}", flush=True)
 
     def test_nan_diagnostic_is_visible_before_fragment_clamp(self):

@@ -11,6 +11,16 @@ func runTool(_ body: () throws -> Void) {
     catch { fputs("\(error)\n", stderr); exit(1) }
 }
 
+func validateRenderDimensions(width: Int, height: Int) throws {
+    guard (1...8192).contains(width) else { throw ToolError("Invalid width") }
+    guard (1...8192).contains(height) else { throw ToolError("Invalid height") }
+    guard width * height <= 16_777_216 else { throw ToolError("Render exceeds 16 megapixels") }
+}
+
+func validateRenderTime(_ time: Float) throws {
+    guard time.isFinite, time >= 0 else { throw ToolError("Invalid time") }
+}
+
 // Buffer 0 matches ShaderUniforms in shared/common.metal.
 struct Uniforms {
     var resolution: SIMD2<Float>
@@ -59,9 +69,7 @@ final class OffscreenRenderer {
     private let bytesPerRow: Int
 
     init(context: MetalContext, width: Int, height: Int, pixelFormat: MTLPixelFormat) throws {
-        guard (1...8192).contains(width), (1...8192).contains(height), width * height <= 16_777_216 else {
-            throw ToolError("Invalid render dimensions or render exceeds 16 megapixels")
-        }
+        try validateRenderDimensions(width: width, height: height)
         let bytesPerPixel: Int
         switch pixelFormat {
         case .bgra8Unorm_srgb: bytesPerPixel = 4
@@ -91,6 +99,7 @@ final class OffscreenRenderer {
     }
 
     func render(time: Float) throws -> RenderedFrame {
+        try validateRenderTime(time)
         let pass = MTLRenderPassDescriptor()
         pass.colorAttachments[0].texture = texture
         pass.colorAttachments[0].loadAction = .clear

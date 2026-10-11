@@ -4,8 +4,8 @@
   "kind": "recipe",
   "name": "Ember Sparks",
   "origin": {
-    "attribution": "Jan Mr\u00f3z (jaszunio15), \"Sparks from fire\" (https://www.shadertoy.com/view/wl2Gzc), via Alex Sherwin's Ghostty adaptation; adapted in shaders/ember-drift",
-    "license": "CC BY 3.0 (derived from Jan Mr\u00f3z \"Sparks from fire\" wl2Gzc) \u2014 keep attribution when adapting",
+    "attribution": "Jan Mr\u00f3z (jaszunio15), \"Sparks from fire\" (https://www.shadertoy.com/view/wl2Gzc), via Alex Sherwin's Ghostty adaptation; adapted in shaders/ember-drift; hash adaptations after David Hoskins (https://www.shadertoy.com/view/4djSRW), see references/hoskins-hash",
+    "license": "CC BY 3.0 (derived from Jan Mr\u00f3z \"Sparks from fire\" wl2Gzc) \u2014 keep attribution when adapting; hash functions MIT (Copyright (c) 2014 David Hoskins)",
     "shaderIDs": [
       "ember-drift"
     ]

@@ -21,12 +21,12 @@ Canonical source: `snippets/rune-glyph/code.metal`. Example: `snippets/rune-glyp
 ## Tuning
 
 - Change the stroke width with `smoothstep(w, 0.0, d)`; 0.06–0.15 reads well.
-- Animate by bumping the seed on a timer (`floor(t * rate)`, wrapped) for flickering code.
+- Animate by bumping the seed on a bounded timer for flickering code. Wrap time before multiplying; choose a period whose product with the rate is a multiple of the 4096-seed period. The example's 1.5 Hz rate wraps at 8192 seconds. Matrix Corridor uses rates quantized to 1/32 Hz and a 131072-second clock independent of its camera route, with integer whole-tick arithmetic.
 - Change `float4(2, 3, 2, 3)` to snap to a different grid (for example 3×3 for denser symbols); remove the forced edges for sparser, smaller glyphs.
 
 ## Limitations
 
-Point-sampled: glyphs smaller than about 8 pixels alias and shimmer. Strokes can coincide, and about 1 in 50 seeds produces a sparse glyph. The glyph set is random, not a designed alphabet.
+Point-sampled: glyphs smaller than about 8 pixels alias and shimmer. Strokes can coincide, and about 1 in 50 seeds produces a sparse glyph. The glyph set is random, not a designed alphabet. Bounded timer arithmetic cannot restore precision already lost in the incoming float time uniform; long-uptime samples do not establish smooth continuous playback.
 
 ## Cost
 
@@ -35,3 +35,5 @@ Estimate: four 4-output hashes and four segment distances per evaluation (about 
 ## Reuse and origin
 
 Derived from "runes" by FabriceNeyret2 (https://www.shadertoy.com/view/4ltyDM), based on "runes" by otaviogood (https://shadertoy.com/view/MsXSRn), with the segment distance from https://www.shadertoy.com/view/4dcfW8, as modified in the ghostty-shaders `inside-the-matrix.glsl` (@pkazmier). Licensed CC BY-NC-SA 3.0 (Shadertoy default for this lineage): adaptations must keep that license and these credits. The sin-based hash was replaced with a Hoskins hash. Copy and adapt recipe functions; shared helpers remain canonical. Compile and render the example after changes. See `docs/shader-authoring.md` for the runtime and publication contract.
+
+The hash adaptation also uses David Hoskins' "Hash without Sine", MIT, Copyright (c) 2014 David Hoskins; see `references/hoskins-hash`. Retain its complete notice with the hash code.

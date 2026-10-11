@@ -35,3 +35,5 @@ Measured: the four-layer spark loop in `shaders/ember-drift` costs about 1.8 ms 
 ## Reuse and origin
 
 Derived from "Sparks from fire" by Jan Mróz (jaszunio15), https://www.shadertoy.com/view/wl2Gzc, CC BY 3.0, via Alex Sherwin's Ghostty adaptation (`sparks-from-fire.glsl`). Keep the attribution when adapting. Copy and adapt recipe functions; shared helpers remain canonical. Compile and render the example after changes. See `docs/shader-authoring.md` for the runtime and publication contract.
+
+The hash adaptation also uses David Hoskins' "Hash without Sine", MIT, Copyright (c) 2014 David Hoskins; see `references/hoskins-hash`. Retain its complete notice with the hash code.

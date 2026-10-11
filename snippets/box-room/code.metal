@@ -12,6 +12,7 @@ float4 hdRoomHit(float3 ro, float3 rd, float3 halfExtents) {
 
 // Triangle-wave bounce path inside +/-halfExtents. start is the position at t = 0 (inside the box), velocity in
 // units per second. Whole and fractional seconds are wrapped separately to keep long-running phases precise.
+// halfExtents must be strictly positive on every axis; start must be inside the box.
 float3 hdBounceInBox(float3 start, float3 velocity, float3 halfExtents, float t) {
     float3 rate = velocity / (4.0 * halfExtents);
     float whole = floor(t);

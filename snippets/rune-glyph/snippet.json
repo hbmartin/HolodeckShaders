@@ -4,8 +4,8 @@
   "kind": "recipe",
   "name": "Rune Glyph",
   "origin": {
-    "attribution": "\"runes\" by FabriceNeyret2 (https://www.shadertoy.com/view/4ltyDM), based on \"runes\" by otaviogood (https://shadertoy.com/view/MsXSRn); segment distance from https://www.shadertoy.com/view/4dcfW8; as modified in ghostty-shaders inside-the-matrix.glsl (@pkazmier); adapted in shaders/matrix-corridor",
-    "license": "CC BY-NC-SA 3.0 (derived from Shadertoy 4ltyDM / MsXSRn lineage) \u2014 adaptations must keep this license and these credits",
+    "attribution": "\"runes\" by FabriceNeyret2 (https://www.shadertoy.com/view/4ltyDM), based on \"runes\" by otaviogood (https://shadertoy.com/view/MsXSRn); segment distance from https://www.shadertoy.com/view/4dcfW8; as modified in ghostty-shaders inside-the-matrix.glsl (@pkazmier); adapted in shaders/matrix-corridor; hash adaptations after David Hoskins (https://www.shadertoy.com/view/4djSRW), see references/hoskins-hash",
+    "license": "CC BY-NC-SA 3.0 (derived from Shadertoy 4ltyDM / MsXSRn lineage) \u2014 adaptations must keep this license and these credits; hash functions MIT (Copyright (c) 2014 David Hoskins)",
     "shaderIDs": [
       "matrix-corridor"
     ]

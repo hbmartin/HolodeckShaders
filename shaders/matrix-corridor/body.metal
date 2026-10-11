@@ -1,3 +1,26 @@
+// MIT notice for Dave Hoskins, "Hash without Sine" (https://www.shadertoy.com/view/4djSRW):
+// MIT License
+//
+// Copyright (c) 2014 David Hoskins.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 // "Inside the Matrix" (ghostty-shaders "inside-the-matrix.glsl", modified for Ghostty by @pkazmier)
 // https://github.com/0xhckr/ghostty-shaders/blob/85898f08fcf4a9274e418912098e99e00a5f8350/inside-the-matrix.glsl
 // The original Shadertoy author is not named in that file. Its header states:
@@ -9,7 +32,8 @@
 // Adapted for Holodeck: terminal blending and mouse look removed; aspect-correct view rays; the
 // 300 s time reset (which made the camera jump) replaced by a wrap at the full 1920 s route period,
 // with fall speeds quantized to 0.1, z-cell hashes wrapped mod 16 and symbol indices wrapped mod 640
-// so camera and rain positions repeat; glyphs use an independent clock across route wraps;
+// so camera and rain positions repeat; glyphs use an independent 131072 s clock with rates
+// quantized to 1/16 scene units (1/32 Hz), preserving seed continuity across both clocks' wraps;
 // sin hashes replaced by Hoskins hashes on bounded inputs; one
 // strip line per column instead of one per z-cell; 16 branchless DDA steps (was 40) with distance
 // fog; route start offset 100 s; full brightness (was 0.25) with an sRGB-style decode.
@@ -63,9 +87,33 @@ float hdRuneDistance(float2 uv, float2 seed) {
     return d;
 }
 
+// A bounded clock independent of the camera route. Wrapping cannot restore precision
+// already lost in the incoming float time uniform.
+float hdMxGlyphPhase(float t) {
+    return fmod(t + 100.0, 131072.0) * (1.0 / 32.0);
+}
+
+// rateSteps is 1..80, giving rateSteps/32 glyph changes per real second.
+// Each clock wrap advances 4096*rateSteps ticks, so this seed remains continuous.
+// Evaluate floor(fract(glyphPhase)*rateSteps) exactly from the float's significand:
+// a rounded float product can otherwise advance a seed just before its boundary.
+// The 24-bit significand times at most 80 fits in 31 bits. Fractions with exponent
+// below 119 are too small to reach one tick; this also avoids shifts of 32 or more.
+uint hdMxGlyphSeed(float glyphPhase, uint rateSteps) {
+    uint whole = uint(floor(glyphPhase));
+    uint bits = as_type<uint>(fract(glyphPhase));
+    uint exponent = (bits >> 23u) & 255u;
+    uint partial = 0u;
+    if (exponent >= 119u) {
+        uint significand = (bits & 0x7fffffu) | 0x800000u;
+        partial = (significand * rateSteps) >> (150u - exponent);
+    }
+    return (whole * rateSteps + partial) & 4095u;
+}
+
 // Digital rain seen along a ray. xy horizontal, z vertical. time wraps the rain positions;
-// glyphTime continues across route wraps, with only the hash seed reduced below 4096.
-float3 hdMxRain(float3 ro, float3 rd, float time, float glyphTime) {
+// glyphPhase wraps independently and preserves the modulo-4096 seed sequence.
+float3 hdMxRain(float3 ro, float3 rd, float time, float glyphPhase) {
     float4 result = float4(0.0);
     float2 ro2 = ro.xy;
     float t3ToT2 = max(length(rd.xy), 1e-4);
@@ -120,8 +168,9 @@ float3 hdMxRain(float3 ro, float3 rd, float time, float glyphTime) {
         float2 charHash = hdMxHash22(float2(idx - 640.0 * floor(idx / 640.0), ch2.x * 97.0));
         if (charHash.x < 0.1 && k != 0.0) continue;   // 10% missing symbols
         float rate = k == 0.0 ? 1.0 : ch2.z + ch2.w * ch2.w * 4.0 * pow(charHash.y, 4.0);
-        float tf = floor(glyphTime * rate);
-        float d = hdRuneDistance(float2(u, q), float2(floor(charHash.x * 1024.0), tf - 4096.0 * floor(tf / 4096.0)));
+        uint rateSteps = uint(clamp(floor(rate * 16.0 + 0.5), 1.0, 80.0));
+        uint tick = hdMxGlyphSeed(glyphPhase, rateSteps);
+        float d = hdRuneDistance(float2(u, q), float2(floor(charHash.x * 1024.0), float(tick)));
         float highlight = max(1.0, 3.0 - k * 0.5) * 0.2;
         float a = smoothstep(0.1, 0.0, d) + highlight * smoothstep(0.4, 0.0, d);
         a = min(a * clamp((count - 0.5 - k) * 0.5, 0.0, 1.0), 1.0);
@@ -151,7 +200,7 @@ float3 shade(float2 p, float t, float2 pixel) {
     const float period = 1920.0;                     // seconds for one full walk of the route
     float tw = t + 100.0;                            // start somewhere scenic
     float time = (tw - period * floor(tw / period)) * 0.5;   // SPEED
-    float glyphTime = tw * 0.5;                      // glyph updates continue across route wraps
+    float glyphPhase = hdMxGlyphPhase(t);            // independent, seamless modulo-4096 clock
 
     const float turnRad = 0.25 / 3.0;
     const float turnAbsTime = (hdMxPI / 2.0 * turnRad) * 1.5;
@@ -230,6 +279,6 @@ float3 shade(float2 p, float t, float2 pixel) {
     rd = normalize(rd);
     ro += rd * 0.2;
 
-    float3 col = hdMxRain(ro, rd, time, glyphTime);
+    float3 col = hdMxRain(ro, rd, time, glyphPhase);
     return col * col;
 }

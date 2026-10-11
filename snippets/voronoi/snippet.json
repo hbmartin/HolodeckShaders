@@ -4,8 +4,8 @@
   "kind": "recipe",
   "name": "Voronoi F1/F2",
   "origin": {
-    "attribution": "Adapted from SwiftShaders by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91, Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal); used in shaders/sunlit-shallows",
-    "license": "MIT (Copyright (c) 2024 Muhittin Camdali) \u2014 keep the copyright notice when adapting",
+    "attribution": "Adapted from SwiftShaders by Muhittin Camdali (https://github.com/muhittincamdali/SwiftShaders, commit 4acb3a91, Sources/SwiftShaders/Shaders/Voronoi/VoronoiShader.metal); used in shaders/sunlit-shallows; hash adaptations after David Hoskins (https://www.shadertoy.com/view/4djSRW), see references/hoskins-hash",
+    "license": "MIT (Copyright (c) 2024 Muhittin Camdali) \u2014 keep the copyright notice when adapting; hash functions MIT (Copyright (c) 2014 David Hoskins)",
     "shaderIDs": [
       "sunlit-shallows"
     ]

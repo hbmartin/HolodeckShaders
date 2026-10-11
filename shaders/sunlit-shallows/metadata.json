@@ -32,7 +32,8 @@
   "reuse": {
     "references": [
       "ghostty-shaders",
-      "swiftshaders"
+      "swiftshaders",
+      "hoskins-hash"
     ],
     "snippets": [
       "voronoi",

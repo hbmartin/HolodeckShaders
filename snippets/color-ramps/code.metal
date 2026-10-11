@@ -1,10 +1,3 @@
-// Heat ramp after Inferno "Infrared"; HSL conversions after Inferno "Shimmer"
-// (bwhtmn, after markiv/SwiftUI-Shimmer), https://github.com/twostraws/Inferno
-// Copyright (c) 2023 Paul Hudson and other authors (Inferno), MIT License.
-// Changes: float maths, branchless heat ramp, hue wrapped into [0, 1).
-// hdHsvToRgb is the widely used branchless HSV conversion.
-
-// Blue (0) -> yellow (0.5) -> red (1). Input is clamped to [0, 1].
 // MIT notice for inferno (preserved from upstream):
 // Copyright (c) 2023 Paul Hudson and other authors.
 //
@@ -26,6 +19,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// Heat ramp after Inferno "Infrared"; HSL conversions after Inferno "Shimmer"
+// (bwhtmn, after markiv/SwiftUI-Shimmer), https://github.com/twostraws/Inferno
+// Copyright (c) 2023 Paul Hudson and other authors (Inferno), MIT License.
+// Changes: float maths, branchless heat ramp, hue wrapped into [0, 1).
+// hdHsvToRgb is the widely used branchless HSV conversion.
+
+// Blue (0) -> yellow (0.5) -> red (1). Input is clamped to [0, 1].
 float3 hdHeatRamp(float x) {
     float s = clamp(x, 0.0, 1.0) * 2.0;
     float3 cold = float3(0.0, 0.0, 1.0), medium = float3(1.0, 1.0, 0.0), hot = float3(1.0, 0.0, 0.0);

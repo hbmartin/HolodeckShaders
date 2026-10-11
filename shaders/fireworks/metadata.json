@@ -31,7 +31,8 @@
   "reuse": {
     "references": [
       "bigwings-fireworks",
-      "ghostty-shaders"
+      "ghostty-shaders",
+      "hoskins-hash"
     ],
     "snippets": [
       "layered-stars"

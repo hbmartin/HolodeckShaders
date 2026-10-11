@@ -1,0 +1,29 @@
+{
+  "adaptationNotes": "Metal adaptations retain the original Hoskins MIT notice. NOTICE contains the Hoskins notice verified against David A Roberts' pinned WGSL port, not code from that port. The original Shadertoy page was unavailable to automated retrieval; no original implementation is imported here.",
+  "files": {},
+  "id": "hoskins-hash",
+  "language": "GLSL (original); notice verified via WGSL port",
+  "name": "Hash without Sine",
+  "origin": {
+    "author": "David Hoskins (Dave Hoskins)",
+    "license": "MIT (Copyright (c) 2014 David Hoskins)",
+    "noticeVerifiedFrom": "https://gist.github.com/davidar/5f9677a0ccfbd63d7a8657ad9af3a856/f3619046080c1f8ff07c54f6658ed215ef5f9638",
+    "url": "https://www.shadertoy.com/view/4djSRW"
+  },
+  "requirements": [
+    "Floating-point fract arithmetic; no textures or extra uniforms"
+  ],
+  "schemaVersion": 1,
+  "searchTerms": [
+    "Dave Hoskins",
+    "David Hoskins",
+    "hash21",
+    "hash12"
+  ],
+  "summary": "David Hoskins hash functions used by canonical common helpers and standalone Metal adaptations.",
+  "tags": [
+    "hash",
+    "noise",
+    "mit"
+  ]
+}

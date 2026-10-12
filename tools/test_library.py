@@ -103,8 +103,6 @@ class LibraryTests(unittest.TestCase):
         with patch.object(catalog, "renderer_fingerprint", wraps=catalog.renderer_fingerprint) as fingerprint, \
              patch.object(catalog, "shader_entry", wraps=catalog.shader_entry) as entry, \
              patch.object(catalog, "read_json", side_effect=count_read):
-            # A keyword-style read must work under the same validation spy.
-            self.assertEqual(catalog.read_json(path=self.root / "index.json"), read_json(self.root / "index.json"))
             items = library.validate()
         self.assertEqual(len(items), self.asset_count + 1)
         fingerprint.assert_called_once_with()

@@ -41,3 +41,23 @@ Fresh checks:
 Local command logs are stored in ignored `.cache/numeric-regression-fixes/`. GPU fixtures reuse the existing Holodeck Grid assembly and canonical shared renderer. Its related Box Room, Grid Lines and Hologram Rim assets and inspiration references remain unchanged; no new recipe or external reference code was copied. Public interfaces, Swift sources, production shaders and editorial selection are unchanged.
 
 App motion was not re-inspected for this test-only change. Physical Apple TV playback and performance, minimum supported OS playback, continuous long-duration uptime and sustained app frame rate remain unverified; the earlier app observations above are historical.
+
+## Numeric fixture cleanup verification — 2026-10-11
+
+These additional test-only changes were verified against baseline `e8dc13a8a83f02ad254ec6acf6af7a6263c72ba5` on Apple M2 Pro, macOS 27.0.1 (26A434), and Xcode 27.0 (27A266a). All earlier verification sections and JSON reports retain their original evidence.
+
+- Scene literals whose exponents exceed Decimal's construction limits now raise the existing labeled out-of-range assertion, retaining the original `InvalidOperation` as the cause. This policy rejects both extreme positive and extreme negative exponents; representable Decimal underflow continues rounding to signed zero. Thirty cases cover both exponent signs, unsigned/positive/negative mantissas, and absent, lowercase and uppercase float/half suffixes. `FLOAT_LITERAL` remains unchanged.
+- The exact overflow-message assertion now stays inside each literal's subtest. Temporary missing-exception and wrong-message mutations each produce one failure labeled `1e39f`, still attempt all 42 overflow cases, and produce no secondary errors. The new extreme-exponent regression reports 30 bare `InvalidOperation` errors when run against the reviewed parser, demonstrating the original failure class.
+- One fixture table supplies 35 literal rows and 105 signed CPU cases, preserving every prior midpoint/boundary case. Its explicit GPU-sign selection retains all fourteen prior compiled literals and adds uppercase `H` and `F` cases. Expected bits remain independently specified; the parser does not generate the oracle.
+- Scalar bit conversions use shared, explicit little-endian binary16/binary32 helpers, including adjacent-value probes. The `float32()` arithmetic oracle and native-order raw pixel packing retain their original implementations. GPU fixture compilation now uses `library.compile_source` for both SDKs.
+- Reported JSON times are checked numerically; pixel bytes independently verify the uniform's signed-zero bits. A temporary mutation clearing the encoded sign bit fails all three negative-zero render cases. The library test retains its keyword-compatible spy and one-read-per-shader assertions while removing the fixture-only keyword assertion.
+
+Fresh checks:
+
+- `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py' -v`: all 68 tests pass, with no skips. Sixteen literals match the explicit expected bits, Python parser and actual GPU-compiled constants, and the fixture compiles for macOS and tvOS through the canonical helper. Existing render/compute probes and the 196,000-case Matrix seed oracle pass.
+- `python3 tools/library.py validate --compile`: all 67 authoring assets validate and all 28 snippet examples compile for macOS and tvOS.
+- `python3 tools/catalog.py validate`: publication validation passes for all 23 selected shaders, including tvOS compilation. All 23 assembled-source hashes, preview fingerprints, preview JSON hashes and PNG hashes match the baseline captured before these edits; no previews were regenerated.
+
+Command logs, baseline publication hashes, tested module hashes and mutation results are stored in ignored `.cache/numeric-fixture-fixes/`. GPU fixtures reuse the existing Holodeck Grid assembly and canonical shared renderer, with the same related Box Room, Grid Lines and Hologram Rim assets and inspiration references. No new recipe or external reference code was copied. Public interfaces, Swift sources, production shaders and editorial selection are unchanged.
+
+App motion was not re-inspected for this test-only change. Physical Apple TV playback and performance, minimum supported OS playback, continuous long-duration uptime and sustained app frame rate remain unverified.

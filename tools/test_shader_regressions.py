@@ -7,15 +7,71 @@ import struct
 import subprocess
 import tempfile
 import unittest
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from unittest.mock import patch
 
 import catalog
+import library
 
 
 def float32(value):
     return struct.unpack("f", struct.pack("f", value))[0]
+
+
+FLOAT_FORMATS = {"float": ("<f", "<I"), "half": ("<e", "<H")}
+
+
+def float_bits(value, precision="float"):
+    float_format, bits_format = FLOAT_FORMATS[precision]
+    return struct.unpack(bits_format, struct.pack(float_format, value))[0]
+
+
+def bits_float(bits, precision="float"):
+    float_format, bits_format = FLOAT_FORMATS[precision]
+    return struct.unpack(float_format, struct.pack(bits_format, bits))[0]
+
+
+# Positive literal, independently specified IEEE bits, and signs compiled on GPU.
+# CPU tests exercise the unsigned, positive and negative forms of every row.
+LITERAL_CASES = (
+    ("1.0000000596046447f", 0x3f800000, ("",)),
+    ("1.000000059604644775390625f", 0x3f800000, ("",)),
+    ("1.0000000596046448f", 0x3f800001, ("", "-")),
+    ("1.000000178813934326171875f", 0x3f800002, ("",)),
+    ("0.0f", 0x00000000, ()),
+    ("1e-50f", 0x00000000, ()),
+    ("1e-400f", 0x00000000, ()),
+    ("1e-999f", 0x00000000, ()),
+    ("7.006492321624085e-46f", 0x00000000, ()),
+    ("7.006492321624085354618647916449580656401309709382578858785341419448955413429303"
+     "00743319094181060791015625e-46f", 0x00000000, ()),
+    ("7.006492321624086e-46f", 0x00000001, ()),
+    ("1e-45f", 0x00000001, ("",)),
+    ("3e-45f", 0x00000002, ()),
+    ("1.1754942106924411e-38f", 0x007fffff, ()),
+    ("1.1754943508222875e-38f", 0x00800000, ()),
+    ("340282346638528859811704183484516925440.0f", 0x7f7fffff, ()),
+    ("340282356779733661637539395458142568447.0f", 0x7f7fffff, ()),
+    ("3.4028235e38f", 0x7f7fffff, ("",)),
+    ("1.0000000596046448F", 0x3f800001, ("",)),
+    ("1.0004882812499999h", 0x3c00, ("",)),
+    ("1.00048828125h", 0x3c00, ("",)),
+    ("1.0004882812500001h", 0x3c01, ("", "-")),
+    ("1.00146484375h", 0x3c02, ("",)),
+    ("0.0h", 0x0000, ()),
+    ("1e-50h", 0x0000, ()),
+    ("1e-400h", 0x0000, ()),
+    ("0.0000000298023223876953124h", 0x0000, ()),
+    ("0.0000000298023223876953125h", 0x0000, ()),
+    ("0.0000000298023223876953126h", 0x0001, ()),
+    ("0.000000059604644775390625h", 0x0001, ("",)),
+    ("0.000060975551605224609375h", 0x03ff, ()),
+    ("0.00006103515625h", 0x0400, ()),
+    ("65504.0h", 0x7bff, ("",)),
+    ("65519.9999999999999999h", 0x7bff, ()),
+    ("1.0004882812500001H", 0x3c01, ("",)),
+)
 
 
 FRAGMENT_CLAMP = "return float4(clamp(color, 0.0, 1.0), 1.0);"
@@ -52,23 +108,27 @@ def scene_match(source, pattern, name):
 def literal_value(part, name):
     """Round an exact decimal directly to the literal's Metal storage precision."""
     suffix = part[-1] if part[-1] in "fFhH" else ""
-    decimal = Decimal(part[:-1] if suffix else part)
-    magnitude = decimal.copy_abs()
     if suffix in ("h", "H"):
-        precision, float_format, bits_format = "half", "<e", "<H"
+        precision = "half"
         largest_bits, sign_bit, next_power = 0x7bff, 0x8000, 2.0**16
     else:
-        precision, float_format, bits_format = "float", "<f", "<I"
+        precision = "float"
         largest_bits, sign_bit, next_power = 0x7f7fffff, 0x80000000, 2.0**128
+    range_message = f"Invalid scene data {name}: {precision} literal out of range ({part})"
+    try:
+        decimal_value = Decimal(part[:-1] if suffix else part)
+    except InvalidOperation as error:
+        raise AssertionError(range_message) from error
+    magnitude = decimal_value.copy_abs()
 
     def decode(bits):
-        return struct.unpack(float_format, struct.pack(bits_format, bits))[0]
+        return bits_float(bits, precision)
 
     # Adjacent binary16/32 values and their midpoints are exact in binary64.
     # At the overflow midpoint, ties-to-even selects the next power (infinity).
     overflow_midpoint = Decimal.from_float((decode(largest_bits) + next_power) / 2)
     if magnitude >= overflow_midpoint:
-        raise AssertionError(f"Invalid scene data {name}: {precision} literal out of range ({part})")
+        raise AssertionError(range_message)
 
     # Positive finite IEEE bit patterns increase monotonically with their values.
     lower, upper = 0, largest_bits
@@ -82,7 +142,7 @@ def literal_value(part, name):
         midpoint = Decimal.from_float((decode(lower) + decode(lower + 1)) / 2)
         if magnitude > midpoint or (magnitude == midpoint and lower & 1):
             lower += 1
-    return decode(lower | (sign_bit if decimal.is_signed() else 0))
+    return decode(lower | (sign_bit if decimal_value.is_signed() else 0))
 
 
 def values(text, count, name):
@@ -199,7 +259,7 @@ class MetalProbeCase(unittest.TestCase):
 
 class RegressionHarnessTests(unittest.TestCase):
     def test_scene_parsers_accept_metal_suffixes_and_half_rounding(self):
-        half = struct.unpack("e", struct.pack("e", 0.05))[0]
+        half = bits_float(0x2a66, "half")
         for literal, expected in (("0.05f", float32(0.05)), (".05F", float32(0.05)), ("5e-2f", float32(0.05)),
                                   ("0.05", float32(0.05)), ("0.05h", half), ("5e-2H", half), ("1.F", 1.0),
                                   ("2", 2.0), ("3.4028235e38f", float32(3.4028235e38)),
@@ -215,46 +275,13 @@ class RegressionHarnessTests(unittest.TestCase):
                 scalar_constant(f"constant float clearance = {literal};", "clearance")
 
     def test_scene_literals_round_exactly_at_midpoints_and_boundaries(self):
-        cases = {
-            ("<f", "<I", 0x80000000): (
-                ("1.0000000596046447f", 0x3f800000),
-                ("1.000000059604644775390625f", 0x3f800000),
-                ("1.0000000596046448f", 0x3f800001),
-                ("1.000000178813934326171875f", 0x3f800002),
-                ("0.0f", 0x00000000), ("1e-50f", 0x00000000),
-                ("1e-400f", 0x00000000), ("1e-999f", 0x00000000),
-                ("7.006492321624085e-46f", 0x00000000),
-                ("7.006492321624085354618647916449580656401309709382578858785341419448955413429303"
-                 "00743319094181060791015625e-46f", 0x00000000),
-                ("7.006492321624086e-46f", 0x00000001),
-                ("1e-45f", 0x00000001), ("3e-45f", 0x00000002),
-                ("1.1754942106924411e-38f", 0x007fffff),
-                ("1.1754943508222875e-38f", 0x00800000),
-                ("340282346638528859811704183484516925440.0f", 0x7f7fffff),
-                ("340282356779733661637539395458142568447.0f", 0x7f7fffff),
-            ),
-            ("<e", "<H", 0x8000): (
-                ("1.0004882812499999h", 0x3c00),
-                ("1.00048828125h", 0x3c00),
-                ("1.0004882812500001h", 0x3c01),
-                ("1.00146484375h", 0x3c02),
-                ("0.0h", 0x0000), ("1e-50h", 0x0000), ("1e-400h", 0x0000),
-                ("0.0000000298023223876953124h", 0x0000),
-                ("0.0000000298023223876953125h", 0x0000),
-                ("0.0000000298023223876953126h", 0x0001),
-                ("0.000000059604644775390625h", 0x0001),
-                ("0.000060975551605224609375h", 0x03ff),
-                ("0.00006103515625h", 0x0400),
-                ("65504.0h", 0x7bff), ("65519.9999999999999999h", 0x7bff),
-            ),
-        }
-        for (float_format, bits_format, sign_bit), literals in cases.items():
-            for literal, expected in literals:
-                for sign in ("", "-", "+"):
-                    with self.subTest(literal=sign + literal):
-                        value = values(sign + literal, 1, "rounding")[0]
-                        bits = struct.unpack(bits_format, struct.pack(float_format, value))[0]
-                        self.assertEqual(bits, expected | (sign_bit if sign == "-" else 0))
+        for literal, expected, _ in LITERAL_CASES:
+            precision = "half" if literal.endswith(("h", "H")) else "float"
+            sign_bit = 0x8000 if precision == "half" else 0x80000000
+            for sign in ("", "-", "+"):
+                with self.subTest(literal=sign + literal):
+                    value = values(sign + literal, 1, "rounding")[0]
+                    self.assertEqual(float_bits(value, precision), expected | (sign_bit if sign == "-" else 0))
 
     def test_scene_parsers_reject_overflow_with_original_literal(self):
         cases = {
@@ -267,10 +294,24 @@ class RegressionHarnessTests(unittest.TestCase):
             for literal in literals:
                 for sign in ("", "-", "+"):
                     part = sign + literal
-                    with self.subTest(literal=part), self.assertRaises(AssertionError) as error:
-                        scalar_constant(f"constant float clearance = {part};", "clearance")
-                    self.assertEqual(str(error.exception),
-                                     f"Invalid scene data clearance: {precision} literal out of range ({part})")
+                    with self.subTest(literal=part):
+                        with self.assertRaises(AssertionError) as error:
+                            scalar_constant(f"constant float clearance = {part};", "clearance")
+                        self.assertEqual(str(error.exception),
+                                         f"Invalid scene data clearance: {precision} literal out of range ({part})")
+
+    def test_scene_parsers_label_exponents_beyond_decimal_limits(self):
+        for suffix in ("", "f", "F", "h", "H"):
+            precision = "half" if suffix in ("h", "H") else "float"
+            for exponent_sign in ("+", "-"):
+                for sign in ("", "-", "+"):
+                    part = f"{sign}1e{exponent_sign}99999999999999999999{suffix}"
+                    with self.subTest(literal=part):
+                        with self.assertRaises(AssertionError) as error:
+                            scalar_constant(f"constant float clearance = {part};", "clearance")
+                        self.assertEqual(str(error.exception),
+                                         f"Invalid scene data clearance: {precision} literal out of range ({part})")
+                        self.assertIsInstance(error.exception.__cause__, InvalidOperation)
 
     def test_source_edits_reject_missing_and_duplicate_anchors(self):
         for edit in (lambda source: replace_once(source, "anchor", "replacement", "Fixture anchor"),
@@ -459,7 +500,9 @@ class MetalSceneRegressionTests(MetalProbeCase):
         self.assertEqual(len(frames), len(expected))
         for frame, bits in zip(frames, expected):
             with self.subTest(bits=hex(bits)):
-                time = struct.unpack("<f", struct.pack("<I", bits))[0]
+                time = bits_float(bits)
+                # JSON may report -0 as integer zero; equality checks numeric time.
+                # The pixel bytes below independently check the uniform's sign bit.
                 self.assertEqual(frame["time"], time)
                 self.assertEqual(frame["nonfinite"], 0)
                 pixels = Path(frame["path"]).read_bytes()
@@ -491,21 +534,18 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
                 self.assertEqual(json.loads(output.read_text())["seeds"], [row[column] for row in rows])
 
     def test_scene_literals_match_compiled_metal_constants(self):
-        cases = [("1.0000000596046447f", 0x3f800000), ("1.000000059604644775390625f", 0x3f800000),
-                 ("1.0000000596046448f", 0x3f800001), ("1.000000178813934326171875f", 0x3f800002),
-                 ("-1.0000000596046448f", 0xbf800001), ("3.4028235e38f", 0x7f7fffff),
-                 ("1e-45f", 0x00000001), ("1.0004882812499999h", 0x3c00),
-                 ("1.00048828125h", 0x3c00), ("1.0004882812500001h", 0x3c01),
-                 ("1.00146484375h", 0x3c02), ("-1.0004882812500001h", 0xbc01),
-                 ("65504.0h", 0x7bff), ("0.000000059604644775390625h", 0x0001)]
+        cases = []
+        for literal, expected, gpu_signs in LITERAL_CASES:
+            sign_bit = 0x8000 if literal.endswith(("h", "H")) else 0x80000000
+            cases.extend((sign + literal, expected | (sign_bit if sign == "-" else 0)) for sign in gpu_signs)
         branches = []
         parsed = []
         for index, (literal, _) in enumerate(cases):
-            half = literal.endswith("h")
+            half = literal.endswith(("h", "H"))
             expression = f"uint(as_type<ushort>({literal}))" if half else f"as_type<uint>({literal})"
             branches.append(f"    case {index}: seeds[i] = {expression}; break;")
             value = values(literal, 1, "compiled literal")[0]
-            parsed.append(struct.unpack("<H" if half else "<I", struct.pack("<e" if half else "<f", value))[0])
+            parsed.append(float_bits(value, "half" if half else "float"))
         source = """
 #include <metal_stdlib>
 using namespace metal;
@@ -517,10 +557,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         result = self.run_probe("literal-rounding", "compute", source, [[0, 0]] * len(cases))
         self.assertEqual(result["seeds"], [bits for _, bits in cases])
         self.assertEqual(result["seeds"], parsed)
-        for sdk in ("macosx", "appletvos"):
-            with self.subTest(sdk=sdk):
-                subprocess.run(["xcrun", "-sdk", sdk, "metal", "-c", str(self.root / "literal-rounding.metal"),
-                                "-o", str(self.root / f"literal-rounding-{sdk}.air")], check=True)
+        library.compile_source(source, "literal-rounding")
 
     def test_shared_renderer_and_cli_validate_time_and_dimensions(self):
         driver_source = self.root / "validation-driver.swift"
@@ -603,9 +640,9 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
             first_tick = math.ceil(100 * steps / 32)
             for tick in range(first_tick, first_tick + 400):
                 time = float32(tick * 32 / steps - 100)
-                bits = struct.unpack("I", struct.pack("f", time))[0]
+                bits = float_bits(time)
                 for adjacent in (max(0, bits - 1), bits, bits + 1):
-                    samples.append([struct.unpack("f", struct.pack("I", adjacent))[0], steps])
+                    samples.append([bits_float(adjacent), steps])
         result = self.run_probe("matrix-seeds", "compute", source, samples)
         # Independent, unbounded double-precision oracle, using the identical float input/addition.
         # The oracle does not reproduce the implementation's wrapped phase or split arithmetic.

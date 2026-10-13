@@ -1,0 +1,889 @@
+{
+  "collections": [
+    {
+      "description": "A varied selection of Holodeck scenes.",
+      "id": "featured",
+      "name": "Featured",
+      "shaderIDs": [
+        "aurora",
+        "waves",
+        "kaleidoscope",
+        "chrome"
+      ]
+    },
+    {
+      "description": "Night skies and moving light.",
+      "id": "atmospheric",
+      "name": "Atmospheric",
+      "shaderIDs": [
+        "aurora",
+        "starfield",
+        "ember-drift",
+        "sunlit-shallows",
+        "fireworks",
+        "side-view-of-the-ocean"
+      ]
+    },
+    {
+      "description": "Flowing color and geometric patterns.",
+      "id": "abstract",
+      "name": "Abstract",
+      "shaderIDs": [
+        "plasma",
+        "waves",
+        "kaleidoscope",
+        "apollonian-twist",
+        "light-grid",
+        "sonar-pulse",
+        "dramamine-sunset",
+        "evening-and-morning",
+        "green-caresses",
+        "orange-flow",
+        "side-view-of-the-ocean"
+      ]
+    },
+    {
+      "description": "Metal finishes under moving studio lights.",
+      "id": "materials",
+      "name": "Materials",
+      "shaderIDs": [
+        "chrome",
+        "brushed-gold",
+        "iridescent"
+      ]
+    },
+    {
+      "description": "Simulated rooms, energy fields and digital worlds.",
+      "id": "holodeck",
+      "name": "Holodeck",
+      "shaderIDs": [
+        "holodeck-grid",
+        "force-shield",
+        "warp-speed",
+        "matrix-corridor"
+      ]
+    }
+  ],
+  "defaultShaderID": "plasma",
+  "schemaVersion": 1,
+  "shaders": [
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.4000000059604645,
+          0.1599999964237213,
+          0.9599999785423279
+        ],
+        [
+          1,
+          0.2800000011920929,
+          0.5
+        ]
+      ],
+      "description": "Liquid color, flowing through an electric field.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "abstract",
+          "fluid",
+          "colorful"
+        ]
+      },
+      "id": "plasma",
+      "name": "Plasma",
+      "previewPath": "previews/plasma.png",
+      "previewSHA256": "976a77a42f4b26ba846039ee351470e338dcfecae3d5d74dd6cef41b94e85f8d",
+      "sourcePath": "sources/plasma.metal",
+      "sourceSHA256": "4e369e5324fcd083c9cf08e74fd250504dcdba35a3d18ca61a870b2c9afb8aa6",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.03999999910593033,
+          0.7200000286102295,
+          0.5299999713897705
+        ],
+        [
+          0.17000000178813934,
+          0.2800000011920929,
+          0.7599999904632568
+        ]
+      ],
+      "description": "Curtains of light beneath a midnight sky.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "atmospheric",
+          "curtains",
+          "night",
+          "glow"
+        ]
+      },
+      "id": "aurora",
+      "name": "Aurora",
+      "previewPath": "previews/aurora.png",
+      "previewSHA256": "8fd681b22bed0d6a89050d6b53f73a4c16ffa8aaa19415ce93a3873b5c16b104",
+      "sourcePath": "sources/aurora.metal",
+      "sourceSHA256": "a746e3e5b650bef75e81d3059494284b7296947a4562fa1b1752d4df8c1021fc",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.029999999329447746,
+          0.5600000023841858,
+          0.8999999761581421
+        ],
+        [
+          0.3100000023841858,
+          0.11999999731779099,
+          0.7200000286102295
+        ]
+      ],
+      "description": "Luminous ribbons moving in overlapping tides.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "abstract",
+          "ribbons",
+          "flowing",
+          "luminous"
+        ]
+      },
+      "id": "waves",
+      "name": "Waves",
+      "previewPath": "previews/waves.png",
+      "previewSHA256": "c83ba0e9f2252edb0ad4cb088e54b28a8f5447f876a7d3c358f12e058c40bca5",
+      "sourcePath": "sources/waves.metal",
+      "sourceSHA256": "93bc50323ed50c5941068a2a1217849766071b2cf33aed0e6863ac8bf567f7f8",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.8999999761581421,
+          0.28999999165534973,
+          0.1599999964237213
+        ],
+        [
+          0.6100000143051147,
+          0.12999999523162842,
+          0.7699999809265137
+        ]
+      ],
+      "description": "A shifting mosaic of mirrored color.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "geometric",
+          "symmetry",
+          "colorful"
+        ]
+      },
+      "id": "kaleidoscope",
+      "name": "Kaleidoscope",
+      "previewPath": "previews/kaleidoscope.png",
+      "previewSHA256": "ea50aa266297be1ecabc5efec7deb37843c313fadd63b064a9016f44619a6ccc",
+      "sourcePath": "sources/kaleidoscope.metal",
+      "sourceSHA256": "2aac5d045d3a06615fd15da5a5d3d73654c9ff666126c85f5a4881c52824ff49",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.10000000149011612,
+          0.14000000059604645,
+          0.3499999940395355
+        ],
+        [
+          0.3100000023841858,
+          0.4000000059604645,
+          0.7599999904632568
+        ]
+      ],
+      "description": "Drift through layers of distant constellations.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "atmospheric",
+          "space",
+          "stars",
+          "drifting"
+        ]
+      },
+      "id": "starfield",
+      "name": "Starfield",
+      "previewPath": "previews/starfield.png",
+      "previewSHA256": "137b53175a5bcb1dbd2f3a72167783f5d9c9c689cd2bb88eff9aadb735603d3b",
+      "sourcePath": "sources/starfield.metal",
+      "sourceSHA256": "44b39cc3048479f9f58afbe87d0d5b0d00f6b5f387300cb6bdec38f23d02008d",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.36000001430511475,
+          0.4300000071525574,
+          0.5299999713897705
+        ],
+        [
+          0.8100000023841858,
+          0.8700000047683716,
+          0.9399999976158142
+        ]
+      ],
+      "description": "A polished sphere reflecting a moving light studio.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "metal",
+          "reflective",
+          "studio"
+        ]
+      },
+      "id": "chrome",
+      "name": "Chrome",
+      "previewPath": "previews/chrome.png",
+      "previewSHA256": "bfc15eb9f4464e287c9a515f0c3db0586c0cb8e5a6ce8839ceffdb1303b871f8",
+      "sourcePath": "sources/chrome.metal",
+      "sourceSHA256": "b8e3959fe3de5d33536047930b85781ed5f718e9dc467854baac4ee811a54ac8",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.4399999976158142,
+          0.23999999463558197,
+          0.07000000029802322
+        ],
+        [
+          0.9599999785423279,
+          0.7099999785423279,
+          0.27000001072883606
+        ]
+      ],
+      "description": "Warm metal with fine grain and soft reflections.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "metal",
+          "warm",
+          "textured"
+        ]
+      },
+      "id": "brushed-gold",
+      "name": "Brushed Gold",
+      "previewPath": "previews/brushed-gold.png",
+      "previewSHA256": "f8c6630d18b2d306feb7894d8ef45aa41fdfb66e414050351662f392ad9c7852",
+      "sourcePath": "sources/brushed-gold.metal",
+      "sourceSHA256": "028557f93700112b37d3379497da2a04dc220c377e24c18d9487fe9da3582638",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "3D MATERIAL",
+      "colors": [
+        [
+          0.28999999165534973,
+          0.7599999904632568,
+          0.7699999809265137
+        ],
+        [
+          0.800000011920929,
+          0.27000001072883606,
+          0.7200000286102295
+        ]
+      ],
+      "description": "An interference finish that changes with the light.",
+      "discovery": {
+        "moods": [
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "material",
+          "shimmer",
+          "colorful",
+          "studio"
+        ]
+      },
+      "id": "iridescent",
+      "name": "Iridescent",
+      "previewPath": "previews/iridescent.png",
+      "previewSHA256": "9e66b83c06f0f3d0c0510558a8b18ee423cc8ec233238b5a9d9fc865e16a603c",
+      "sourcePath": "sources/iridescent.metal",
+      "sourceSHA256": "88b12e10cde87376a18feb1a084cc2626e52449721b39a563d7c813f49711662",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.149,
+          0.682,
+          1.0
+        ],
+        [
+          0.01,
+          0.03,
+          0.07
+        ]
+      ],
+      "description": "A hexagonal energy shield shimmers, ripples under distant impacts and quietly rebuilds itself.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "sci-fi",
+          "shield",
+          "hexagon",
+          "energy",
+          "glow"
+        ]
+      },
+      "id": "force-shield",
+      "name": "Force Shield",
+      "previewPath": "previews/force-shield.png",
+      "previewSHA256": "d5eb493d847f8382ce4f043ef92162eda372bb829fcca06c5c1a0b8495c8a3c8",
+      "sourcePath": "sources/force-shield.metal",
+      "sourceSHA256": "7174b76faba885de3a7920f5d3aed7ade63fd9fdfd8bcb5205f7a7da14674007",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          1.0,
+          0.72,
+          0.18
+        ],
+        [
+          0.08,
+          0.12,
+          0.6
+        ]
+      ],
+      "description": "Blueprint holograms drift slowly through an amber-gridded holodeck.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "sci-fi",
+          "grid",
+          "hologram",
+          "room",
+          "retro"
+        ]
+      },
+      "id": "holodeck-grid",
+      "name": "Holodeck Grid",
+      "previewPath": "previews/holodeck-grid.png",
+      "previewSHA256": "14e2f26655eb48a8fae7f08cd4762f9cc9976aa56cd135a849734cfe518d7d1e",
+      "sourcePath": "sources/holodeck-grid.metal",
+      "sourceSHA256": "891340a2dea71d3b10bde0941f4d2ed03c91b38368724d6ba806dd35637340d3",
+      "updatedAt": "2026-10-11T14:47:07Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.2,
+          0.6,
+          0.9
+        ],
+        [
+          0.8,
+          0.9,
+          1.0
+        ]
+      ],
+      "description": "Streak through a folding fractal starfield at warp speed.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "fast",
+        "tags": [
+          "space",
+          "fractal",
+          "stars",
+          "tunnel"
+        ]
+      },
+      "id": "warp-speed",
+      "name": "Warp Speed",
+      "previewPath": "previews/warp-speed.png",
+      "previewSHA256": "d55e4dbd14f3fa63b91af363aa3489e52aefb809511a8c6bd30292b01de397f3",
+      "sourcePath": "sources/warp-speed.metal",
+      "sourceSHA256": "be4e739304ad8aa90bb8812e29074ed6b8c6617b7b8618121f3cd85f558dc38f",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.1,
+          0.75,
+          0.3
+        ],
+        [
+          0.0,
+          0.06,
+          0.02
+        ]
+      ],
+      "description": "Walk the streets of a city built from falling green code.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "matrix",
+          "digital rain",
+          "glyphs",
+          "city",
+          "cyber"
+        ]
+      },
+      "id": "matrix-corridor",
+      "name": "Matrix Corridor",
+      "previewPath": "previews/matrix-corridor.png",
+      "previewSHA256": "93c368b1900f08c24156831bc8640482045a8b7ab0e545bca29ca22f473dfb52",
+      "sourcePath": "sources/matrix-corridor.metal",
+      "sourceSHA256": "5eba41c9a1adb8fe0895bb89a98bfc6425c47a46dc4c427d9f1fce21da676315",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.8,
+          0.66,
+          0.95
+        ],
+        [
+          0.58,
+          0.92,
+          0.8
+        ]
+      ],
+      "description": "Neon circles nest and unfold through a slowly turning Apollonian fractal.",
+      "discovery": {
+        "moods": [
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "fractal",
+          "circles",
+          "geometric",
+          "neon"
+        ]
+      },
+      "id": "apollonian-twist",
+      "name": "Apollonian Twist",
+      "previewPath": "previews/apollonian-twist.png",
+      "previewSHA256": "014967d9b8b0d4451cad94ce7cd2fac576e79e51710bfacbe2a0eb2cba3a2af1",
+      "sourcePath": "sources/apollonian-twist.metal",
+      "sourceSHA256": "c83ed8386bc84fa447eb6ef8304747d4dd285cb6e3d7f28bcfb6cb4802d33486",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.93,
+          0.12,
+          0.62
+        ],
+        [
+          0.18,
+          0.86,
+          0.96
+        ]
+      ],
+      "description": "A wall of soft lights, each drifting through its own colors.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "grid",
+          "lights",
+          "led",
+          "colorful"
+        ]
+      },
+      "id": "light-grid",
+      "name": "Light Grid",
+      "previewPath": "previews/light-grid.png",
+      "previewSHA256": "f1df28a5bfdd42fdf00da16ec5a3036e8b0667af612aa7553aa57db4de5af765",
+      "sourcePath": "sources/light-grid.metal",
+      "sourceSHA256": "4e801d3b4290542588beaf260d8eb0535e6af87e6bda83cc9da935892292e3f9",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.96,
+          0.32,
+          0.62
+        ],
+        [
+          0.2,
+          0.62,
+          0.95
+        ]
+      ],
+      "description": "A glowing orb sending slow rings of light out into the dark.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "slow",
+        "tags": [
+          "rings",
+          "orb",
+          "pulse",
+          "glow"
+        ]
+      },
+      "id": "sonar-pulse",
+      "name": "Sonar Pulse",
+      "previewPath": "previews/sonar-pulse.png",
+      "previewSHA256": "cdbd82557721a5316217132d670c2d1c7f3d94252c486282ab801f6ddca60131",
+      "sourcePath": "sources/sonar-pulse.metal",
+      "sourceSHA256": "5e899f4b082e4d4ddf9fd8df9ae8cb8da126cb39155e89217f7d2569f00bb920",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          1.0,
+          0.45,
+          0.08
+        ],
+        [
+          0.25,
+          0.07,
+          0.02
+        ]
+      ],
+      "description": "Glowing embers drift upward through warm, rolling smoke.",
+      "discovery": {
+        "moods": [
+          "calm"
+        ],
+        "motion": "steady",
+        "tags": [
+          "fire",
+          "embers",
+          "sparks",
+          "smoke",
+          "warm"
+        ]
+      },
+      "id": "ember-drift",
+      "name": "Ember Drift",
+      "previewPath": "previews/ember-drift.png",
+      "previewSHA256": "7f446d54eb5e3dc7c3dad35ffeb5e3bccaa271b1b2df7afbb95cff35de37f818",
+      "sourcePath": "sources/ember-drift.metal",
+      "sourceSHA256": "5f103693b682c695046c3cdd987b60a6c60ed7de00c645cd9d268cc591c4a488",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.1,
+          0.55,
+          0.55
+        ],
+        [
+          0.01,
+          0.08,
+          0.12
+        ]
+      ],
+      "description": "Sunbeams sway through clear shallows as caustics dance across the sand.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "underwater",
+          "ocean",
+          "caustics",
+          "light rays",
+          "water"
+        ]
+      },
+      "id": "sunlit-shallows",
+      "name": "Sunlit Shallows",
+      "previewPath": "previews/sunlit-shallows.png",
+      "previewSHA256": "bcf3a737d2416c08967fb374346efe4d1d2c4e61a6ef79f075603d3704f916bf",
+      "sourcePath": "sources/sunlit-shallows.metal",
+      "sourceSHA256": "5ff3f1ef5ee597fc335a8a5106230e01816ddfbf2e9a2dbeb8b6638709f0a284",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.95,
+          0.55,
+          0.3
+        ],
+        [
+          0.02,
+          0.03,
+          0.09
+        ]
+      ],
+      "description": "Rainbow fireworks bloom and fall across a quiet night sky.",
+      "discovery": {
+        "moods": [
+          "energetic"
+        ],
+        "motion": "steady",
+        "tags": [
+          "fireworks",
+          "celebration",
+          "night",
+          "particles",
+          "glow"
+        ]
+      },
+      "id": "fireworks",
+      "name": "Fireworks",
+      "previewPath": "previews/fireworks.png",
+      "previewSHA256": "88cbc8f58c1cfd6245d3fa8e11758ac472ee8fc5dad438cc6e1eb3c1c06855df",
+      "sourcePath": "sources/fireworks.metal",
+      "sourceSHA256": "a5a03cf2790acde02efe41e152cd7f48732d6b11b17b67d7b1e996b4bb82e997",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.46,
+          0,
+          0.79
+        ],
+        [
+          0,
+          0.64,
+          0.65
+        ]
+      ],
+      "description": "A pearl of light glides along a violet and coral arc above a turquoise dusk.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "violet",
+          "sunset",
+          "glow",
+          "ribbons"
+        ]
+      },
+      "id": "dramamine-sunset",
+      "name": "Dramamine Sunset",
+      "previewPath": "previews/dramamine-sunset.png",
+      "previewSHA256": "39cae63e407f867f0d80ed0b5b1b5b0e823747bf3d3fff6cb645438a2bddffbc",
+      "sourcePath": "sources/dramamine-sunset.metal",
+      "sourceSHA256": "ea9c999f0782e816441a8e185fdb2de981cba5f29b993b748f39305e2a52b6f5",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.94,
+          0.26,
+          0.02
+        ],
+        [
+          0.04,
+          0.69,
+          0.85
+        ]
+      ],
+      "description": "Soft concentric ripples join scarlet evening and golden dawn with cyan and cobalt.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "ripples",
+          "warm",
+          "cool",
+          "color"
+        ]
+      },
+      "id": "evening-and-morning",
+      "name": "Evening and Morning",
+      "previewPath": "previews/evening-and-morning.png",
+      "previewSHA256": "55cd982cda53d7b00b674f4d4545b48d5786892b1fe5d0b6d78de3fc6f256415",
+      "sourcePath": "sources/evening-and-morning.metal",
+      "sourceSHA256": "acee9168ac671359d8a06110f67c36cc737378974898432b8a62674e961401e7",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.24,
+          0.98,
+          0.27
+        ],
+        [
+          0.58,
+          0.99,
+          1
+        ]
+      ],
+      "description": "Mint and lime fields breathe beneath soft, drifting folds of cyan light.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "mint",
+          "green",
+          "folds",
+          "pastel"
+        ]
+      },
+      "id": "green-caresses",
+      "name": "Green Caresses",
+      "previewPath": "previews/green-caresses.png",
+      "previewSHA256": "4a1dda8ea7cbf7009b2c63435b36f9eaecf429bed8411bb8243df81e6de9e9d8",
+      "sourcePath": "sources/green-caresses.metal",
+      "sourceSHA256": "81ce2a4a1054d790516a6110f97f71acc78750db58916b8fcc936e24e82feefd",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.96,
+          0.49,
+          0
+        ],
+        [
+          0.91,
+          0.86,
+          0
+        ]
+      ],
+      "description": "Translucent amber sheets turn and flow through a quiet field of orange and gold.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "amber",
+          "orange",
+          "gold",
+          "folds"
+        ]
+      },
+      "id": "orange-flow",
+      "name": "Orange Flow",
+      "previewPath": "previews/orange-flow.png",
+      "previewSHA256": "2810038cf188a95968dcb614e8b51a169f641e2e8579dbc677cf0da5d5ecb769",
+      "sourcePath": "sources/orange-flow.metal",
+      "sourceSHA256": "7359e9d8490fdae5502ba3a62cdb801b776c5e7891f67082338a232f62195191",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    },
+    {
+      "category": "PROCEDURAL",
+      "colors": [
+        [
+          0.82,
+          0.87,
+          1
+        ],
+        [
+          0.025,
+          0.47,
+          0.59
+        ]
+      ],
+      "description": "A hazy lavender surface melts through blue and cyan into slow, deep teal currents.",
+      "discovery": {
+        "moods": [
+          "calm",
+          "dreamy"
+        ],
+        "motion": "slow",
+        "tags": [
+          "ocean",
+          "blue",
+          "gradient",
+          "haze"
+        ]
+      },
+      "id": "side-view-of-the-ocean",
+      "name": "Side View of the Ocean",
+      "previewPath": "previews/side-view-of-the-ocean.png",
+      "previewSHA256": "df6530f042bb832cb74392863150a680e01dee7b35d3978c23d7a36dda02e16b",
+      "sourcePath": "sources/side-view-of-the-ocean.metal",
+      "sourceSHA256": "dd7ef26caae595332a47607c9624aee923c343fb824b540dcd3911a26d67542a",
+      "updatedAt": "2026-10-11T00:35:45Z"
+    }
+  ],
+  "sourceRevision": "dfbd4442a4a7911bdeccd1666f701dac0e6a7fbc"
+}

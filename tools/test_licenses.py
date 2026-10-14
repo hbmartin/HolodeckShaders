@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import catalog
+import authoring
 import library
 
 # Source obligations are independent of informational metadata.reuse links.
@@ -213,11 +213,11 @@ def audit_notices(records=None, upstreams=None):
         paths.extend(f"shared/{part}.metal" for part in spec["requiredShared"])
         references = [ref for path in paths for ref in records[path]]
         require_notices("example " + item["id"], library.snippet_source(item), references, upstreams)
-    for metadata, source, *_ in catalog.entries()[1]:
+    for metadata, source, *_ in authoring.entries()[1]:
         paths = [f"shaders/{metadata['id']}/body.metal"]
         paths.extend(f"shared/{part}.metal" for part in metadata["shared"])
         references = [ref for path in paths for ref in records[path]]
-        require_notices("published " + metadata["id"], source, references, upstreams)
+        require_notices("assembled " + metadata["id"], source, references, upstreams)
 
 
 @contextlib.contextmanager
@@ -225,12 +225,9 @@ def fixture_root():
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
         for folder in ("shaders", "shared", "snippets", "references"):
-            shutil.copytree(catalog.ROOT / folder, root / folder)
-        (root / "tools").mkdir()
-        for path in catalog.renderer_sources("render-preview.swift"):
-            shutil.copyfile(path, root / "tools" / path.name)
-        shutil.copyfile(catalog.ROOT / "index.json", root / "index.json")
-        with patch.object(catalog, "ROOT", root):
+            shutil.copytree(authoring.ROOT / folder, root / folder)
+        shutil.copyfile(authoring.ROOT / "index.json", root / "index.json")
+        with patch.object(authoring, "ROOT", root):
             yield root
 
 
@@ -262,9 +259,9 @@ class LicenseDeliveryTests(unittest.TestCase):
             with self.subTest(original=original), fixture_root() as root:
                 destination = root / "references/unregistered"
                 shutil.copytree(root / "references" / original, destination)
-                spec = catalog.read_json(destination / "reference.json")
+                spec = authoring.read_json(destination / "reference.json")
                 spec["id"] = "unregistered"
-                catalog.write_json(destination / "reference.json", spec)
+                authoring.write_json(destination / "reference.json", spec)
                 with self.assertRaisesRegex(ValueError, "Unregistered licensed reference"):
                     audit_notices()
 
@@ -273,10 +270,10 @@ class LicenseDeliveryTests(unittest.TestCase):
             with self.subTest(original=original), fixture_root() as root:
                 destination = root / "snippets/unregistered"
                 shutil.copytree(root / "snippets" / original, destination)
-                spec = catalog.read_json(destination / "snippet.json")
+                spec = authoring.read_json(destination / "snippet.json")
                 spec.update(id="unregistered", examplePath="snippets/unregistered/example.metal")
                 spec["source"]["path"] = "snippets/unregistered/code.metal"
-                catalog.write_json(destination / "snippet.json", spec)
+                authoring.write_json(destination / "snippet.json", spec)
                 records = dict(SOURCE_REQUIREMENTS, **{
                     "snippets/unregistered/code.metal": [],
                     "snippets/unregistered/example.metal": [],

@@ -10,19 +10,13 @@ import unittest
 from unittest.mock import patch
 import authoring
 import library
+from authoring_test_support import fixture_root
 
 class LibraryTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.root = pathlib.Path(self.temp.name)
-        for folder in ("shaders", "shared", "snippets", "references", "templates", "docs", "tools"):
-            shutil.copytree(authoring.ROOT / folder, self.root / folder, ignore=shutil.ignore_patterns("__pycache__"))
-        shutil.copyfile(authoring.ROOT / "index.json", self.root / "index.json")
-        shutil.copyfile(authoring.ROOT / ".gitignore", self.root / ".gitignore")
-        self.root_patch = patch.object(authoring, "ROOT", self.root)
-        self.root_patch.start()
-        self.addCleanup(self.root_patch.stop)
-        self.addCleanup(self.temp.cleanup)
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        self.root = stack.enter_context(fixture_root("shaders", "shared", "snippets", "references", "templates", "docs"))
         self.asset_count = len(library.assets())
 
     def test_library_and_search_output(self):
@@ -128,6 +122,80 @@ class LibraryTests(unittest.TestCase):
         (self.root / "snippets/polar-fold/example.metal").unlink()
         with self.assertRaises(ValueError): library.validate()
 
+    def test_reference_internal_directory_and_broken_symlinks_are_rejected(self):
+        for case in ("file", "directory", "broken", "root", "broken-root"):
+            with self.subTest(case=case):
+                reference_id = "linked-" + case
+                destination = library.scaffold("reference", reference_id)
+                original = destination / "original"
+                if case in ("root", "broken-root"):
+                    target = self.root / ("shared" if case == "root" else "missing")
+                    original.symlink_to(target, target_is_directory=True)
+                    relative = "original"
+                else:
+                    original.mkdir()
+                    nested = original / "nested"
+                    nested.mkdir()
+                    target = {"file": self.root / "shared/common.metal",
+                              "directory": self.root / "shared", "broken": self.root / "missing"}[case]
+                    (nested / "link").symlink_to(target, target_is_directory=case == "directory")
+                    relative = "original/nested/link"
+                with self.assertRaisesRegex(ValueError, reference_id + "/" + relative):
+                    library.validate()
+                # Remove each rejected asset so the next case reaches its own link.
+                if original.is_symlink():
+                    original.unlink()
+                shutil.rmtree(destination)
+
+    def test_reference_alias_to_an_original_file_is_rejected(self):
+        destination = library.scaffold("reference", "aliased")
+        original = destination / "original"
+        original.mkdir()
+        (original / "real.frag").write_bytes(b"original bytes")
+        (original / "alias.frag").symlink_to("real.frag")
+        spec = authoring.read_json(destination / "reference.json")
+        spec["files"] = {name: authoring.digest(b"original bytes") for name in ("real.frag", "alias.frag")}
+        authoring.write_json(destination / "reference.json", spec)
+        with self.assertRaisesRegex(ValueError, "aliased/original/alias.frag"):
+            library.validate()
+
+    def test_snippet_sources_preserve_component_bytes_and_harness_separators(self):
+        for snippet_id in ("value-noise", "glowing-ribbons"):
+            with self.subTest(snippet_id=snippet_id):
+                item = library.find("snippet", snippet_id)
+                spec = item["specification"]
+                components = [self.root / "shared" / f"{part}.metal" for part in spec["requiredShared"]]
+                if spec["kind"] == "recipe":
+                    components.append(self.root / spec["source"]["path"])
+                components.extend([self.root / spec["examplePath"], self.root / "shared/fragment.metal"])
+                expected = []
+                for path in components:
+                    data = b"// caf\xc3\xa9\r\n" + path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+                    path.write_bytes(data)
+                    expected.append(data)
+                self.assertEqual(library.snippet_source(item).encode("utf-8"), b"\n".join(expected))
+
+    def test_compile_and_render_inputs_preserve_assembled_source_bytes(self):
+        components = [self.root / "shared/common.metal", self.root / "shaders/plasma/body.metal",
+                      self.root / "shared/fragment.metal"]
+        expected = b""
+        for path in components:
+            data = b"// caf\xc3\xa9\r\n" + path.read_bytes().replace(b"\n", b"\r\n")
+            path.write_bytes(data)
+            expected += data
+        observed = []
+
+        def inspect_source(args, check):
+            source_path = pathlib.Path(args[5] if args[0] == "xcrun" else args[2])
+            observed.append(source_path.read_bytes())
+
+        with patch.object(library.subprocess, "run", side_effect=inspect_source), \
+             patch.object(library.shader_tool, "command", return_value=["renderer", "render"]), \
+             contextlib.redirect_stdout(io.StringIO()):
+            library.compile_source(authoring.shader_entry("plasma")[1], "plasma")
+            library.render("shader", "plasma", "0,3,10")
+        self.assertEqual(observed, [expected] * 5)
+
     def test_missing_specification_and_duplicate_id_are_rejected(self):
         directory = self.root / "snippets/copy"
         shutil.copytree(self.root / "snippets/fbm", directory)
@@ -147,7 +215,7 @@ class LibraryTests(unittest.TestCase):
             spec = authoring.read_json(destination / "reference.json")
             spec["files"] = {"input.frag": authoring.digest(source.read_bytes())}
             authoring.write_json(destination / "reference.json", spec)
-            with self.assertRaises(ValueError): library.validate()
+            with self.assertRaisesRegex(ValueError, "linked/original/input.frag"): library.validate()
 
     def test_manual_reference_inventory_and_checksums(self):
         destination = library.scaffold("reference", "manual")

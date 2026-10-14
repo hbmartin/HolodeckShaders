@@ -24,7 +24,7 @@ mkdir -p "$HOME/.local/bin"
 install HolodeckCore/.build/release/holodeck-shader-tool "$HOME/.local/bin/holodeck-shader-tool"
 ```
 
-Add that directory to `PATH`, or set `HOLODECK_SHADER_TOOL` to the executable's absolute path. `holodeck-shader-tool --version` must report major version 1. An invalid explicit override does not fall back to another executable. Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` for actual GPU regression probes. Static validation and CI do not require this executable or a sibling checkout.
+Add that directory to `PATH`, or set `HOLODECK_SHADER_TOOL` to the executable's absolute path. `holodeck-shader-tool --version` must report major version 1; the version check has a five-second timeout and receives no interactive input. An invalid explicit override, including an empty value, does not fall back to another executable. Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` for actual GPU regression probes. Static validation and CI do not require this executable or a sibling checkout.
 
 ## Delivery and previews
 

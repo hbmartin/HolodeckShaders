@@ -105,7 +105,7 @@ def validate_snippet(item):
     allowed = [f"shared/{part}.metal" for part in shared] if spec["kind"] == "shared-helper" else [item["path"] + "/code.metal"]
     if source.get("path") not in allowed:
         raise ValueError(f"Invalid canonical source: {item['id']}")
-    code = path(source["path"]).read_text()
+    code = authoring.read_source(path(source["path"]))
     if any(symbol not in code for symbol in source["symbols"]):
         raise ValueError(f"Missing declared symbol: {item['id']}")
     if spec.get("examplePath") != item["path"] + "/example.metal":
@@ -127,10 +127,10 @@ def validate_snippet(item):
 def snippet_source(item):
     validate_snippet(item)
     spec = item["specification"]
-    parts = [path(f"shared/{part}.metal").read_text() for part in spec["requiredShared"]]
+    parts = [authoring.read_source(path(f"shared/{part}.metal")) for part in spec["requiredShared"]]
     if spec["kind"] == "recipe":
-        parts.append(path(spec["source"]["path"]).read_text())
-    parts.extend([path(spec["examplePath"]).read_text(), path("shared/fragment.metal").read_text()])
+        parts.append(authoring.read_source(path(spec["source"]["path"])))
+    parts.extend([authoring.read_source(path(spec["examplePath"])), authoring.read_source(path("shared/fragment.metal"))])
     return "\n".join(parts)
 
 
@@ -148,7 +148,14 @@ def validate_reference(item):
     if not isinstance(files, dict):
         raise ValueError(f"Invalid reference files: {item['id']}")
     original = authoring.ROOT / item["path"] / "original"
-    actual = {str(p.relative_to(original)) for p in original.rglob("*") if p.is_file()} if original.exists() else set()
+    if original.is_symlink():
+        raise ValueError(f"Reference symlink forbidden: {item['id']}/original")
+    # rglob does not descend into directory symlinks; reject them along with file links.
+    original_paths = list(original.rglob("*")) if original.exists() else []
+    for entry in original_paths:
+        if entry.is_symlink():
+            raise ValueError(f"Reference symlink forbidden: {item['id']}/original/{entry.relative_to(original)}")
+    actual = {str(p.relative_to(original)) for p in original_paths if p.is_file()}
     if actual != set(files):
         raise ValueError(f"Reference file inventory changed: {item['id']}")
     for filename, sha in files.items():
@@ -159,7 +166,7 @@ def validate_reference(item):
 def compile_source(source, label):
     with tempfile.TemporaryDirectory() as temp:
         file = pathlib.Path(temp) / "example.metal"
-        file.write_text(source)
+        file.write_bytes(source.encode("utf-8"))
         for sdk in ("macosx", "appletvos"):
             subprocess.run(["xcrun", "-sdk", sdk, "metal", "-c", str(file), "-o", str(pathlib.Path(temp) / f"{sdk}.air")], check=True)
     print(f"Compiled {label} for macOS and tvOS")
@@ -215,11 +222,11 @@ def render(kind, asset_id, times, width=1280, height=720):
     if not samples or any(not math.isfinite(t) or t < 0 for t in samples) or not 1 <= width <= 8192 or not 1 <= height <= 8192 or width * height > 16_777_216:
         raise ValueError("Invalid render settings")
     source = authoring.shader_entry(asset_id)[1] if kind == "shader" else snippet_source(find(kind, asset_id))
+    renderer = shader_tool.command("render")
     output = authoring.ROOT / ".cache/library" / f"{kind}-{asset_id}"
     output.mkdir(parents=True, exist_ok=True)
-    renderer = shader_tool.command("render")
     file = output / "source.metal"
-    file.write_text(source)
+    file.write_bytes(source.encode("utf-8"))
     for sample in samples:
         image = output / f"{width}x{height}-t{sample:g}.png"
         subprocess.run([*renderer, str(file), str(image), "--width", str(width), "--height", str(height), "--time", str(sample)], check=True)

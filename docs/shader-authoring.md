@@ -24,7 +24,9 @@ Select scenes for distinctive visual experience, sustained motion quality, repre
 
 ## Validation and delivery
 
-Library validation includes unlisted shaders. Publication includes only index.shaders and emits complete sources/PNG previews plus optional discovery/collections; snippets, originals, documentation and reuse links remain authoring-only. Schema version stays 1 because additions are optional. Older clients ignore additions; new clients read older snapshots with missing discovery.
+Library validation includes unlisted shaders. HolodeckMac's local publication includes only index.shaders and serves assembled sources and app-generated PNG previews plus optional discovery/collections; snippets, originals, documentation and reuse links remain authoring-only. Schema version stays 1 because additions are optional. Older clients ignore additions; new clients read older snapshots with missing discovery.
+
+Python validation checks structure and preserves raw UTF-8 source bytes, including line endings. It does not enforce source or catalog byte-size budgets. Holodeck enforces its runtime limits (2 MiB manifest, 1 MiB per assembled source, 16 MiB total sources), so successful Python validation or compilation does not guarantee that the app can load a catalog. Reload in HolodeckMac to verify delivery.
 
 Holodeck generates previews at 1280×720 and three seconds using the sRGB render target. Successful renders are cached outside this repo by source hash, render settings, and renderer version. Failures use metadata-color gradients and produce per-shader diagnostics; reload retries them. Sample renders stay in ignored `.cache/library/` and never alter the app cache or source folder.
 

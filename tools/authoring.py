@@ -68,14 +68,20 @@ def shader_entry(shader_id, *, metadata=None):
     validate_metadata(metadata, shader_id)
     shared = metadata["shared"]
     # Preserve the runtime assembly bytes.
-    source = "".join((ROOT / "shared" / f"{part}.metal").read_text() for part in shared[:-1]) + (directory / "body.metal").read_text() + (ROOT / "shared" / "fragment.metal").read_text()
-    if not source or len(source.encode()) > 1_048_576:
-        raise ValueError(f"Invalid source size for {shader_id}")
+    components = [ROOT / "shared" / f"{part}.metal" for part in shared[:-1]]
+    components.extend([directory / "body.metal", ROOT / "shared" / "fragment.metal"])
+    source = "".join(read_source(component) for component in components)
+    if not source:
+        raise ValueError(f"Empty source for {shader_id}")
     return metadata, source
 
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def read_source(path):
+    return path.read_bytes().decode("utf-8")
 
 
 def read_json(path):
@@ -95,6 +101,4 @@ def entries():
     if "collections" in index:
         validate_collections(index["collections"], ids)
     result = [shader_entry(shader_id) for shader_id in ids]
-    if sum(len(entry[1].encode()) for entry in result) > 16_777_216:
-        raise ValueError("Catalog sources exceed 16 MiB")
     return index, result

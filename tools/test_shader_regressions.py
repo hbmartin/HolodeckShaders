@@ -408,9 +408,6 @@ class RegressionHarnessTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("HOLODECK_GPU_TESTS") == "1", "Opt in to actual Metal shader regression probes")
 class MetalSceneRegressionTests(MetalProbeCase):
-
-
-
     def test_render_probe_preserves_numeric_uniform_bits(self):
         # Read float bits before the render target can flush a subnormal to zero.
         # Each 16-bit word is exactly representable as an ordinary float color.

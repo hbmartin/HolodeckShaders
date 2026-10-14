@@ -1,26 +1,18 @@
 import copy
+import contextlib
+import hashlib
 import json
-import pathlib
 import shutil
-import tempfile
 import unittest
-from unittest.mock import patch
 import authoring
+from authoring_test_support import fixture_root
 
 
 class AuthoringValidationTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.root = pathlib.Path(self.temp.name)
-        shutil.copytree(authoring.ROOT / "shaders", self.root / "shaders")
-        shutil.copytree(authoring.ROOT / "shared", self.root / "shared")
-        shutil.copytree(authoring.ROOT / "snippets", self.root / "snippets")
-        shutil.copytree(authoring.ROOT / "references", self.root / "references")
-        shutil.copyfile(authoring.ROOT / "index.json", self.root / "index.json")
-        self.root_patch = patch.object(authoring, "ROOT", self.root)
-        self.root_patch.start()
-        self.addCleanup(self.root_patch.stop)
-        self.addCleanup(self.temp.cleanup)
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        self.root = stack.enter_context(fixture_root("shaders", "shared", "snippets", "references"))
 
     def write(self, path, value):
         (self.root / path).write_text(json.dumps(value))
@@ -62,6 +54,75 @@ class AuthoringValidationTests(unittest.TestCase):
         metadata["discovery"]["motion"] = "instant"
         self.write("shaders/plasma/metadata.json", metadata)
         with self.assertRaises(ValueError): authoring.entries()
+
+    def test_source_assembly_preserves_utf8_bytes_and_order(self):
+        for shader_id in ("plasma", "brushed-gold"):
+            metadata = authoring.read_json(self.root / f"shaders/{shader_id}/metadata.json")
+            components = [self.root / "shared" / f"{part}.metal" for part in metadata["shared"][:-1]]
+            components.extend([self.root / f"shaders/{shader_id}/body.metal", self.root / "shared/fragment.metal"])
+            for newline in ("\n", "\r\n"):
+                with self.subTest(shader_id=shader_id, newline=newline):
+                    expected = b""
+                    for index, path in enumerate(components):
+                        data = f"// café 雪 component {index}{newline}".encode("utf-8")
+                        path.write_bytes(data)
+                        expected += data
+                    _, source = authoring.shader_entry(shader_id)
+                    self.assertEqual(source.encode("utf-8"), expected)
+                    self.assertEqual(authoring.digest(source.encode("utf-8")), hashlib.sha256(expected).hexdigest())
+
+    def test_invalid_utf8_and_empty_assembled_sources_are_rejected(self):
+        components = [self.root / "shared/common.metal", self.root / "shaders/plasma/body.metal",
+                      self.root / "shared/fragment.metal"]
+        for path in components:
+            with self.subTest(path=path):
+                original = path.read_bytes()
+                try:
+                    path.write_bytes(b"\xff")
+                    with self.assertRaises(UnicodeDecodeError):
+                        authoring.shader_entry("plasma")
+                finally:
+                    path.write_bytes(original)
+        for path in components:
+            path.write_bytes(b"")
+        with self.assertRaisesRegex(ValueError, "Empty source"):
+            authoring.shader_entry("plasma")
+
+    def test_source_larger_than_one_mib_is_accepted(self):
+        path = self.root / "shaders/plasma/body.metal"
+        path.write_bytes(path.read_bytes() + b"\n//" + b"x" * 1_048_576 + b"\n")
+        _, entries = authoring.entries()
+        source = next(source for metadata, source in entries if metadata["id"] == "plasma")
+        self.assertGreater(len(source.encode("utf-8")), 1_048_576)
+
+    def test_aggregate_sources_larger_than_sixteen_mib_are_accepted(self):
+        ids = []
+        for index in range(17):
+            shader_id = f"large-{index}"
+            directory = self.root / "shaders" / shader_id
+            shutil.copytree(self.root / "shaders/plasma", directory)
+            metadata = authoring.read_json(directory / "metadata.json")
+            metadata["id"] = shader_id
+            authoring.write_json(directory / "metadata.json", metadata)
+            body = directory / "body.metal"
+            body.write_bytes(body.read_bytes() + b"\n//" + b"x" * 1_000_000 + b"\n")
+            ids.append(shader_id)
+        self.write("index.json", {"shaders": ids, "defaultShaderID": ids[0]})
+        _, entries = authoring.entries()
+        sizes = [len(source.encode("utf-8")) for _, source in entries]
+        self.assertTrue(all(size < 1_048_576 for size in sizes))
+        self.assertGreater(sum(sizes), 16_777_216)
+
+    def test_fixture_root_restores_state_and_cleans_up_on_failure(self):
+        previous = authoring.ROOT
+        with self.assertRaisesRegex(RuntimeError, "fixture failure"):
+            with fixture_root("shared") as root:
+                self.assertEqual(authoring.ROOT, root)
+                self.assertTrue((root / "shared/common.metal").is_file())
+                self.assertFalse((root / "shaders").exists())
+                raise RuntimeError("fixture failure")
+        self.assertEqual(authoring.ROOT, previous)
+        self.assertFalse(root.exists())
 
 
 if __name__ == "__main__":

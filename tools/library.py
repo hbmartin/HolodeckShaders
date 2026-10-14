@@ -69,10 +69,29 @@ def search(query, kind=None):
     return [value[4] for value in sorted(ranked, key=lambda value: value[:4])]
 
 
+def reference_documentation(spec):
+    origin = spec["origin"]
+    sections = [f"# {spec['name']}", spec["summary"],
+                "## Provenance\n\n" + "\n".join([
+                    f"- Language: {spec['language']}", f"- Author: {origin['author']}",
+                    f"- Source: {origin.get('url') or 'Unknown'}", f"- License: {origin['license']}"])]
+    if spec["requirements"]:
+        sections.append("## Requirements\n\n" + "\n".join(f"- {value}" for value in spec["requirements"]))
+    sections.append("## Adaptation\n\n" + spec["adaptationNotes"])
+    if "notes" in spec:
+        sections.append("## Notes\n\n" + spec["notes"])
+    files = "\n".join(f"- `{name}`: `{sha}`" for name, sha in sorted(spec["files"].items()))
+    sections.append("## Original files\n\n" + (files or "No original files; metadata only."))
+    return "\n\n".join(sections) + "\n"
+
+
 def show(kind, asset_id):
     item = dict(find(kind, asset_id))
     readme = authoring.ROOT / item["path"] / "README.md"
-    item["documentation"] = readme.read_text() if readme.is_file() else (authoring.ROOT / "docs/shader-authoring.md").read_text()
+    if kind == "reference":
+        item["documentation"] = reference_documentation(item["specification"])
+    else:
+        item["documentation"] = readme.read_text() if readme.is_file() else (authoring.ROOT / "docs/shader-authoring.md").read_text()
     if kind == "shader":
         item["sourcePath"] = item["path"] + "/body.metal"
         item["sourceLocations"] = [item["sourcePath"]] + [f"shared/{part}.metal" for part in item["specification"]["shared"]]
@@ -143,7 +162,8 @@ def validate_reference(item):
             raise ValueError(f"Invalid reference {field}: {item['id']}")
     if not isinstance(spec.get("origin"), dict) or any(not authoring.text_field(spec["origin"].get(field)) for field in ("author", "license")):
         raise ValueError(f"Missing reference provenance: {item['id']}")
-    path(item["path"] + "/README.md")
+    if "notes" in spec and (not isinstance(spec["notes"], str) or not spec["notes"].strip()):
+        raise ValueError(f"Invalid reference notes: {item['id']}")
     files = spec.get("files")
     if not isinstance(files, dict):
         raise ValueError(f"Invalid reference files: {item['id']}")
@@ -241,7 +261,8 @@ def emit(items, as_json=False):
         for item in items:
             print(f"{item['kind']}\t{item['id']}\t{item['name']}\t{item['summary']}\t{item['path']}")
     else:
-        print(json.dumps(items["specification"], indent=2, sort_keys=True))
+        if items["kind"] != "reference":
+            print(json.dumps(items["specification"], indent=2, sort_keys=True))
         print(items["documentation"])
         print("Source locations: " + ", ".join(items["sourceLocations"]))
         if items["example"] is not None:

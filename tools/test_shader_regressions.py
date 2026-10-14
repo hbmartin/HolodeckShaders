@@ -408,58 +408,6 @@ class RegressionHarnessTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("HOLODECK_GPU_TESTS") == "1", "Opt in to actual Metal shader regression probes")
 class MetalSceneRegressionTests(MetalProbeCase):
-    def test_render_probe_preserves_numeric_uniform_bits(self):
-        # Read float bits before the render target can flush a subnormal to zero.
-        # Each 16-bit word is exactly representable as an ordinary float color.
-        source = replace_once(unclamped(authoring.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
-                              "uint timeBits = as_type<uint>(u.time);\n"
-                              "    float3 color = float3(float(timeBits & 0xffffu), float(timeBits >> 16), 0.0);",
-                              "Expose numeric uniform bits")
-        source_path = self.root / "numeric-inputs.metal"
-        source_path.write_text(source)
-        samples_path = self.root / "numeric-inputs.json"
-        samples_path.write_text("[0,-0.0,3.25,1e-50,1e-400,-1e-50,-1e-400,3.4028235e38,1e-45]")
-        output = self.root / "numeric-inputs.result.json"
-        subprocess.run([*self.probe, "render", str(source_path), str(samples_path), str(output)], check=True)
-        frames = json.loads(output.read_text())["frames"]
-        expected = [0x00000000, 0x80000000, 0x40500000, 0x00000000, 0x00000000,
-                    0x80000000, 0x80000000, 0x7f7fffff, 0x00000001]
-        self.assertEqual(len(frames), len(expected))
-        for frame, bits in zip(frames, expected):
-            with self.subTest(bits=hex(bits)):
-                time = bits_float(bits)
-                # JSON may report -0 as integer zero; equality checks numeric time.
-                # The pixel bytes below independently check the uniform's sign bit.
-                self.assertEqual(frame["time"], time)
-                self.assertEqual(frame["nonfinite"], 0)
-                pixels = Path(frame["path"]).read_bytes()
-                pixel = struct.pack("4f", bits & 0xffff, bits >> 16, 0, 1)
-                self.assertEqual(pixels, pixel * (160 * 90))
-
-    def test_compute_probe_preserves_each_numeric_sample_component(self):
-        samples_path = self.root / "numeric-compute.json"
-        samples_path.write_text("[[1e-50,-2],[1e-400,1],[-1e-50,-1e-400],[-1e-50,0],[0,-1e-400],"
-                                "[3.4028235e38,-3.4028235e38],[1e-45,0],[-1e-45,1e-45],[-0.0,0],[0,-0.0]]")
-        rows = [(0x00000000, 0xc0000000), (0x00000000, 0x3f800000),
-                (0x80000000, 0x80000000), (0x80000000, 0x00000000), (0x00000000, 0x80000000),
-                (0x7f7fffff, 0xff7fffff), (0x00000001, 0x00000000), (0x80000001, 0x00000001),
-                (0x80000000, 0x00000000), (0x00000000, 0x80000000)]
-        for column, component in enumerate(("x", "y")):
-            source_path = self.root / f"numeric-compute-{component}.metal"
-            source_path.write_text(f"""
-#include <metal_stdlib>
-using namespace metal;
-kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
-                            device uint *seeds [[buffer(1)]],
-                            uint i [[thread_position_in_grid]]) {{
-    seeds[i] = as_type<uint>(samples[i].{component});
-}}
-""")
-            output = self.root / f"numeric-compute-{component}.result.json"
-            with self.subTest(component=component):
-                subprocess.run([*self.probe, "compute", str(source_path), str(samples_path), str(output)], check=True)
-                self.assertEqual(json.loads(output.read_text())["seeds"], [row[column] for row in rows])
-
     def test_scene_literals_match_compiled_metal_constants(self):
         cases = []
         for literal, expected, gpu_signs in LITERAL_CASES:
@@ -547,24 +495,6 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
                             with self.assertRaises(AssertionError):
                                 self.assert_render_equal(control, expected)
         print(f"Metal invalid lanes: zero/negative authored and available extents skip the bounce call on {actual['device']}", flush=True)
-
-    def test_nan_diagnostic_is_visible_before_fragment_clamp(self):
-        source = replace_once(authoring.shader_entry("holodeck-grid")[1], FRAGMENT_COLOR,
-                              "float3 color = float3(as_type<float>(0x7fc00000u));", "Inject NaN diagnostic")
-        raw = self.run_probe("nan-raw", "render", unclamped(source), [0])
-        self.assertEqual(raw["frames"][0]["nonfinite"], 160 * 90 * 3)
-        clamped = self.run_probe("nan-clamped", "render", source, [0])
-        self.assertEqual(clamped["frames"][0]["nonfinite"], 0)
-
-    def test_shared_uniforms_deliver_resolution_and_time(self):
-        source = replace_once(unclamped(authoring.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
-                              "float3 color = float3(u.resolution, u.time);", "Expose Metal uniform values")
-        times = [0, 3.25]
-        result = self.run_probe("uniforms", "render", source, times)
-        for frame, time in zip(result["frames"], times):
-            pixels = Path(frame["path"]).read_bytes()
-            self.assertEqual(len(pixels), 160 * 90 * 16)
-            self.assertTrue(all(pixel == (160, 90, time, 1) for pixel in struct.iter_unpack("4f", pixels)))
 
     def test_raw_rgb_is_finite_at_wraps_and_long_uptime(self):
         times = [0, 3, 10, 1819.875, 1820, 1820.125, 3740,

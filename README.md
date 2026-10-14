@@ -1,27 +1,35 @@
 # HolodeckShaders
 
-Public source of truth for Holodeck's runtime Metal shaders. `main` contains authoring files; `published` contains a complete validated catalog, full Metal libraries and PNG previews. The app pins every download to one published commit. No backend or login is needed.
+Shader sources and authoring assets for Holodeck. HolodeckMac loads this folder, generates previews, and serves a complete catalog to Apple TV over the local network. Shader edits require reload, not an app rebuild.
 
 ## Authoring
 
-See [the reuse library](docs/shader-library.md) and [complete authoring workflow](docs/shader-authoring.md) for discovery, recipe contracts, local reference imports, scaffolding and validation. Run `python3 tools/library.py --help` for CLI commands. Snippets and references are authoring assets; only IDs in `index.json` enter the app catalog.
+See [the reuse library](docs/shader-library.md) and [authoring workflow](docs/shader-authoring.md). Python uses only its standard library. SDK compilation requires Xcode; sample rendering and GPU regression tests use the installed Holodeck CLI on a Mac with Metal.
 
-Requires a Mac with Xcode and a Metal device for rendering previews. Python 3 uses only its standard library.
+1. Search techniques with `python3 tools/library.py search "flowing ribbons"` and inspect contracts with `show`.
+2. Create `shaders/<id>/metadata.json` and `body.metal`, or scaffold with `python3 tools/library.py new shader my-scene`. Bodies implement `float3 shade(float2 p, float time, float2 pixel)`.
+3. Run `python3 tools/library.py validate --compile` and `python3 -m unittest discover -s tools -p 'test_*.py'`. Validation includes unlisted shaders; compilation covers every complete shader and snippet example for macOS and tvOS.
+4. Render samples with `python3 tools/library.py render shader my-scene --times 0,3,10`. Inspect motion and target-device performance in Holodeck.
+5. When selected, add the stable ID to the ordered `shaders` array in `index.json` and any collections. Commit source and metadata. In HolodeckMac, select this folder under **Settings → Shader Library**, then press **Reload Shaders**.
 
-1. Create `shaders/<id>/metadata.json` and `body.metal`. IDs are stable lowercase words separated by hyphens. Metadata includes `id`, `name`, `description`, `category` (`PROCEDURAL` or `3D MATERIAL`), two RGB colors with values in 0...1, and `shared`: `["common", "fragment"]` or `["common", "material", "fragment"]`.
-2. Add the ID to the ordered `shaders` array in `index.json`. Its `defaultShaderID` must exist. Bodies implement `float3 shade(float2 p, float time, float2 pixel)`; shared helpers supply the vertex, fragment and buffer-0 uniform contract.
-3. Run `python3 tools/catalog.py generate`. This renders every preview at 1280×720, time 3 seconds, to an sRGB Metal target, and writes the source/render-settings fingerprint and PNG hash. Commit source, metadata, `preview.png` and `preview.json` together. Shared helper edits require regenerating dependent previews.
-4. Commit changes, then run `python3 tools/catalog.py validate`. This verifies metadata and previews, derives update dates from Git, assembles full sources and compiles them for tvOS. It writes `dist/catalog.json`, `dist/sources/` and `dist/previews/`.
-5. Merge to `main`. GitHub Actions repeats validation before replacing `published` with one complete commit. Pull requests validate without publishing. Failed validation leaves the previous publication available; GitHub Actions can be rerun with workflow_dispatch.
+Only indexed shaders enter the app catalog. Snippets, reference originals, templates, documentation, and `reuse` links remain authoring assets. Original references and required source license notices must be preserved.
 
-`updatedAt` is the committer date of the latest commit affecting that shader's metadata, body or shared helpers. Initial dates come from the migration commit. Preview-only regeneration does not change the date. The manifest records the authoring commit as `sourceRevision`; the app separately records the publication commit.
+## GPU tooling
 
-## App delivery
+Build and install from the Holodeck checkout:
 
-Holodeck downloads the published catalog and assets directly from this repository at a fixed commit. It ships with no catalog, shader source or previews. First launch requires internet; later launches can use a validated downloaded cache offline. If tvOS evicts that cache, the app needs to download again. Publishing shaders requires no app rebuild or snapshot-export step.
+```sh
+swift build --package-path HolodeckCore -c release --product holodeck-shader-tool
+mkdir -p "$HOME/.local/bin"
+install HolodeckCore/.build/release/holodeck-shader-tool "$HOME/.local/bin/holodeck-shader-tool"
+```
 
-## Contract
+Add that directory to `PATH`, or set `HOLODECK_SHADER_TOOL` to the executable's absolute path. `holodeck-shader-tool --version` must report major version 1. An invalid explicit override does not fall back to another executable. Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` for actual GPU regression probes. Static validation and CI do not require this executable or a sibling checkout.
 
-Schema version 1 also supports optional ordered `collections` (`id`, `name`, `description`, `shaderIDs`) and per-shader `discovery` (`tags`, `moods`, `motion`). Existing apps ignore these additions. Authoring-only `reuse` links are excluded from publication. New apps use collection order, mood/motion filters and tag search; older snapshots remain usable.
+## Delivery and previews
 
-`catalog.json` schema version 1 contains `defaultShaderID`, `sourceRevision`, and ordered `shaders` entries: `id`, `name`, `category`, `description`, `colors`, UTC ISO-8601 `updatedAt`, `sourcePath`, `sourceSHA256`, `previewPath`, `previewSHA256`. Paths are `sources/<id>.metal` and `previews/<id>.png`; hashes are lowercase SHA-256. Each source is a complete runtime library exposing `vertexShader` and `fragmentShader` with the 16-byte `ShaderUniforms` layout. Keep this contract compatible with released apps; incompatible formats require a new schema version.
+Use an updated HolodeckMac that generates previews; older Mac builds require preview files that this repo no longer stores. The app reads source and metadata without Git commits, Python scripts, or Xcode. It renders previews at 1280×720 and three seconds, caches successful images in app-owned storage, and serves them with hash-verified sources in immutable local publications. Failed preview renders use metadata-color gradients and show diagnostics in Settings; reload retries them. Invalid authoring files retain the last valid publication. The source folder stays read-only.
+
+Apple TV pairs with the Mac and uses its downloaded cache offline. The app's catalog schema, source entry points, 16-byte uniform layout, ordered collections, and discovery fields remain compatible. See Holodeck's [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md).
+
+GitHub publication is retired. The existing `published` branch remains frozen for older clients; CI validates authoring assets without publishing. No committed previews, generated publication directory, or historical verification reports are needed for authoring.

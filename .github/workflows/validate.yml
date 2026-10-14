@@ -1,0 +1,22 @@
+name: Validate shader library
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: library-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test authoring validation and license delivery
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - name: Validate library and compile shaders and examples
+        run: python3 tools/library.py validate --compile

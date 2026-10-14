@@ -1,3 +1,5 @@
-# Original references
+# References
 
-Preserve imported originals here using `tools/library.py import-reference`. See `docs/shader-library.md` for specifications and provenance. Existing repository shaders remain their own canonical examples. References are never delivered to the app. References for sources whose license does not permit redistributing originals are metadata-only: scaffold them with `tools/library.py new reference` and fill in provenance without adding files.
+Preserve permissively licensed originals here with a deliberate file inventory and SHA-256 checksums. Scaffold with `python3 tools/library.py new reference`, then follow the manual reference workflow in [the shader library](../docs/shader-library.md). Validation checks original bytes without copying, staging, or rewriting them.
+
+Existing repository shaders remain their own canonical examples. References are never delivered to the app. Sources whose license does not permit redistributing originals remain metadata-only with URL, author, license, and adaptation notes.

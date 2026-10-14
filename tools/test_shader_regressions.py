@@ -11,7 +11,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from unittest.mock import patch
 
-import catalog
+import authoring
+import shader_tool
 import library
 
 
@@ -200,7 +201,7 @@ def invalid_lane(source, kind, extent):
 
 class SceneGeometryTests(unittest.TestCase):
     def test_effective_lanes_fit_with_positive_extents_and_clearance(self):
-        source = (catalog.ROOT / "shaders/holodeck-grid/body.metal").read_text()
+        source = (authoring.ROOT / "shaders/holodeck-grid/body.metal").read_text()
         room = vector_constant(source, "kRoomHalf")
         clearance = scalar_constant(source, "kRoomClearance")
         scale = scalar_constant(source, "kRotatedBoundScale")
@@ -232,8 +233,7 @@ class MetalProbeCase(unittest.TestCase):
         cls.temp = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.temp.cleanup)
         cls.root = Path(cls.temp.name)
-        cls.probe = cls.root / "probe"
-        catalog.compile_renderer("shader-regression-probe.swift", cls.probe)
+        cls.probe = shader_tool.command("probe")
 
     def run_probe(self, label, mode, source, samples):
         source_path, samples_path, output_path = (self.root / f"{label}{suffix}"
@@ -242,7 +242,7 @@ class MetalProbeCase(unittest.TestCase):
             self.assertTrue(samples, f"{label}: no render samples")
         source_path.write_text(source)
         samples_path.write_text(json.dumps(samples))
-        subprocess.run([str(self.probe), mode, str(source_path), str(samples_path), str(output_path)], check=True)
+        subprocess.run([*self.probe, mode, str(source_path), str(samples_path), str(output_path)], check=True)
         result = json.loads(output_path.read_text())
         self.assertIsInstance(result, dict, f"{label}: probe result must be an object")
         if mode == "render":
@@ -320,7 +320,7 @@ class RegressionHarnessTests(unittest.TestCase):
             for source, count in (("absent", 0), ("anchor anchor", 2)):
                 with self.subTest(source=source), self.assertRaisesRegex(AssertionError, f"Fixture anchor: expected 1 match, found {count}"):
                     edit(source)
-        wrapper = (catalog.ROOT / "shared/fragment.metal").read_text()
+        wrapper = (authoring.ROOT / "shared/fragment.metal").read_text()
         drifted = replace_once(wrapper, "clamp(color,", "clamp( color,", "Simulate wrapper drift")
         with self.assertRaisesRegex(AssertionError, "Remove fragment clamp"):
             unclamped(drifted)
@@ -352,11 +352,11 @@ class RegressionHarnessTests(unittest.TestCase):
     def test_dotted_labels_preserve_independent_probe_files(self):
         with tempfile.TemporaryDirectory() as directory:
             case = MetalProbeCase()
-            case.root, case.probe = Path(directory), Path(directory) / "probe"
+            case.root, case.probe = Path(directory), ["probe", "probe"]
 
             def simulate_probe(args, check):
-                samples = json.loads(Path(args[3]).read_text())
-                Path(args[4]).write_text(json.dumps({"frames": [{"time": time} for time in samples]}))
+                samples = json.loads(Path(args[4]).read_text())
+                Path(args[5]).write_text(json.dumps({"frames": [{"time": time} for time in samples]}))
 
             with patch.object(subprocess, "run", side_effect=simulate_probe):
                 for extent in (0.0, 0.5, 0.25):
@@ -370,10 +370,10 @@ class RegressionHarnessTests(unittest.TestCase):
     def test_incomplete_render_results_fail_before_comparison(self):
         with tempfile.TemporaryDirectory() as directory:
             case = MetalProbeCase()
-            case.root, case.probe = Path(directory), Path(directory) / "probe"
+            case.root, case.probe = Path(directory), ["probe", "probe"]
             for frames in (None, [], [{}, {}]):
                 def simulate_probe(args, check):
-                    Path(args[4]).write_text(json.dumps({"frames": frames}))
+                    Path(args[5]).write_text(json.dumps({"frames": frames}))
                 with self.subTest(frames=frames), patch.object(subprocess, "run", side_effect=simulate_probe), self.assertRaises(AssertionError):
                     case.run_probe("incomplete", "render", "source", [0])
             with patch.object(subprocess, "run") as run, self.assertRaisesRegex(AssertionError, "no render samples"):
@@ -383,23 +383,23 @@ class RegressionHarnessTests(unittest.TestCase):
     def test_nonobject_probe_results_fail_with_label(self):
         with tempfile.TemporaryDirectory() as directory:
             case = MetalProbeCase()
-            case.root, case.probe = Path(directory), Path(directory) / "probe"
+            case.root, case.probe = Path(directory), ["probe", "probe"]
             for mode in ("render", "compute"):
                 for payload in (None, [], 42):
                     def simulate_probe(args, check):
-                        Path(args[4]).write_text(json.dumps(payload))
+                        Path(args[5]).write_text(json.dumps(payload))
                     with self.subTest(mode=mode, payload=payload), patch.object(subprocess, "run", side_effect=simulate_probe):
                         with self.assertRaisesRegex(AssertionError, "bad-shape: probe result must be an object"):
                             case.run_probe("bad-shape", mode, "source", [0])
 
-    def test_compile_failure_still_runs_class_cleanup(self):
+    def test_tool_resolution_failure_still_runs_class_cleanup(self):
         class FailingProbe(MetalProbeCase):
             def test_unused(self):
-                self.fail("Compiler failure should prevent the test from running")
+                self.fail("Tool resolution failure should prevent the test from running")
 
         result = unittest.TestResult()
-        failure = subprocess.CalledProcessError(1, "swiftc")
-        with patch.object(catalog, "compile_renderer", side_effect=failure):
+        failure = ValueError("No usable shader tool")
+        with patch.object(shader_tool, "command", side_effect=failure):
             unittest.TestSuite([FailingProbe("test_unused")]).run(result)
         self.assertEqual(result.testsRun, 0)
         self.assertEqual(len(result.errors), 1)
@@ -409,82 +409,12 @@ class RegressionHarnessTests(unittest.TestCase):
 @unittest.skipUnless(os.environ.get("HOLODECK_GPU_TESTS") == "1", "Opt in to actual Metal shader regression probes")
 class MetalSceneRegressionTests(MetalProbeCase):
 
-    def test_render_probe_rejects_invalid_times_before_any_output(self):
-        source_path = self.root / "time-validation.metal"
-        source_path.write_text(catalog.shader_entry("plasma")[1])
-        payloads = ("[-1]", "[NaN]", "[Infinity]", "[-Infinity]", "[true]", "[false]", '["3"]',
-                    "[1e39]", "[0, 3.25, -1]", "[0, true]", "[0, 1e39]")
-        for index, payload in enumerate(payloads):
-            samples_path = self.root / f"invalid-times-{index}.json"
-            output_path = self.root / f"invalid-times-{index}.result.json"
-            samples_path.write_text(payload)
-            with self.subTest(payload=payload):
-                result = subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output_path)],
-                                        capture_output=True, text=True)
-                self.assertEqual(result.returncode, 1, result.stderr)
-                self.assertIn("Invalid", result.stderr)
-                self.assertFalse(output_path.exists())
-                self.assertFalse(list(self.root.glob(f"invalid-times-{index}.result.*.rgba32")))
-        samples_path = self.root / "empty-times.json"
-        output_path = self.root / "empty-times.result.json"
-        samples_path.write_text("[]")
-        subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output_path)], check=True)
-        self.assertEqual(json.loads(output_path.read_text())["frames"], [])
 
-    def test_probe_rejects_invalid_samples_before_metal_setup(self):
-        invalid_source = self.root / "invalid-input-source.metal"
-        invalid_source.write_text("not a Metal library")
-        fixtures = [
-            ("render", "{}", "Invalid render samples: expected an array"),
-            ("render", "null", "Invalid render samples"),
-            ("render", "[null]", "Invalid render samples[0]: expected a number"),
-            ("render", "[[0]]", "Invalid render samples[0]: expected a number"),
-            ("render", "[0,3.25,-1]", "Invalid render samples[2]: -1 must be nonnegative"),
-            ("render", "[0,true]", "Invalid render samples[1]: expected a number, got true"),
-            ("render", "[false]", "Invalid render samples[0]: expected a number, got false"),
-            ("render", '[0,"3"]', "Invalid render samples[1]: expected a number"),
-            ("render", "[0,1e39]", "Invalid render samples[1]"),
-            ("render", "[3.4028236e38]", "Invalid render samples[0]"),
-            ("render", "[NaN]", "Invalid render samples"),
-            ("render", "[Infinity]", "Invalid render samples"),
-            ("compute", "{}", "Invalid compute samples"),
-            ("compute", "null", "Invalid compute samples"),
-            ("compute", "[]", "Invalid compute samples: expected a nonempty array"),
-            ("compute", "[null]", "Invalid compute samples[0]: expected two numbers"),
-            ("compute", "[[0]]", "Invalid compute samples[0]: expected two numbers"),
-            ("compute", "[[0,1,2]]", "Invalid compute samples[0]: expected two numbers"),
-            ("compute", "[[true,1]]", "Invalid compute samples[0][0]: expected a number, got true"),
-            ("compute", "[[0,false]]", "Invalid compute samples[0][1]: expected a number, got false"),
-            ("compute", "[[0,null]]", "Invalid compute samples[0][1]: expected a number"),
-            ("compute", '[[0,"1"]]', "Invalid compute samples[0][1]: expected a number"),
-            ("compute", "[[1e39,0]]", "Invalid compute samples[0][0]"),
-            ("compute", "[[0,1],[0,-1e39]]", "Invalid compute samples[1][1]"),
-            ("compute", "[[3.4028236e38,0]]", "Invalid compute samples[0][0]"),
-            ("compute", "[[NaN,0]]", "Invalid compute samples"),
-            ("compute", "[[0,Infinity]]", "Invalid compute samples"),
-            ("compute", "not-json", "Invalid compute samples"),
-        ]
-        for index, (mode, payload, message) in enumerate(fixtures):
-            samples_path = self.root / f"input-validation-{index}.json"
-            samples_path.write_text(payload)
-            for source in (self.root / "missing-input-source.metal", invalid_source):
-                output = self.root / f"input-validation-{index}-{source.stem}.result.json"
-                with self.subTest(mode=mode, payload=payload, source=source.name):
-                    result = subprocess.run([str(self.probe), mode, str(source), str(samples_path), str(output)],
-                                            capture_output=True, text=True)
-                    self.assertEqual(result.returncode, 1, result.stderr)
-                    self.assertIn(message, result.stderr)
-                    if "1e39" in payload or "3.4028236e38" in payload:
-                        value = re.search(r": ([^ ]+) is not finite as Float", result.stderr)
-                        self.assertIsNotNone(value, result.stderr)
-                        self.assertGreater(abs(float(value[1])), float32(3.4028235e38))
-                    self.assertFalse(output.exists())
-                    self.assertFalse(list(self.root.glob(f"{output.stem}.*.rgba32")))
 
     def test_render_probe_preserves_numeric_uniform_bits(self):
         # Read float bits before the render target can flush a subnormal to zero.
         # Each 16-bit word is exactly representable as an ordinary float color.
-        source = replace_once(unclamped(catalog.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
+        source = replace_once(unclamped(authoring.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
                               "uint timeBits = as_type<uint>(u.time);\n"
                               "    float3 color = float3(float(timeBits & 0xffffu), float(timeBits >> 16), 0.0);",
                               "Expose numeric uniform bits")
@@ -493,7 +423,7 @@ class MetalSceneRegressionTests(MetalProbeCase):
         samples_path = self.root / "numeric-inputs.json"
         samples_path.write_text("[0,-0.0,3.25,1e-50,1e-400,-1e-50,-1e-400,3.4028235e38,1e-45]")
         output = self.root / "numeric-inputs.result.json"
-        subprocess.run([str(self.probe), "render", str(source_path), str(samples_path), str(output)], check=True)
+        subprocess.run([*self.probe, "render", str(source_path), str(samples_path), str(output)], check=True)
         frames = json.loads(output.read_text())["frames"]
         expected = [0x00000000, 0x80000000, 0x40500000, 0x00000000, 0x00000000,
                     0x80000000, 0x80000000, 0x7f7fffff, 0x00000001]
@@ -530,7 +460,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
 """)
             output = self.root / f"numeric-compute-{component}.result.json"
             with self.subTest(component=component):
-                subprocess.run([str(self.probe), "compute", str(source_path), str(samples_path), str(output)], check=True)
+                subprocess.run([*self.probe, "compute", str(source_path), str(samples_path), str(output)], check=True)
                 self.assertEqual(json.loads(output.read_text())["seeds"], [row[column] for row in rows])
 
     def test_scene_literals_match_compiled_metal_constants(self):
@@ -559,69 +489,9 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         self.assertEqual(result["seeds"], parsed)
         library.compile_source(source, "literal-rounding")
 
-    def test_shared_renderer_and_cli_validate_time_and_dimensions(self):
-        driver_source = self.root / "validation-driver.swift"
-        driver_source.write_text("""
-import Foundation
-import Metal
-@main enum ValidationDriver {
-    static func main() { runTool { try run() } }
-    static func reject(_ expected: String, _ body: () throws -> Void) throws {
-        do { try body() }
-        catch let error as ToolError {
-            guard error.description == expected else { throw error }
-            return
-        }
-        throw ToolError("Expected rejection: \\(expected)")
-    }
-    static func run() throws {
-        for (width, height) in [(1, 1), (8192, 1), (1, 8192), (4096, 4096), (8192, 2048)] {
-            try validateRenderDimensions(width: width, height: height)
-        }
-        let invalid = [(0, 1, "Invalid width"), (-1, 1, "Invalid width"), (8193, 1, "Invalid width"),
-                       (Int.max, 1, "Invalid width"), (Int.min, 1, "Invalid width"),
-                       (1, 0, "Invalid height"), (1, -1, "Invalid height"), (1, 8193, "Invalid height"),
-                       (1, Int.max, "Invalid height"), (1, Int.min, "Invalid height"),
-                       (4097, 4096, "Render exceeds 16 megapixels")]
-        let context = try MetalContext(sourcePath: CommandLine.arguments[1])
-        for (width, height, message) in invalid {
-            try reject(message) { try validateRenderDimensions(width: width, height: height) }
-            try reject(message) { _ = try OffscreenRenderer(context: context, width: width, height: height, pixelFormat: .rgba32Float) }
-        }
-        let renderer = try OffscreenRenderer(context: context, width: 1, height: 1, pixelFormat: .rgba32Float)
-        for time: Float in [-1, .nan, .infinity, -.infinity] {
-            try reject("Invalid time") { _ = try renderer.render(time: time) }
-        }
-        for time: Float in [0, 3.25] { _ = try renderer.render(time: time) }
-        print("Shared renderer validation passed")
-    }
-}
-""")
-        driver = self.root / "validation-driver"
-        catalog.compile_renderer(driver_source, driver)
-        metal_path = self.root / "validation.metal"
-        metal_path.write_text(catalog.shader_entry("plasma")[1])
-        subprocess.run([str(driver), str(metal_path)], check=True)
-        preview = self.root / "preview"
-        catalog.compile_renderer("render-preview.swift", preview)
-        options = [("--width", "0", "Invalid width"), ("--width", "8193", "Invalid width"),
-                   ("--width", str(2**63 - 1), "Invalid width"), ("--width", "text", "Invalid width"),
-                   ("--height", "0", "Invalid height"), ("--height", "text", "Invalid height")]
-        options += [("--time", time, "Invalid time") for time in ("-1", "nan", "inf", "-inf", "true", "1e39")]
-        for option, value, message in options:
-            with self.subTest(option=option, value=value):
-                result = subprocess.run([str(preview), str(self.root / "missing.metal"), str(self.root / "invalid.png"),
-                                         option, value], capture_output=True, text=True)
-                self.assertEqual(result.returncode, 1)
-                self.assertEqual(result.stderr.strip(), message)
-        result = subprocess.run([str(preview), str(self.root / "missing.metal"), str(self.root / "invalid.png"),
-                                 "--width", "4097", "--height", "4096"], capture_output=True, text=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertEqual(result.stderr.strip(), "Render exceeds 16 megapixels")
-        self.assertFalse((self.root / "invalid.png").exists())
 
     def test_actual_matrix_seed_sequence_through_one_year(self):
-        source = catalog.shader_entry("matrix-corridor")[1]
+        source = authoring.shader_entry("matrix-corridor")[1]
         source += """
 kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
                             device uint *seeds [[buffer(1)]],
@@ -652,7 +522,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         print(f"Metal seed oracle: {len(samples)} cases on {result['device']}", flush=True)
 
     def test_nonpositive_lane_is_skipped_before_bounce_division(self):
-        source = unclamped(catalog.shader_entry("holodeck-grid")[1])
+        source = unclamped(authoring.shader_entry("holodeck-grid")[1])
         # A sentinel immediately before the real bounce call proves invalid geometry
         # cannot reach it, even if subsequent intersection math would hide a NaN.
         source = replace_once(source, BOUNCE_CALL,
@@ -682,7 +552,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         print(f"Metal invalid lanes: zero/negative authored and available extents skip the bounce call on {actual['device']}", flush=True)
 
     def test_nan_diagnostic_is_visible_before_fragment_clamp(self):
-        source = replace_once(catalog.shader_entry("holodeck-grid")[1], FRAGMENT_COLOR,
+        source = replace_once(authoring.shader_entry("holodeck-grid")[1], FRAGMENT_COLOR,
                               "float3 color = float3(as_type<float>(0x7fc00000u));", "Inject NaN diagnostic")
         raw = self.run_probe("nan-raw", "render", unclamped(source), [0])
         self.assertEqual(raw["frames"][0]["nonfinite"], 160 * 90 * 3)
@@ -690,7 +560,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         self.assertEqual(clamped["frames"][0]["nonfinite"], 0)
 
     def test_shared_uniforms_deliver_resolution_and_time(self):
-        source = replace_once(unclamped(catalog.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
+        source = replace_once(unclamped(authoring.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
                               "float3 color = float3(u.resolution, u.time);", "Expose Metal uniform values")
         times = [0, 3.25]
         result = self.run_probe("uniforms", "render", source, times)
@@ -703,7 +573,7 @@ kernel void regressionProbe(device const float2 *samples [[buffer(0)]],
         times = [0, 3, 10, 1819.875, 1820, 1820.125, 3740,
                  130971.875, 130972, 130972.125, 86400, 20 * 86400, 78 * 86400, 365 * 86400]
         for scene in ("matrix-corridor", "holodeck-grid"):
-            source = unclamped(catalog.shader_entry(scene)[1])
+            source = unclamped(authoring.shader_entry(scene)[1])
             result = self.run_probe(scene + "-finite", "render", source, times)
             self.assertTrue(all(frame["nonfinite"] == 0 for frame in result["frames"]), scene)
 

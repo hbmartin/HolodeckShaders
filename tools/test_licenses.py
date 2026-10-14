@@ -215,6 +215,10 @@ def audit_notices(records=None, upstreams=None):
         require_notices("assembled " + metadata["id"], source, references, upstreams)
 
 
+def license_fixture_root():
+    return fixture_root("shaders", "shared", "snippets", "references")
+
+
 def remove_mit_notice(path, holder):
     pattern = r"// Copyright \(c\) " + re.escape(holder) + r".*?// (?:THE )?SOFTWARE\.\n"
     text, count = re.subn(pattern, "", path.read_text(), count=1, flags=re.DOTALL)
@@ -240,7 +244,7 @@ class LicenseDeliveryTests(unittest.TestCase):
 
     def test_unregistered_licensed_references_are_rejected(self):
         for original in ("inferno", "sparks-from-fire"):
-            with self.subTest(original=original), fixture_root("shaders", "shared", "snippets", "references") as root:
+            with self.subTest(original=original), license_fixture_root() as root:
                 destination = root / "references/unregistered"
                 shutil.copytree(root / "references" / original, destination)
                 spec = authoring.read_json(destination / "reference.json")
@@ -251,7 +255,7 @@ class LicenseDeliveryTests(unittest.TestCase):
 
     def test_declared_mit_cc_and_mixed_snippets_cannot_have_empty_requirements(self):
         for original in ("color-ramps", "kali-starfield", "rune-glyph"):
-            with self.subTest(original=original), fixture_root("shaders", "shared", "snippets", "references") as root:
+            with self.subTest(original=original), license_fixture_root() as root:
                 destination = root / "snippets/unregistered"
                 shutil.copytree(root / "snippets" / original, destination)
                 spec = authoring.read_json(destination / "snippet.json")
@@ -266,32 +270,32 @@ class LicenseDeliveryTests(unittest.TestCase):
                     audit_notices(records)
 
     def test_secondary_notice_is_required_independently(self):
-        with fixture_root("shaders", "shared", "snippets", "references") as root:
+        with license_fixture_root() as root:
             remove_mit_notice(root / "snippets/dot-curtain/code.metal", "2017-present gl-transitions contributors")
             with self.assertRaisesRegex(ValueError, "Missing gl-transitions-polka MIT notice"):
                 audit_notices()
 
     def test_shared_notice_is_required(self):
-        with fixture_root("shaders", "shared", "snippets", "references") as root:
+        with license_fixture_root() as root:
             remove_mit_notice(root / "shared/common.metal", "2014 David Hoskins")
             with self.assertRaisesRegex(ValueError, "Missing hoskins-hash MIT notice in shared/common"):
                 audit_notices()
 
     def test_assembled_common_notice_cannot_hide_missing_body_notice(self):
-        with fixture_root("shaders", "shared", "snippets", "references") as root:
+        with license_fixture_root() as root:
             remove_mit_notice(root / "shaders/matrix-corridor/body.metal", "2014 David Hoskins")
             with self.assertRaisesRegex(ValueError, "Missing hoskins-hash MIT notice in shaders/matrix"):
                 audit_notices()
 
     def test_missing_cc_uri_is_rejected(self):
-        with fixture_root("shaders", "shared", "snippets", "references") as root:
+        with license_fixture_root() as root:
             path = root / "snippets/rune-glyph/code.metal"
             path.write_text(path.read_text().replace(UPSTREAM_REQUIREMENTS["inside-the-matrix"]["uri"], ""))
             with self.assertRaisesRegex(ValueError, "Missing inside-the-matrix CC URI"):
                 audit_notices()
 
     def test_every_mit_block_is_required_and_incomplete_blocks_are_rejected(self):
-        with fixture_root("shaders", "shared", "snippets", "references") as root:
+        with license_fixture_root() as root:
             path = root / "references/inferno/original/LICENSE"
             first = mit_notices(path.read_text())[0]
             second = first.replace("2023 Paul Hudson and other authors.", "2001 Fixture Author.")

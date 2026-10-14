@@ -1,5 +1,5 @@
-.cache/
-dist/
+/.cache/
+/dist/
 .DS_Store
 __pycache__/
 shaders/*/preview.png

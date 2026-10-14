@@ -96,8 +96,6 @@ SOURCE_REQUIREMENTS = {
     'snippets/simplex-noise-3d/example.metal': [],
     'snippets/sine-warp/code.metal': ['inferno'],
     'snippets/sine-warp/example.metal': [],
-    'snippets/sinebow-lines/code.metal': ['inferno'],
-    'snippets/sinebow-lines/example.metal': [],
     'snippets/sphere-shell/code.metal': [],
     'snippets/sphere-shell/example.metal': [],
     'snippets/studio-material/example.metal': [],

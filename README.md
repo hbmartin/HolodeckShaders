@@ -16,20 +16,12 @@ Only indexed shaders enter the app catalog. Snippets, reference originals, templ
 
 ## GPU tooling
 
-Build and install from the Holodeck checkout:
+Follow Holodeck's [CLI installation instructions](https://github.com/hbmartin/Holodeck#shader-tooling). This repo resolves the installed executable through `PATH`, or `HOLODECK_SHADER_TOOL` set to its absolute path. `holodeck-shader-tool --version` must report major version 1; the version check has a five-second timeout and receives no interactive input. An invalid explicit override, including an empty value, does not fall back to another executable.
 
-```sh
-swift build --package-path HolodeckCore -c release --product holodeck-shader-tool
-mkdir -p "$HOME/.local/bin"
-install HolodeckCore/.build/release/holodeck-shader-tool "$HOME/.local/bin/holodeck-shader-tool"
-```
-
-Add that directory to `PATH`, or set `HOLODECK_SHADER_TOOL` to the executable's absolute path. `holodeck-shader-tool --version` must report major version 1; the version check has a five-second timeout and receives no interactive input. An invalid explicit override, including an empty value, does not fall back to another executable. Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` for actual GPU regression probes. Static validation and CI do not require this executable or a sibling checkout.
+Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` for shader-specific geometry, seed, parser, and long-uptime probes. Generic GPU probe tests live in HolodeckCore; see the same tooling guide. Static validation and CI require no installed CLI or sibling checkout.
 
 ## Delivery and previews
 
-Use an updated HolodeckMac that generates previews; older Mac builds require preview files that this repo no longer stores. The app reads source and metadata without Git commits, Python scripts, or Xcode. It renders previews at 1280×720 and three seconds, caches successful images in app-owned storage, and serves them with hash-verified sources in immutable local publications. Failed preview renders use metadata-color gradients and show diagnostics in Settings; reload retries them. Invalid authoring files retain the last valid publication. The source folder stays read-only.
-
-Apple TV pairs with the Mac and uses its downloaded cache offline. The app's catalog schema, source entry points, 16-byte uniform layout, ordered collections, and discovery fields remain compatible. See Holodeck's [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md).
+Use an updated HolodeckMac that generates previews, then choose this folder under **Settings → Shader Library** and press **Reload Shaders** after edits. Holodeck owns previews, caches, and local publications; do not commit generated images here. See its [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md) for preview behavior and TV setup, and its [technical reference](https://github.com/hbmartin/Holodeck/blob/main/docs/local-shader-serving.md) for serving and app behavior.
 
 GitHub publication is retired. The existing `published` branch remains frozen for older clients; CI validates authoring assets without publishing. No committed previews, generated publication directory, or historical verification reports are needed for authoring.

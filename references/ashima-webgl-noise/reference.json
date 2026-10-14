@@ -7,6 +7,7 @@
   "id": "ashima-webgl-noise",
   "language": "GLSL",
   "name": "Ashima WebGL Noise",
+  "notes": "Textureless 3D simplex noise by Ian McEwan (Ashima Arts), maintained by Stefan Gustavson, MIT licensed (LICENSE preserved in `original/`). Upstream: https://github.com/ashima/webgl-noise (maintained fork: https://github.com/stegu/webgl-noise). Pinned to `6abed1e`.\n\nFills the gap left by the shared 2D value noise: smooth 3D noise for animated surfaces and volumes.\n",
   "origin": {
     "author": "Ian McEwan, Ashima Arts; Stefan Gustavson",
     "importedAt": "2026-10-10T18:51:46.120658Z",

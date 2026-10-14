@@ -4,6 +4,7 @@
   "id": "bigwings-fireworks",
   "language": "GLSL (Ghostty/Shadertoy)",
   "name": "Fireworks (BigWings)",
+  "notes": "Shadertoy lscGRl by Martijn Steinrucken, as included in 0xhckr/ghostty-shaders (`85898f0`). Originals are preserved only for permissive licenses. NC/SA or unlicensed sources are recorded here as metadata only (no files); see docs/shader-library.md.\n\nVisual: repeating bursts of particles with inverse-square glows and rainbow cycling.\n",
   "origin": {
     "author": "Martijn Steinrucken (BigWings), 2015",
     "license": "CC BY-NC-SA 3.0 (stated in shader header)",

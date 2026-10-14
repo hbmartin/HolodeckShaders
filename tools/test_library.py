@@ -56,6 +56,62 @@ class LibraryTests(unittest.TestCase):
         with self.assertRaises(ValueError): library.scaffold("shader", "new-scene")
         with self.assertRaises(ValueError): library.scaffold("shader", "../escape")
 
+    def test_reference_scaffold_and_display_use_metadata_without_readme(self):
+        destination = library.scaffold("reference", "documented-reference")
+        self.assertFalse((destination / "README.md").exists())
+        metadata = destination / "reference.json"
+        spec = authoring.read_json(metadata)
+        self.assertNotIn("notes", spec)
+        library.validate()
+        detail = library.show("reference", "documented-reference")
+        self.assertEqual(detail["specification"], spec)
+        self.assertEqual(detail["sourceLocations"], [])
+        self.assertIsNone(detail["example"])
+        self.assertIn(spec["summary"], detail["documentation"])
+        self.assertIn(spec["adaptationNotes"], detail["documentation"])
+
+        spec["requirements"] = ["A source texture"]
+        spec["origin"]["url"] = "https://example.invalid/reference"
+        spec["notes"] = "A unique résumé note.\n\n| Technique | Detail |\n| --- | --- |\n| Warp | " + "x" * 2100 + " |\n"
+        authoring.write_json(metadata, spec)
+        # A leftover document cannot override metadata, which is now authoritative.
+        (destination / "README.md").write_text("stale external documentation")
+        library.validate()
+        detail = library.show("reference", "documented-reference")
+        for text in (spec["notes"], spec["requirements"][0], spec["origin"]["url"]):
+            self.assertIn(text, detail["documentation"])
+        self.assertNotIn("stale external documentation", detail["documentation"])
+        self.assertEqual(library.search("unique résumé note", "reference"), [])
+        text, machine = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(text): library.emit(detail)
+        with contextlib.redirect_stdout(machine): library.emit(detail, True)
+        self.assertEqual(text.getvalue().count("A unique résumé note."), 1)
+        self.assertNotIn('"schemaVersion"', text.getvalue())
+        self.assertEqual(json.loads(machine.getvalue()), detail)
+
+    def test_reference_notes_must_be_nonempty_markdown_strings(self):
+        destination = library.scaffold("reference", "invalid-notes")
+        metadata = destination / "reference.json"
+        spec = authoring.read_json(metadata)
+        for notes in (None, 42, True, [], {}, "", " \n\t"):
+            with self.subTest(notes=notes):
+                spec["notes"] = notes
+                authoring.write_json(metadata, spec)
+                with self.assertRaisesRegex(ValueError, "Invalid reference notes: invalid-notes"):
+                    library.validate()
+        del spec["notes"]
+        authoring.write_json(metadata, spec)
+        library.validate()
+
+    def test_reference_display_includes_original_inventory(self):
+        item = library.find("reference", "inferno")
+        self.assertFalse((self.root / item["path"] / "README.md").exists())
+        detail = library.show("reference", "inferno")
+        for filename, checksum in item["specification"]["files"].items():
+            self.assertIn(filename, detail["documentation"])
+            self.assertIn(checksum, detail["documentation"])
+            self.assertIn(item["path"] + "/original/" + filename, detail["sourceLocations"])
+
     def test_validation_reuses_shader_inputs(self):
         library.scaffold("shader", "unlisted-scene")
         shader_ids = {item["id"] for item in library.assets("shader")}

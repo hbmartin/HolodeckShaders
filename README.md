@@ -23,9 +23,9 @@ For portable static validation, download the versioned checker and checksum inve
 
 ```sh
 mkdir -p .cache/checker
-gh release download v1.0.1 --repo hbmartin/HolodeckShaderCheck --pattern '*.pyz' --pattern '*.whl' --pattern SHA256SUMS --dir .cache/checker
+gh release download v1.0.2 --repo hbmartin/HolodeckShaderCheck --pattern '*.pyz' --pattern '*.whl' --pattern SHA256SUMS --dir .cache/checker
 (cd .cache/checker && shasum -a 256 -c SHA256SUMS)
-python3 -I .cache/checker/holodeck-shader-check-1.0.1.pyz validate "$PWD" --json
+python3 -I .cache/checker/holodeck-shader-check-1.0.2.pyz validate "$PWD" --json
 ```
 
 Alternatively install the verified wheel into a virtual environment to obtain `holodeck-shader-check`. Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. GitHub CI pins the checker artifact by SHA-256. Native compilation CI freezes the pinned Holodeck dependency graph and uses the `xcode-27` preview runner for Swift 6.4.

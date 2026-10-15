@@ -1,0 +1,6 @@
+interface:
+  display_name: "Holodeck Authoring"
+  short_description: "Author and verify assets in a Holodeck library"
+  default_prompt: "Use $holodeck-authoring to create or adapt a shader in this Holodeck library and verify its contracts and provenance."
+policy:
+  allow_implicit_invocation: true

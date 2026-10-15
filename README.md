@@ -1,31 +1,45 @@
 # HolodeckShaders
 
-Shader sources and authoring assets for Holodeck. HolodeckMac loads this folder, generates previews, and serves a complete catalog to Apple TV over the local network. Shader edits require reload, not an app rebuild.
+Shader sources, skills and authoring assets for Holodeck. HolodeckMac loads this folder, generates previews, and serves the selected catalog to Apple TV over the local network. Shader edits require reload, not an app rebuild.
 
 ## Authoring
 
-See [the reuse library](docs/shader-library.md) and [authoring workflow](docs/shader-authoring.md). Python uses only its standard library. SDK compilation requires Xcode; sample rendering and GPU regression tests use the installed Holodeck CLI on a Mac with Metal.
+Use [the Holodeck authoring skill](skills/holodeck-authoring/SKILL.md), [reuse library](docs/shader-library.md), and [authoring workflow](docs/shader-authoring.md). The skill locates the requested library checkout explicitly; its installation directory is not assumed to contain the assets. Generic Metal technique skills remain under `vendor/metal-skills`.
 
-1. Search techniques with `python3 tools/library.py search "flowing ribbons"` and inspect contracts with `show`.
-2. Create `shaders/<id>/metadata.json` and `body.metal`, or scaffold with `python3 tools/library.py new shader my-scene`. Bodies implement `float3 shade(float2 p, float time, float2 pixel)`.
-3. Run `python3 tools/library.py validate --compile` and `python3 -m unittest discover -s tools -p 'test_*.py'`. Validation includes unlisted shaders; compilation covers every complete shader and snippet example for macOS and tvOS.
-4. Render samples with `python3 tools/library.py render shader my-scene --times 0,3,10`. Inspect motion and target-device performance in Holodeck.
-5. When selected, add the stable ID to the ordered `shaders` array in `index.json` and any collections. Commit source and metadata. In HolodeckMac, select this folder under **Settings → Shader Library**, then press **Reload Shaders**.
+1. Search assets with `rg` and read their specifications, contracts and examples directly.
+2. Copy a matching template into an unused asset directory, refuse overwrites, replace all placeholders, and refine the source and metadata. Bodies implement `float3 shade(float2 p, float time, float2 pixel)`.
+3. Register every new copyable source and its upstream notice obligations in `authoring.json`.
+4. Run `holodeck-shader-tool library validate ROOT --compile`; use `--gpu` locally for actual regression probes. Validation includes unlisted shaders and compilation covers every complete shader and snippet example for macOS and tvOS.
+5. Render with `holodeck-shader-tool library render ROOT shader my-scene --times 0,3,10`. Inspect samples, motion and target-device performance in Holodeck.
+6. When selected, add the stable ID to the ordered `shaders` array in `index.json` and appropriate collections. Commit source and metadata, select this folder in **HolodeckMac → Settings → Shader Library**, then press **Reload Shaders**.
 
-Only indexed shaders enter the app catalog. Snippets, reference originals, templates, documentation, and `reuse` links remain authoring assets. Original references and required source license notices must be preserved.
+Only indexed shaders enter the app catalog. Snippets, originals, templates, documentation, provenance, and `reuse` links remain authoring assets. Original references and required source license notices must be preserved. Technical verification does not imply editorial selection.
 
-## GPU tooling
+## External tooling
 
-Follow Holodeck's [CLI installation instructions](https://github.com/hbmartin/Holodeck#shader-tooling). This repo resolves the installed executable through `PATH`, or `HOLODECK_SHADER_TOOL` set to its absolute path. `holodeck-shader-tool --version` must report major version 1; the version check has a five-second timeout and receives no interactive input. An invalid explicit override, including an empty value, does not fall back to another executable.
+[HolodeckShaderCheck](https://github.com/hbmartin/HolodeckShaderCheck) owns Python assembly, validation, license checks, CPU regressions, and GPU-profile orchestration. It has no runtime dependencies beyond Python 3.9 or later. This repository contains no authoring implementation or test scripts.
 
-Render and probe calls also receive no interactive input. Each sample render has a 120-second deadline; each probe batch has a 300-second deadline. Set `HOLODECK_RENDER_TIMEOUT_SECONDS` or `HOLODECK_PROBE_TIMEOUT_SECONDS` to a positive finite number of seconds to override these defaults. Empty or invalid values fail before tool execution. Version checks retain their five-second deadline. Bare executable names and relative paths are invalid explicit tool overrides.
+For portable static validation, download the versioned checker and checksum inventory into ignored scratch storage:
 
-CPU geometry and parser tests run with the ordinary Python suite. Run `HOLODECK_GPU_TESTS=1 python3 -m unittest discover -s tools -p 'test_*.py'` to additionally run actual shared-source uniform/clamp checks, scene geometry/seed/long-uptime probes, and the combined-recipe compile/render test. Generic GPU probe tests live in HolodeckCore; see the same tooling guide. Static validation and CI require no installed CLI or sibling checkout.
+```sh
+mkdir -p .cache/checker
+gh release download v1.0.1 --repo hbmartin/HolodeckShaderCheck --pattern '*.pyz' --pattern '*.whl' --pattern SHA256SUMS --dir .cache/checker
+(cd .cache/checker && shasum -a 256 -c SHA256SUMS)
+python3 -I .cache/checker/holodeck-shader-check-1.0.1.pyz validate "$PWD" --json
+```
 
-## Delivery and previews
+Alternatively install the verified wheel into a virtual environment to obtain `holodeck-shader-check`. Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. GitHub CI pins the checker artifact by SHA-256.
 
-Use HolodeckMac built from [commit `93ec2ee`](https://github.com/hbmartin/Holodeck/commit/93ec2ee) or later, which generates previews. Older builds require preview files this repo no longer stores. Choose this folder under **Settings → Shader Library** and press **Reload Shaders** after edits. Holodeck owns previews, caches, and local publications; do not commit generated images here. See its [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md) for preview behavior and TV setup, and its [technical reference](https://github.com/hbmartin/Holodeck/blob/main/docs/local-shader-serving.md) for serving and app behavior.
+For compilation, rendering, and GPU profiles, install `holodeck-shader-tool` **1.1.0 or later with its resource bundle** using [Holodeck's tooling instructions](https://github.com/hbmartin/Holodeck#shader-tooling). The native CLI bundles a checksum-pinned checker zipapp and runs it through isolated Python; runtime operation performs no downloads or package installation. `library info --json` reports the checker version and interface. Native library commands accept `--python /absolute/interpreter`, defaulting to `/usr/bin/python3`.
 
-Python validation and SDK compilation accept oversized sources. Holodeck enforces delivery limits of 1 MiB per assembled source, 16 MiB across indexed sources, and 2 MiB per manifest. Reload in HolodeckMac to verify delivery; rejected candidates report their byte counts and limits while preserving the previous publication.
+The standalone checker finds its native GPU backend through `--shader-tool /absolute/tool`, `HOLODECK_SHADER_TOOL`, or PATH when neither override is set. Invalid explicit overrides, including empty environment values, never fall back. The backend must report major version 1. Version checks have a five-second timeout and disconnected stdin. Render and probe calls also disconnect stdin and use 120/300-second deadlines. Positive finite `HOLODECK_RENDER_TIMEOUT_SECONDS` and `HOLODECK_PROBE_TIMEOUT_SECONDS` override operation deadlines; invalid values fail before execution.
 
-GitHub publication is retired. The existing `published` branch remains frozen for older clients; CI validates authoring assets without publishing. No committed previews, generated publication directory, or historical verification reports are needed for authoring.
+Checker exit codes are 0 (success), 1 (failed checks), and 2 (usage or unavailable tooling). `validate --json` emits one structured result on stdout. Render samples default to ignored `.cache/library/`; they never alter app caches or source assets.
+
+## Delivery and cutover
+
+Holodeck owns previews, caching, publication and delivery. See its [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md). Do not commit generated previews, publication output, or historical verification reports. The legacy `published` branch remains frozen; CI validates without publishing.
+
+Authoring validation and compilation preserve raw UTF-8 assembly bytes and accept oversized sources. Holodeck enforces delivery limits of 1 MiB per assembled source, 16 MiB across indexed sources, and 2 MiB per manifest. Reload in HolodeckMac to verify delivery; rejected candidates report byte counts and limits while preserving the previous publication.
+
+The script-free authoring cutover requires the updated Holodeck build for automated shader requests. Its worker verifies the checker interface and schema, permits only scoped provenance additions, and independently performs technical/GPU/image verification. Older builds that invoke local Python scripts cannot manage requests against this checkout. Ordinary catalog loading remains compatible with builds that generate their own previews (commit `93ec2ee` or later). Drain active requests before switching a managed checkout.

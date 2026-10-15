@@ -1,0 +1,182 @@
+{
+  "regressionProfiles": [
+    "shared-runtime-v1",
+    "holodeck-grid-v1",
+    "matrix-corridor-v1"
+  ],
+  "schemaVersion": 1,
+  "sourceRequirements": {
+    "shaders/apollonian-twist/body.metal": [
+      "swiftui-new-metal-shaders"
+    ],
+    "shaders/aurora/body.metal": [],
+    "shaders/brushed-gold/body.metal": [],
+    "shaders/chrome/body.metal": [],
+    "shaders/dramamine-sunset/body.metal": [],
+    "shaders/ember-drift/body.metal": [
+      "sparks-from-fire",
+      "hoskins-hash"
+    ],
+    "shaders/evening-and-morning/body.metal": [],
+    "shaders/fireworks/body.metal": [
+      "bigwings-fireworks",
+      "hoskins-hash"
+    ],
+    "shaders/force-shield/body.metal": [
+      "ashima-webgl-noise"
+    ],
+    "shaders/green-caresses/body.metal": [],
+    "shaders/holodeck-grid/body.metal": [],
+    "shaders/iridescent/body.metal": [],
+    "shaders/kaleidoscope/body.metal": [],
+    "shaders/light-grid/body.metal": [
+      "inferno"
+    ],
+    "shaders/matrix-corridor/body.metal": [
+      "inside-the-matrix",
+      "hoskins-hash"
+    ],
+    "shaders/orange-flow/body.metal": [],
+    "shaders/plasma/body.metal": [],
+    "shaders/side-view-of-the-ocean/body.metal": [],
+    "shaders/sonar-pulse/body.metal": [
+      "inferno"
+    ],
+    "shaders/starfield/body.metal": [],
+    "shaders/sunlit-shallows/body.metal": [
+      "swiftshaders",
+      "hoskins-hash"
+    ],
+    "shaders/warp-speed/body.metal": [
+      "warp-speed-2"
+    ],
+    "shaders/waves/body.metal": [],
+    "shared/common.metal": [
+      "hoskins-hash"
+    ],
+    "shared/fragment.metal": [],
+    "shared/material.metal": [],
+    "snippets/aurora-curtains/code.metal": [],
+    "snippets/aurora-curtains/example.metal": [],
+    "snippets/box-room/code.metal": [],
+    "snippets/box-room/example.metal": [],
+    "snippets/color-ramps/code.metal": [
+      "inferno"
+    ],
+    "snippets/color-ramps/example.metal": [],
+    "snippets/cosine-palette/example.metal": [],
+    "snippets/crt-overlay/code.metal": [
+      "vhs-overlay"
+    ],
+    "snippets/crt-overlay/example.metal": [],
+    "snippets/dot-curtain/code.metal": [
+      "inferno",
+      "gl-transitions-polka"
+    ],
+    "snippets/dot-curtain/example.metal": [],
+    "snippets/ember-sparks/code.metal": [
+      "sparks-from-fire",
+      "hoskins-hash"
+    ],
+    "snippets/ember-sparks/example.metal": [],
+    "snippets/fbm/example.metal": [],
+    "snippets/glowing-ribbons/code.metal": [],
+    "snippets/glowing-ribbons/example.metal": [],
+    "snippets/god-rays/code.metal": [],
+    "snippets/god-rays/example.metal": [],
+    "snippets/gradient-noise/code.metal": [
+      "swiftshaders"
+    ],
+    "snippets/gradient-noise/example.metal": [],
+    "snippets/grid-lines/code.metal": [],
+    "snippets/grid-lines/example.metal": [],
+    "snippets/hex-grid/code.metal": [],
+    "snippets/hex-grid/example.metal": [],
+    "snippets/hologram-rim/code.metal": [],
+    "snippets/hologram-rim/example.metal": [],
+    "snippets/impact-ripple/code.metal": [],
+    "snippets/impact-ripple/example.metal": [],
+    "snippets/kali-starfield/code.metal": [
+      "warp-speed-2"
+    ],
+    "snippets/kali-starfield/example.metal": [],
+    "snippets/layered-stars/code.metal": [],
+    "snippets/layered-stars/example.metal": [],
+    "snippets/noise-dissolve/code.metal": [],
+    "snippets/noise-dissolve/example.metal": [],
+    "snippets/polar-fold/code.metal": [],
+    "snippets/polar-fold/example.metal": [],
+    "snippets/rain-ripples/code.metal": [
+      "swiftshaders"
+    ],
+    "snippets/rain-ripples/example.metal": [],
+    "snippets/rune-glyph/code.metal": [
+      "inside-the-matrix",
+      "hoskins-hash"
+    ],
+    "snippets/rune-glyph/example.metal": [],
+    "snippets/simplex-noise-3d/code.metal": [
+      "ashima-webgl-noise"
+    ],
+    "snippets/simplex-noise-3d/example.metal": [],
+    "snippets/sine-warp/code.metal": [
+      "inferno"
+    ],
+    "snippets/sine-warp/example.metal": [],
+    "snippets/sphere-shell/code.metal": [],
+    "snippets/sphere-shell/example.metal": [],
+    "snippets/studio-material/example.metal": [],
+    "snippets/value-noise/example.metal": [],
+    "snippets/voronoi/code.metal": [
+      "swiftshaders",
+      "hoskins-hash"
+    ],
+    "snippets/voronoi/example.metal": []
+  },
+  "upstreamRequirements": {
+    "ashima-webgl-noise": {
+      "license": "MIT",
+      "noticePath": "references/ashima-webgl-noise/original/LICENSE"
+    },
+    "bigwings-fireworks": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    },
+    "gl-transitions-polka": {
+      "license": "MIT",
+      "noticePath": "references/gl-transitions-polka/original/LICENSE"
+    },
+    "hoskins-hash": {
+      "license": "MIT",
+      "noticePath": "references/hoskins-hash/NOTICE"
+    },
+    "inferno": {
+      "license": "MIT",
+      "noticePath": "references/inferno/original/LICENSE"
+    },
+    "inside-the-matrix": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    },
+    "sparks-from-fire": {
+      "license": "CC BY 3.0",
+      "uri": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    "swiftshaders": {
+      "license": "MIT",
+      "noticePath": "references/swiftshaders/original/LICENSE"
+    },
+    "swiftui-new-metal-shaders": {
+      "license": "MIT",
+      "noticePath": "references/swiftui-new-metal-shaders/original/LICENSE"
+    },
+    "vhs-overlay": {
+      "license": "MIT",
+      "noticePath": "references/vhs-overlay/original/vhs.glsl"
+    },
+    "warp-speed-2": {
+      "license": "CC BY-NC-SA 3.0",
+      "uri": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    }
+  }
+}

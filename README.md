@@ -28,7 +28,7 @@ gh release download v1.0.1 --repo hbmartin/HolodeckShaderCheck --pattern '*.pyz'
 python3 -I .cache/checker/holodeck-shader-check-1.0.1.pyz validate "$PWD" --json
 ```
 
-Alternatively install the verified wheel into a virtual environment to obtain `holodeck-shader-check`. Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. GitHub CI pins the checker artifact by SHA-256.
+Alternatively install the verified wheel into a virtual environment to obtain `holodeck-shader-check`. Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. GitHub CI pins the checker artifact by SHA-256. Native compilation CI freezes the pinned Holodeck dependency graph and uses the `xcode-27` preview runner for Swift 6.4.
 
 For compilation, rendering, and GPU profiles, install `holodeck-shader-tool` **1.1.0 or later with its resource bundle** using [Holodeck's tooling instructions](https://github.com/hbmartin/Holodeck#shader-tooling). The native CLI bundles a checksum-pinned checker zipapp and runs it through isolated Python; runtime operation performs no downloads or package installation. `library info --json` reports the checker version and interface. Native library commands accept `--python /absolute/interpreter`, defaulting to `/usr/bin/python3`.
 

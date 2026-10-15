@@ -1,4 +1,5 @@
 import contextlib
+import copy
 from collections import Counter
 import io
 import json
@@ -6,6 +7,7 @@ import os
 import pathlib
 import shutil
 import tempfile
+import sys
 import unittest
 from unittest.mock import patch
 import authoring
@@ -74,13 +76,10 @@ class LibraryTests(unittest.TestCase):
         spec["origin"]["url"] = "https://example.invalid/reference"
         spec["notes"] = "A unique résumé note.\n\n| Technique | Detail |\n| --- | --- |\n| Warp | " + "x" * 2100 + " |\n"
         authoring.write_json(metadata, spec)
-        # A leftover document cannot override metadata, which is now authoritative.
-        (destination / "README.md").write_text("stale external documentation")
         library.validate()
         detail = library.show("reference", "documented-reference")
         for text in (spec["notes"], spec["requirements"][0], spec["origin"]["url"]):
             self.assertIn(text, detail["documentation"])
-        self.assertNotIn("stale external documentation", detail["documentation"])
         self.assertEqual(library.search("unique résumé note", "reference"), [])
         text, machine = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(text): library.emit(detail)
@@ -88,6 +87,65 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(text.getvalue().count("A unique résumé note."), 1)
         self.assertNotIn('"schemaVersion"', text.getvalue())
         self.assertEqual(json.loads(machine.getvalue()), detail)
+
+    def test_obsolete_reference_readme_is_rejected_but_upstream_readme_is_allowed(self):
+        destination = library.scaffold("reference", "old-documentation")
+        readme = destination / "README.md"
+        readme.write_text("guidance to migrate")
+        with self.assertRaisesRegex(ValueError, "old-documentation; move guidance into reference.json notes"):
+            library.validate()
+        readme.unlink()
+        original = destination / "original"
+        original.mkdir()
+        readme = original / "README.md"
+        readme.write_text("unchanged upstream documentation")
+        spec = authoring.read_json(destination / "reference.json")
+        spec["files"] = {"README.md": authoring.digest(readme.read_bytes())}
+        authoring.write_json(destination / "reference.json", spec)
+        library.validate()
+
+    def test_reference_shape_errors_are_shared_by_show_and_validate(self):
+        destination = library.scaffold("reference", "malformed-reference")
+        metadata = destination / "reference.json"
+        original = authoring.read_json(metadata)
+        cases = [("schemaVersion", None), ("name", None), ("summary", []),
+                 ("language", ""), ("adaptationNotes", None), ("tags", None),
+                 ("searchTerms", [42]), ("requirements", {}), ("origin", []),
+                 ("notes", None), ("files", []), ("files", {"../bad": "a" * 64}),
+                 ("files", {"file.metal": "invalid"}),
+                 ("origin", dict(original["origin"], author=None)),
+                 ("origin", dict(original["origin"], license=None)),
+                 ("origin", dict(original["origin"], url=42))]
+        for field, value in cases:
+            with self.subTest(field=field, value=value):
+                spec = copy.deepcopy(original)
+                spec[field] = value
+                authoring.write_json(metadata, spec)
+                for operation in (lambda: library.show("reference", "malformed-reference"), library.validate):
+                    with self.assertRaises(ValueError) as error:
+                        operation()
+                    self.assertIn("malformed-reference", str(error.exception))
+                    self.assertIn(field, str(error.exception))
+                with patch.object(sys, "argv", ["library.py", "show", "reference", "malformed-reference"]), \
+                     contextlib.redirect_stderr(io.StringIO()) as stderr, self.assertRaises(SystemExit) as exit:
+                    library.main()
+                self.assertEqual(exit.exception.code, 1)
+                self.assertIn(field, stderr.getvalue())
+                self.assertNotIn("Traceback", stderr.getvalue())
+
+    def test_show_can_inspect_missing_or_changed_originals(self):
+        destination = library.scaffold("reference", "damaged-original")
+        spec = authoring.read_json(destination / "reference.json")
+        spec["files"] = {"file.metal": authoring.digest(b"expected bytes")}
+        authoring.write_json(destination / "reference.json", spec)
+        for present in (False, True):
+            with self.subTest(present=present):
+                if present:
+                    (destination / "original").mkdir()
+                    (destination / "original/file.metal").write_bytes(b"changed bytes")
+                self.assertEqual(library.show("reference", "damaged-original")["specification"], spec)
+                with self.assertRaises(ValueError):
+                    library.validate()
 
     def test_reference_notes_must_be_nonempty_markdown_strings(self):
         destination = library.scaffold("reference", "invalid-notes")
@@ -196,12 +254,45 @@ class LibraryTests(unittest.TestCase):
                               "directory": self.root / "shared", "broken": self.root / "missing"}[case]
                     (nested / "link").symlink_to(target, target_is_directory=case == "directory")
                     relative = "original/nested/link"
-                with self.assertRaisesRegex(ValueError, reference_id + "/" + relative):
-                    library.validate()
-                # Remove each rejected asset so the next case reaches its own link.
-                if original.is_symlink():
-                    original.unlink()
-                shutil.rmtree(destination)
+                try:
+                    with self.assertRaisesRegex(ValueError, reference_id + "/" + relative):
+                        library.validate()
+                finally:
+                    if original.is_symlink():
+                        original.unlink()
+                    shutil.rmtree(destination)
+
+    def test_reference_asset_metadata_and_notice_symlinks_are_rejected(self):
+        for case in ("asset", "metadata", "notice", "support-directory"):
+            for broken in (False, True):
+                with self.subTest(case=case, broken=broken):
+                    destination = library.scaffold("reference", "linked-asset")
+                    target = self.root / "link-target"
+                    if case == "asset":
+                        destination.rename(target)
+                        link = destination
+                    elif case == "metadata":
+                        link = destination / "reference.json"
+                        link.rename(target)
+                    else:
+                        link = destination / ("NOTICE" if case == "notice" else "support")
+                        if case == "notice":
+                            target.write_text("license notice")
+                        else:
+                            target.mkdir()
+                    link.symlink_to(self.root / "missing" if broken else target,
+                                    target_is_directory=case in ("asset", "support-directory"))
+                    try:
+                        with self.assertRaisesRegex(ValueError, "Reference symlink forbidden: linked-asset"):
+                            library.validate()
+                    finally:
+                        link.unlink()
+                        if destination.exists():
+                            shutil.rmtree(destination)
+                        if target.is_dir():
+                            shutil.rmtree(target)
+                        elif target.exists():
+                            target.unlink()
 
     def test_reference_alias_to_an_original_file_is_rejected(self):
         destination = library.scaffold("reference", "aliased")
@@ -241,7 +332,7 @@ class LibraryTests(unittest.TestCase):
             expected += data
         observed = []
 
-        def inspect_source(args, check):
+        def inspect_source(args, **kwargs):
             source_path = pathlib.Path(args[5] if args[0] == "xcrun" else args[2])
             observed.append(source_path.read_bytes())
 
@@ -251,6 +342,16 @@ class LibraryTests(unittest.TestCase):
             library.compile_source(authoring.shader_entry("plasma")[1], "plasma")
             library.render("shader", "plasma", "0,3,10")
         self.assertEqual(observed, [expected] * 5)
+
+    def test_render_filenames_preserve_distinct_times_and_integer_names(self):
+        paths = []
+        with patch.object(library.shader_tool, "command", return_value=["renderer", "render"]), \
+             patch.object(library.shader_tool, "run", side_effect=lambda args, **kwargs: paths.append(pathlib.Path(args[3]).name)), \
+             contextlib.redirect_stdout(io.StringIO()):
+            library.render("shader", "plasma", "0,3,10,1000000,1000001,0.12345671,0.12345672,3")
+        self.assertEqual(paths[:3], ["1280x720-t0.png", "1280x720-t3.png", "1280x720-t10.png"])
+        self.assertEqual(len(set(paths)), 7)
+        self.assertEqual(paths[1], paths[-1])
 
     def test_missing_specification_and_duplicate_id_are_rejected(self):
         directory = self.root / "snippets/copy"

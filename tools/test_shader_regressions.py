@@ -242,7 +242,8 @@ class MetalProbeCase(unittest.TestCase):
             self.assertTrue(samples, f"{label}: no render samples")
         source_path.write_text(source)
         samples_path.write_text(json.dumps(samples))
-        subprocess.run([*self.probe, mode, str(source_path), str(samples_path), str(output_path)], check=True)
+        shader_tool.run([*self.probe, mode, str(source_path), str(samples_path), str(output_path)],
+                        operation="probe", label=label)
         result = json.loads(output_path.read_text())
         self.assertIsInstance(result, dict, f"{label}: probe result must be an object")
         if mode == "render":
@@ -354,7 +355,7 @@ class RegressionHarnessTests(unittest.TestCase):
             case = MetalProbeCase()
             case.root, case.probe = Path(directory), ["probe", "probe"]
 
-            def simulate_probe(args, check):
+            def simulate_probe(args, **kwargs):
                 samples = json.loads(Path(args[4]).read_text())
                 Path(args[5]).write_text(json.dumps({"frames": [{"time": time} for time in samples]}))
 
@@ -372,7 +373,7 @@ class RegressionHarnessTests(unittest.TestCase):
             case = MetalProbeCase()
             case.root, case.probe = Path(directory), ["probe", "probe"]
             for frames in (None, [], [{}, {}]):
-                def simulate_probe(args, check):
+                def simulate_probe(args, **kwargs):
                     Path(args[5]).write_text(json.dumps({"frames": frames}))
                 with self.subTest(frames=frames), patch.object(subprocess, "run", side_effect=simulate_probe), self.assertRaises(AssertionError):
                     case.run_probe("incomplete", "render", "source", [0])
@@ -386,7 +387,7 @@ class RegressionHarnessTests(unittest.TestCase):
             case.root, case.probe = Path(directory), ["probe", "probe"]
             for mode in ("render", "compute"):
                 for payload in (None, [], 42):
-                    def simulate_probe(args, check):
+                    def simulate_probe(args, **kwargs):
                         Path(args[5]).write_text(json.dumps(payload))
                     with self.subTest(mode=mode, payload=payload), patch.object(subprocess, "run", side_effect=simulate_probe):
                         with self.assertRaisesRegex(AssertionError, "bad-shape: probe result must be an object"):
@@ -408,6 +409,25 @@ class RegressionHarnessTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("HOLODECK_GPU_TESTS") == "1", "Opt in to actual Metal shader regression probes")
 class MetalSceneRegressionTests(MetalProbeCase):
+    def test_shared_uniforms_deliver_resolution_and_time(self):
+        source = replace_once(unclamped(authoring.shader_entry("holodeck-grid")[1]), FRAGMENT_COLOR,
+                              "float3 color = float3(u.resolution, u.time);", "Expose Metal uniform values")
+        source += '\nstatic_assert(sizeof(ShaderUniforms) == 16, "ShaderUniforms must match the 16-byte host buffer");\n'
+        library.compile_source(source, "shared-uniform-contract")
+        result = self.run_probe("shared-uniforms", "render", source, [0, 3.25])
+        for frame, time in zip(result["frames"], (0, 3.25)):
+            pixels = Path(frame["path"]).read_bytes()
+            self.assertEqual(len(pixels), 160 * 90 * 16)
+            self.assertEqual(pixels, struct.pack("4f", 160, 90, time, 1) * (160 * 90))
+
+    def test_nan_diagnostic_before_actual_fragment_clamp(self):
+        source = replace_once(authoring.shader_entry("holodeck-grid")[1], FRAGMENT_COLOR,
+                              "float3 color = float3(as_type<float>(0x7fc00000u));", "Inject NaN diagnostic")
+        raw = self.run_probe("shared-nan-raw", "render", unclamped(source), [0])
+        self.assertEqual(raw["frames"][0]["nonfinite"], 160 * 90 * 3)
+        clamped = self.run_probe("shared-nan-clamped", "render", source, [0])
+        self.assertEqual(clamped["frames"][0]["nonfinite"], 0)
+
     def test_scene_literals_match_compiled_metal_constants(self):
         cases = []
         for literal, expected, gpu_signs in LITERAL_CASES:

@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import pathlib
+import re
 import shutil
 import subprocess
 import tempfile
@@ -11,6 +12,11 @@ import authoring
 import shader_tool
 
 KINDS = {"shader": ("shaders", "metadata.json"), "snippet": ("snippets", "snippet.json"), "reference": ("references", "reference.json")}
+
+
+def reject_reference_symlink(value, label):
+    if value.is_symlink():
+        raise ValueError(f"Reference symlink forbidden: {label}")
 
 
 def path(relative):
@@ -28,8 +34,12 @@ def assets(kind=None, *, shader_metadata=None):
         if kind and asset_kind != kind:
             continue
         for directory in sorted((authoring.ROOT / folder).iterdir()):
+            if asset_kind == "reference" and not directory.name.startswith("."):
+                reject_reference_symlink(directory, directory.name)
             if not directory.is_dir() or directory.name.startswith("."):
                 continue
+            if asset_kind == "reference":
+                reject_reference_symlink(directory / filename, directory.name + "/" + filename)
             file = path(f"{folder}/{directory.name}/{filename}")
             spec = shader_metadata.get(directory.name) if asset_kind == "shader" and shader_metadata is not None else None
             if spec is None:
@@ -87,10 +97,11 @@ def reference_documentation(spec):
 
 def show(kind, asset_id):
     item = dict(find(kind, asset_id))
-    readme = authoring.ROOT / item["path"] / "README.md"
     if kind == "reference":
+        validate_reference_specification(item)
         item["documentation"] = reference_documentation(item["specification"])
     else:
+        readme = authoring.ROOT / item["path"] / "README.md"
         item["documentation"] = readme.read_text() if readme.is_file() else (authoring.ROOT / "docs/shader-authoring.md").read_text()
     if kind == "shader":
         item["sourcePath"] = item["path"] + "/body.metal"
@@ -153,33 +164,57 @@ def snippet_source(item):
     return "\n".join(parts)
 
 
-def validate_reference(item):
+def validate_reference_specification(item):
     spec = item["specification"]
-    if not isinstance(spec, dict) or not authoring.valid_id(item["id"]) or spec.get("id") != item["id"] or spec.get("schemaVersion") != 1 or any(not authoring.text_field(spec.get(field)) for field in ("name", "summary", "language", "adaptationNotes")):
+    if not isinstance(spec, dict):
         raise ValueError(f"Invalid reference: {item['id']}")
+    if not authoring.valid_id(item["id"]) or spec.get("id") != item["id"]:
+        raise ValueError(f"Invalid reference id: {item['id']}")
+    if spec.get("schemaVersion") != 1:
+        raise ValueError(f"Invalid reference schemaVersion: {item['id']}")
+    for field in ("name", "summary", "language", "adaptationNotes"):
+        if not authoring.text_field(spec.get(field)):
+            raise ValueError(f"Invalid reference {field}: {item['id']}")
     for field in ("tags", "searchTerms", "requirements"):
         if not authoring.string_list(spec.get(field)):
             raise ValueError(f"Invalid reference {field}: {item['id']}")
-    if not isinstance(spec.get("origin"), dict) or any(not authoring.text_field(spec["origin"].get(field)) for field in ("author", "license")):
-        raise ValueError(f"Missing reference provenance: {item['id']}")
+    if not isinstance(spec.get("origin"), dict):
+        raise ValueError(f"Invalid reference origin: {item['id']}")
+    for field in ("author", "license"):
+        if not authoring.text_field(spec["origin"].get(field)):
+            raise ValueError(f"Invalid reference origin.{field}: {item['id']}")
+    if spec["origin"].get("url") is not None and not isinstance(spec["origin"]["url"], str):
+        raise ValueError(f"Invalid reference origin.url: {item['id']}")
     if "notes" in spec and (not isinstance(spec["notes"], str) or not spec["notes"].strip()):
         raise ValueError(f"Invalid reference notes: {item['id']}")
     files = spec.get("files")
     if not isinstance(files, dict):
         raise ValueError(f"Invalid reference files: {item['id']}")
+    for filename, sha in files.items():
+        if not isinstance(filename, str) or not pathlib.PurePosixPath(filename).parts or pathlib.PurePosixPath(filename).is_absolute() or ".." in pathlib.PurePosixPath(filename).parts:
+            raise ValueError(f"Invalid reference files path: {item['id']}/{filename}")
+        if not isinstance(sha, str) or re.fullmatch(r"[0-9a-f]{64}", sha) is None:
+            raise ValueError(f"Invalid reference files checksum: {item['id']}/{filename}")
+
+
+def validate_reference(item):
+    validate_reference_specification(item)
+    spec = item["specification"]
+    files = spec["files"]
+    directory = authoring.ROOT / item["path"]
+    reject_reference_symlink(directory, item["id"])
+    # rglob does not descend into directory symlinks; reject the links themselves.
+    for entry in directory.rglob("*"):
+        reject_reference_symlink(entry, item["id"] + "/" + str(entry.relative_to(directory)))
+    if (directory / "README.md").exists():
+        raise ValueError(f"Obsolete reference README.md: {item['id']}; move guidance into reference.json notes")
     original = authoring.ROOT / item["path"] / "original"
-    if original.is_symlink():
-        raise ValueError(f"Reference symlink forbidden: {item['id']}/original")
-    # rglob does not descend into directory symlinks; reject them along with file links.
     original_paths = list(original.rglob("*")) if original.exists() else []
-    for entry in original_paths:
-        if entry.is_symlink():
-            raise ValueError(f"Reference symlink forbidden: {item['id']}/original/{entry.relative_to(original)}")
     actual = {str(p.relative_to(original)) for p in original_paths if p.is_file()}
     if actual != set(files):
         raise ValueError(f"Reference file inventory changed: {item['id']}")
     for filename, sha in files.items():
-        if not isinstance(sha, str) or len(sha) != 64 or authoring.digest(path(item["path"] + "/original/" + filename).read_bytes()) != sha:
+        if authoring.digest(path(item["path"] + "/original/" + filename).read_bytes()) != sha:
             raise ValueError(f"Reference checksum mismatch: {item['id']}/{filename}")
 
 
@@ -248,8 +283,10 @@ def render(kind, asset_id, times, width=1280, height=720):
     file = output / "source.metal"
     file.write_bytes(source.encode("utf-8"))
     for sample in samples:
-        image = output / f"{width}x{height}-t{sample:g}.png"
-        subprocess.run([*renderer, str(file), str(image), "--width", str(width), "--height", str(height), "--time", str(sample)], check=True)
+        stamp = repr(sample).removesuffix(".0")
+        image = output / f"{width}x{height}-t{stamp}.png"
+        shader_tool.run([*renderer, str(file), str(image), "--width", str(width), "--height", str(height), "--time", str(sample)],
+                        operation="render", label=f"{kind} {asset_id} at {sample} seconds")
         print(image)
     return output
 

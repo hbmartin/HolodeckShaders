@@ -81,7 +81,10 @@ def digest(data):
 
 
 def read_source(path):
-    return path.read_bytes().decode("utf-8")
+    try:
+        return path.read_bytes().decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise ValueError(f"Invalid UTF-8 source {path}: {error}") from error
 
 
 def read_json(path):

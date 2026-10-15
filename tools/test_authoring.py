@@ -79,8 +79,10 @@ class AuthoringValidationTests(unittest.TestCase):
                 original = path.read_bytes()
                 try:
                     path.write_bytes(b"\xff")
-                    with self.assertRaises(UnicodeDecodeError):
+                    with self.assertRaisesRegex(ValueError, "Invalid UTF-8 source") as error:
                         authoring.shader_entry("plasma")
+                    self.assertIn(str(path), str(error.exception))
+                    self.assertIsInstance(error.exception.__cause__, UnicodeDecodeError)
                 finally:
                     path.write_bytes(original)
         for path in components:

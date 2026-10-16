@@ -5,8 +5,7 @@ from pathlib import Path
 import sys
 
 
-def check(root):
-    root = Path(root).resolve()
+def expected_skills(root):
     expected = {}
     for folder in (root / "skills", root / "vendor/metal-skills/skills"):
         for skill in folder.iterdir():
@@ -14,6 +13,12 @@ def check(root):
                 if skill.name in expected:
                     raise ValueError(f"Duplicate local/vendor skill name: {skill.name}")
                 expected[skill.name] = skill.resolve()
+    return expected
+
+
+def check(root):
+    root = Path(root).resolve()
+    expected = expected_skills(root)
     discovery = root / ".agents/skills"
     if discovery.is_symlink() or not discovery.is_dir():
         raise ValueError(".agents/skills must be a real directory of individual skill links")

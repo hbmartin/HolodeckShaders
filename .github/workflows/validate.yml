@@ -12,33 +12,50 @@ concurrency:
 jobs:
   static:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Download and verify the pinned portable checker
+      - name: Read the committed checker pin
+        id: checker
         run: |
-          curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --retry 3 --output "$RUNNER_TEMP/shader-checker.pyz" https://github.com/hbmartin/HolodeckShaderCheck/releases/download/v1.0.2/holodeck-shader-check-1.0.2.pyz
-          printf '%s  %s\n' '5f04194022ecf63965f8ef717e2857fa14c00f88bef59449489033ecf7ab5615' "$RUNNER_TEMP/shader-checker.pyz" | sha256sum --check
-      - name: Validate all assets, provenance and CPU profiles
+          python3 -I - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          pin = json.loads(Path('shader_checker.lock.json').read_text())
+          assert pin['repository'] == 'hbmartin/HolodeckShaderCheck'
+          assert pin['interfaceVersion'] == 1
+          assert re.fullmatch(r'1\.[0-9]+\.[0-9]+', pin['version'])
+          assert re.fullmatch(r'[0-9a-f]{40}', pin['sourceCommit'])
+          assert re.fullmatch(r'[0-9a-f]{64}', pin['sha256'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              for key in ('version', 'sourceCommit', 'sha256'):
+                  print(f'{key}={pin[key]}', file=output)
+          PY
+      - name: Download and verify the locked portable checker
+        env:
+          CHECKER_VERSION: ${{ steps.checker.outputs.version }}
+          CHECKER_SHA256: ${{ steps.checker.outputs.sha256 }}
+        run: |
+          curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --retry 3 --output "$RUNNER_TEMP/shader-checker.pyz" "https://github.com/hbmartin/HolodeckShaderCheck/releases/download/v${CHECKER_VERSION}/holodeck-shader-check-${CHECKER_VERSION}.pyz"
+          printf '%s  %s\n' "$CHECKER_SHA256" "$RUNNER_TEMP/shader-checker.pyz" | sha256sum --check
+          python3 -I - <<'PY'
+          import json, os, subprocess, sys
+          info = json.loads(subprocess.check_output([sys.executable, '-I', os.environ['RUNNER_TEMP'] + '/shader-checker.pyz', 'info', '--json']))
+          assert info == {'checkerVersion': os.environ['CHECKER_VERSION'], 'interfaceVersion': 1}, info
+          PY
+      - name: Fetch tests from the checker's exact source commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: hbmartin/HolodeckShaderCheck
+          ref: ${{ steps.checker.outputs.sourceCommit }}
+          path: .cache/checker-source
+          persist-credentials: false
+      - name: Validate assets, templates, provenance and CPU profiles
         run: python3 -I "$RUNNER_TEMP/shader-checker.pyz" validate "$GITHUB_WORKSPACE" --json
-  compile:
-    runs-on: xcode-27
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-      - name: Fetch pinned native tooling
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          repository: hbmartin/Holodeck
-          ref: 7e7f92b47f340aa9d386e97152a4602df637a69b
-          path: .cache/holodeck-tooling
-          persist-credentials: false
-      - name: Install the Metal compiler component
-        run: xcodebuild -downloadComponent MetalToolchain
-      - name: Build the bundled CLI and compile every shader and example for macOS and tvOS
-        run: |
-          swift build --package-path .cache/holodeck-tooling/HolodeckCore -c release --product holodeck-shader-tool --force-resolved-versions
-          task_shader_tool_bin=$(swift build --package-path .cache/holodeck-tooling/HolodeckCore -c release --show-bin-path --force-resolved-versions)
-          "$task_shader_tool_bin/holodeck-shader-tool" library validate "$GITHUB_WORKSPACE" --compile --json
+      - name: Require CPU unit, library and license integration tests
+        working-directory: .cache/checker-source
+        env:
+          HOLODECK_LIBRARY_ROOT: ${{ github.workspace }}
+        run: python3 -I tools/run_tests.py

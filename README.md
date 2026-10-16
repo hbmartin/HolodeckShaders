@@ -9,7 +9,7 @@ Use [the Holodeck authoring skill](skills/holodeck-authoring/SKILL.md), [reuse l
 1. Search assets with `rg` and read their specifications, contracts and examples directly.
 2. Copy a matching template into an unused asset directory, refuse overwrites, replace all placeholders, and refine the source and metadata. Bodies implement `float3 shade(float2 p, float time, float2 pixel)`.
 3. Register every new copyable source and its upstream notice obligations in `authoring.json`.
-4. Run `holodeck-shader-tool library validate ROOT --compile`; use `--gpu` locally for actual regression probes. Validation includes unlisted shaders and compilation covers every complete shader and snippet example for macOS and tvOS.
+4. Run `holodeck-shader-tool library validate ROOT --compile`; use `--gpu` locally for actual regression probes. Validation includes unlisted shaders and temporary template instances; local compilation covers every complete shader, snippet example, and shader/snippet template for macOS and tvOS.
 5. Render with `holodeck-shader-tool library render ROOT shader my-scene --times 0,3,10`. Inspect samples, motion and target-device performance in Holodeck.
 6. When selected, add the stable ID to the ordered `shaders` array in `index.json` and appropriate collections. Commit source and metadata, select this folder in **HolodeckMac → Settings → Shader Library**, then press **Reload Shaders**.
 
@@ -19,18 +19,21 @@ Only indexed shaders enter the app catalog. Snippets, originals, templates, docu
 
 [HolodeckShaderCheck](https://github.com/hbmartin/HolodeckShaderCheck) owns Python assembly, validation, license checks, CPU regressions, and GPU-profile orchestration. It has no runtime dependencies beyond Python 3.9 or later. This repository contains no authoring implementation or test scripts.
 
-For portable static validation, download the versioned checker and checksum inventory into ignored scratch storage:
+For portable static validation, run this from the library root. The committed `shader_checker.lock.json` pins the release, source commit, interface and SHA-256 independently of the downloaded release inventory. Downloads overwrite the ignored cached artifact, so the recipe can be repeated without GitHub CLI authentication:
 
 ```sh
 mkdir -p .cache/checker
-gh release download v1.0.2 --repo hbmartin/HolodeckShaderCheck --pattern '*.pyz' --pattern '*.whl' --pattern SHA256SUMS --dir .cache/checker
-(cd .cache/checker && shasum -a 256 -c SHA256SUMS)
-python3 -I .cache/checker/holodeck-shader-check-1.0.2.pyz validate "$PWD" --json
+task_checker_version=$(python3 -I -c 'import json; print(json.load(open("shader_checker.lock.json"))["version"])')
+task_checker_sha256=$(python3 -I -c 'import json; print(json.load(open("shader_checker.lock.json"))["sha256"])')
+task_checker_file=".cache/checker/holodeck-shader-check-${task_checker_version}.pyz"
+curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --retry 3 --output "$task_checker_file" "https://github.com/hbmartin/HolodeckShaderCheck/releases/download/v${task_checker_version}/holodeck-shader-check-${task_checker_version}.pyz" &&
+  printf '%s  %s\n' "$task_checker_sha256" "$task_checker_file" | shasum -a 256 -c - &&
+  python3 -I "$task_checker_file" validate "$PWD" --json
 ```
 
-Alternatively install the verified wheel into a virtual environment to obtain `holodeck-shader-check`. Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. GitHub CI pins the checker artifact by SHA-256. Native compilation CI freezes the pinned Holodeck dependency graph and uses the `xcode-27` preview runner for Swift 6.4.
+Static checks require no Git checkout, Xcode, Metal, native CLI, or sibling repository. Explicit roots allow checking unpacked libraries too. Linux CI verifies the locked artifact and runs its CPU checks plus the unit, real-library and license integration tests from the exact locked checker source commit. Required CPU integration tests cannot silently skip. CI performs no macOS/tvOS compilation, GPU execution or combined-recipe rendering; run those checks explicitly on a Mac. Update this lock and Holodeck's bundled checker lock together when adopting a checker release.
 
-For compilation, rendering, and GPU profiles, install `holodeck-shader-tool` **1.1.0 or later with its resource bundle** using [Holodeck's tooling instructions](https://github.com/hbmartin/Holodeck#shader-tooling). The native CLI bundles a checksum-pinned checker zipapp and runs it through isolated Python; runtime operation performs no downloads or package installation. `library info --json` reports the checker version and interface. Native library commands accept `--python /absolute/interpreter`, defaulting to `/usr/bin/python3`.
+For compilation, rendering, and GPU profiles, install `holodeck-shader-tool` **1.1.0 or later with its resource bundle and checker 1.0.3 or later** using [Holodeck's tooling instructions](https://github.com/hbmartin/Holodeck#shader-tooling). The native CLI bundles a checksum-pinned checker zipapp and runs it through isolated Python; runtime operation performs no downloads or package installation. `library info --json` reports the checker version and interface. Native library commands accept `--python /absolute/interpreter`, defaulting to `/usr/bin/python3`.
 
 The standalone checker finds its native GPU backend through `--shader-tool /absolute/tool`, `HOLODECK_SHADER_TOOL`, or PATH when neither override is set. Invalid explicit overrides, including empty environment values, never fall back. The backend must report major version 1. Version checks have a five-second timeout and disconnected stdin. Render and probe calls also disconnect stdin and use 120/300-second deadlines. Positive finite `HOLODECK_RENDER_TIMEOUT_SECONDS` and `HOLODECK_PROBE_TIMEOUT_SECONDS` override operation deadlines; invalid values fail before execution.
 

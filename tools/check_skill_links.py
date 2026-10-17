@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Require discovery links to cover every local and vendored skill."""
 import argparse
+import os
 from pathlib import Path
 import sys
 
@@ -22,15 +23,16 @@ def check(root):
     discovery = root / ".agents/skills"
     if discovery.is_symlink() or not discovery.is_dir():
         raise ValueError(".agents/skills must be a real directory of individual skill links")
-    actual = {entry.name: entry for entry in discovery.iterdir()}
+    actual = {entry.name: entry for entry in discovery.iterdir() if entry.name != ".DS_Store"}
     missing = sorted(set(expected) - set(actual))
     extra = sorted(set(actual) - set(expected))
     if missing or extra:
         raise ValueError(f"Skill discovery inventory differs: missing={missing}, unexpected={extra}; update .agents/skills links")
     for name, target in expected.items():
         link = actual[name]
-        if not link.is_symlink() or not (link / "SKILL.md").is_file() or link.resolve() != target:
-            raise ValueError(f"Broken or incorrectly targeted skill link: .agents/skills/{name}; expected {target}")
+        if (not link.is_symlink() or Path(os.readlink(link)).is_absolute()
+                or not (link / "SKILL.md").is_file() or link.resolve() != target):
+            raise ValueError(f"Broken or incorrectly targeted skill link: .agents/skills/{name}; expected a relative link to {target}")
     return len(expected)
 
 

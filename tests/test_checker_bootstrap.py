@@ -5,10 +5,12 @@ import io
 import json
 import os
 from pathlib import Path
+import struct
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import warnings
 import zipfile
 
@@ -34,9 +36,13 @@ class BootstrapTests(unittest.TestCase):
         curl.write_text(f"#!{sys.executable}\n" + """
 import json, os, pathlib, sys
 pathlib.Path(os.environ['BOOTSTRAP_CURL_ARGUMENTS']).write_text(json.dumps(sys.argv[1:]))
+if '--silent' not in sys.argv:
+    print('curl progress table', file=sys.stderr)
 target = pathlib.Path(sys.argv[sys.argv.index('--output') + 1])
 if os.environ.get('BOOTSTRAP_DOWNLOAD_FAILURE'):
     target.write_bytes(b'partial download')
+    if '--silent' not in sys.argv or '--show-error' in sys.argv:
+        print('curl: simulated download failure', file=sys.stderr)
     raise SystemExit(22)
 target.write_bytes(pathlib.Path(os.environ['BOOTSTRAP_DOWNLOAD']).read_bytes())
 """)
@@ -107,10 +113,13 @@ else:
         for _ in range(2):
             result = self.prepare()
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stderr, "")
             metadata = json.loads(result.stdout)
             self.assertEqual(metadata["sourceCommit"], self.pin["sourceCommit"])
             self.assertEqual(Path(metadata["artifactPath"]).read_bytes(), self.artifact.read_bytes())
         curl = json.loads((self.root / "curl.json").read_text())
+        self.assertIn("--silent", curl)
+        self.assertIn("--show-error", curl)
         self.assertEqual(curl[curl.index("--proto") + 1], "=https")
         self.assertEqual(curl[curl.index("--proto-redir") + 1], "=https")
         self.assertIn("https://github.com/hbmartin/HolodeckShaderCheck/releases/download/v1.1.0/holodeck-shader-check-1.1.0.pyz", curl)
@@ -128,8 +137,30 @@ else:
     def test_interrupted_download_preserves_cache_without_fallback(self):
         self.previous_cache()
         self.env["BOOTSTRAP_DOWNLOAD_FAILURE"] = "1"
-        self.assert_cache_preserved(self.prepare())
+        result = self.prepare()
+        self.assert_cache_preserved(result)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("curl: simulated download failure", result.stderr)
         self.assertFalse(self.marker.exists())
+
+    def test_failed_checker_info_keeps_captured_diagnostics_on_stderr(self):
+        self.previous_cache()
+        with zipfile.ZipFile(self.artifact, "w") as archive:
+            archive.writestr("__main__.py", r"""
+import sys
+sys.stdout.buffer.write(b'checker info output\xff\n')
+sys.stderr.buffer.write(b'checker info failure\xff\n')
+raise SystemExit(23)
+""")
+        self.write_pin()
+        result = self.prepare()
+        self.assert_cache_preserved(result)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("info", result.stderr)
+        self.assertIn("exit status 23", result.stderr)
+        self.assertIn("stdout:\nchecker info output\ufffd", result.stderr)
+        self.assertIn("stderr:\nchecker info failure\ufffd", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
 
     def test_incompatible_info_preserves_cache(self):
         self.previous_cache()
@@ -175,7 +206,11 @@ class SourceVerificationTests(unittest.TestCase):
         self.package.mkdir(parents=True)
         (self.package / "__init__.py").write_text('__version__ = "1.1.0"\n')
         (self.package / "cli.py").write_text("raise AssertionError('Source must never be imported')\n")
-        for command in (["git", "init", "--quiet", str(self.root)], ["git", "-C", str(self.root), "add", "src"],
+        for relative in ("tools/run_tests.py", "tests/test_checker.py"):
+            path = self.root / relative
+            path.parent.mkdir()
+            path.write_text("raise SystemExit(1)\n")
+        for command in (["git", "init", "--quiet", str(self.root)], ["git", "-C", str(self.root), "add", "src", "tools", "tests"],
                         ["git", "-C", str(self.root), "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "fixture"]):
             subprocess.run(command, check=True, capture_output=True)
         self.pin = {"sourceCommit": subprocess.check_output(["git", "-C", str(self.root), "rev-parse", "HEAD"], text=True).strip()}
@@ -191,6 +226,16 @@ class SourceVerificationTests(unittest.TestCase):
                     archive.writestr(name, value)
         self.pin["sha256"] = hashlib.sha256(self.artifact.read_bytes()).hexdigest()
 
+    def cli(self, source=None):
+        lock = self.root / "lock.json"
+        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
+                                        repository="hbmartin/HolodeckShaderCheck")))
+        return subprocess.run(
+            [sys.executable, "-I", str(SCRIPT), "verify-source", "--lock", str(lock),
+             "--source", str(source if source is not None else self.root), "--artifact", str(self.artifact)],
+            capture_output=True, text=True, env=dict(os.environ, LC_ALL="C"),
+        )
+
     def test_matches_sources_independently_of_archive_encoding_without_imports(self):
         self.archive()
         bootstrap.verify_source(self.pin, self.root, self.artifact)
@@ -200,6 +245,72 @@ class SourceVerificationTests(unittest.TestCase):
         self.pin["sourceCommit"] = "b" * 40
         with self.assertRaisesRegex(bootstrap.BootstrapError, "HEAD"):
             bootstrap.verify_source(self.pin, self.root, self.artifact)
+
+    def test_clean_checkout_allows_untracked_scratch_files(self):
+        self.archive()
+        scratch = self.root / ".cache/scratch.json"
+        scratch.parent.mkdir()
+        scratch.write_text("{}")
+        result = self.cli()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(result.stderr, "")
+
+    def test_modified_staged_and_deleted_tracked_tests_fail(self):
+        self.archive()
+        for relative in ("tools/run_tests.py", "tests/test_checker.py"):
+            for state in ("modified", "staged", "deleted", "staged deletion"):
+                with self.subTest(path=relative, state=state):
+                    path = self.root / relative
+                    if "delet" in state:
+                        path.unlink()
+                    else:
+                        path.write_text("raise SystemExit(0)\n")
+                    if state.startswith("staged"):
+                        subprocess.run(["git", "-C", str(self.root), "add", relative], check=True, capture_output=True)
+                    try:
+                        result = self.cli()
+                        self.assertEqual(result.returncode, 2, result.stderr)
+                        self.assertEqual(result.stdout, "")
+                        self.assertIn("tracked changes", result.stderr)
+                        self.assertIn(relative, result.stderr)
+                        self.assertNotIn("Traceback", result.stderr)
+                    finally:
+                        subprocess.run(["git", "-C", str(self.root), "restore", "--staged", "--worktree", "--", relative],
+                                       check=True, capture_output=True)
+
+    def test_failed_git_keeps_its_diagnostic(self):
+        self.archive()
+        with tempfile.TemporaryDirectory(prefix="not a git checkout ") as source:
+            result = self.cli(source)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("rev-parse", result.stderr)
+        self.assertIn("exit status 128", result.stderr)
+        self.assertIn("fatal: not a git repository", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_timeout_keeps_partial_output_without_a_traceback(self):
+        self.archive()
+        lock = self.root / "lock.json"
+        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
+                                        repository="hbmartin/HolodeckShaderCheck")))
+        for output, diagnostic in ((b"partial output\xff\n", b"partial error\xff\n"),
+                                   ("partial output\n", "partial error\n")):
+            with self.subTest(output_type=type(output).__name__):
+                error = subprocess.TimeoutExpired(["git", "rev-parse"], 10, output=output, stderr=diagnostic)
+                with mock.patch.object(bootstrap.subprocess, "run", side_effect=error), \
+                        contextlib.redirect_stdout(io.StringIO()) as stdout, \
+                        contextlib.redirect_stderr(io.StringIO()) as stderr:
+                    status = bootstrap.main(["verify-source", "--lock", str(lock), "--source", str(self.root),
+                                             "--artifact", str(self.artifact)])
+                self.assertEqual(status, 2)
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn("git", stderr.getvalue())
+                self.assertIn("timed out after 10 seconds", stderr.getvalue())
+                self.assertIn("stdout:\npartial output", stderr.getvalue())
+                self.assertIn("stderr:\npartial error", stderr.getvalue())
+                self.assertNotIn("Traceback", stderr.getvalue())
 
     def test_missing_additional_duplicate_and_changed_entries_fail(self):
         entries = list(self.entries.items())
@@ -219,8 +330,44 @@ class SourceVerificationTests(unittest.TestCase):
             bootstrap.verify_source(self.pin, self.root, self.artifact)
         self.archive()
         (self.package / "cli.py").write_text("changed source\n")
-        with self.assertRaisesRegex(bootstrap.BootstrapError, "bytes differ"):
+        with self.assertRaisesRegex(bootstrap.BootstrapError, "tracked changes"):
             bootstrap.verify_source(self.pin, self.root, self.artifact)
+
+    def test_unreadable_archives_report_bootstrap_failures(self):
+        cases = {"encrypted": "encrypted", "unsupported": "compression", "deflate": "decompressing",
+                 "invalid": "not a zip file"}
+        for kind, message in cases.items():
+            with self.subTest(kind=kind):
+                self.archive()
+                data = bytearray(self.artifact.read_bytes())
+                # archive() writes __main__.py first; edit its local and central headers together.
+                central = data.index(b"PK\x01\x02")
+                if kind == "encrypted":
+                    for offset in (6, central + 8):
+                        struct.pack_into("<H", data, offset, struct.unpack_from("<H", data, offset)[0] | 1)
+                elif kind in ("unsupported", "deflate"):
+                    for offset in (8, central + 10):
+                        struct.pack_into("<H", data, offset, 99 if kind == "unsupported" else zipfile.ZIP_DEFLATED)
+                    if kind == "deflate":
+                        name_size, extra_size = struct.unpack_from("<HH", data, 26)
+                        data[30 + name_size + extra_size] = 0x07  # Reserved deflate block type.
+                else:
+                    data = bytearray(b"not a zip file")
+                self.artifact.write_bytes(data)
+                self.pin["sha256"] = hashlib.sha256(data).hexdigest()
+                result = self.cli()
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("Cannot read checker archive", result.stderr)
+                self.assertIn(str(self.artifact), result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_archive_eof_is_normalized_at_the_read_boundary(self):
+        self.archive()
+        with mock.patch.object(bootstrap.zipfile, "ZipFile", side_effect=EOFError("truncated archive")):
+            with self.assertRaisesRegex(bootstrap.BootstrapError, "Cannot read checker archive.*truncated archive"):
+                bootstrap.verify_source(self.pin, self.root, self.artifact)
 
     def test_source_failure_is_reported_as_bootstrap_exit_two(self):
         self.archive()

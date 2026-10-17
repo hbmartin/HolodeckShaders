@@ -27,14 +27,20 @@ Select scenes for distinctive visual experience, sustained motion quality, repre
 To run checker integration/GPU tests locally, prepare the artifact from this library root and save its validated metadata in ignored storage:
 
 ```sh
-mkdir -p .cache
-python3 -I tools/checker_bootstrap.py prepare > .cache/checker-pin.json
+(
+    set -eu
+    mkdir -p .cache
+    task_checker_pin=$(mktemp .cache/checker-pin.XXXXXX)
+    trap 'rm -f "$task_checker_pin"' EXIT
+    python3 -I tools/checker_bootstrap.py prepare > "$task_checker_pin"
+    mv "$task_checker_pin" .cache/checker-pin.json
+)
 ```
 
-Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests:
+Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits to the test runner or tests; untracked scratch files are permitted:
 
 ```sh
-python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz
+python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz &&
 HOLODECK_LIBRARY_ROOT=/absolute/library/root HOLODECK_SHADER_TOOL=/absolute/holodeck-shader-tool python3 -I /absolute/checker/checkout/tools/run_tests.py --gpu
 ```
 

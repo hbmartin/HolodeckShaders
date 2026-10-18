@@ -36,6 +36,7 @@
       "inside-the-matrix",
       "hoskins-hash"
     ],
+    "shaders/mutara-veil/body.metal": [],
     "shaders/orange-flow/body.metal": [],
     "shaders/plasma/body.metal": [],
     "shaders/side-view-of-the-ocean/body.metal": [],

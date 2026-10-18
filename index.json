@@ -21,7 +21,8 @@
         "ember-drift",
         "sunlit-shallows",
         "fireworks",
-        "side-view-of-the-ocean"
+        "side-view-of-the-ocean",
+        "mutara-veil"
       ]
     },
     {
@@ -60,7 +61,8 @@
         "holodeck-grid",
         "force-shield",
         "warp-speed",
-        "matrix-corridor"
+        "matrix-corridor",
+        "mutara-veil"
       ]
     }
   ],
@@ -88,6 +90,7 @@
     "evening-and-morning",
     "green-caresses",
     "orange-flow",
-    "side-view-of-the-ocean"
+    "side-view-of-the-ocean",
+    "mutara-veil"
   ]
 }

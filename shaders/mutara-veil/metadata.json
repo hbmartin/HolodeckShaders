@@ -1,0 +1,31 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.46,
+      0.0,
+      0.79
+    ],
+    [
+      0.0,
+      0.64,
+      0.65
+    ]
+  ],
+  "description": "Explore a cinematic nebula of drifting violet and teal gas, luminous filaments and shadowed dust among distant stars.",
+  "discovery": {
+    "tags": ["space", "nebula", "gas", "stars", "violet", "teal", "star-trek", "drifting"],
+    "moods": ["calm", "dreamy"],
+    "motion": "slow"
+  },
+  "id": "mutara-veil",
+  "name": "Mutara Veil",
+  "reuse": {
+    "snippets": ["fbm", "layered-stars"],
+    "references": []
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

@@ -4,7 +4,7 @@
 2. Use the authoring skill to copy a matching template into a valid unused asset directory. Check for existing files and symlinks, refuse overwrites, and replace all ID/name placeholders. Refine names, descriptions, code and contracts before reuse.
 3. Copy and adapt recipe functions and their required license notices into the shader body; use canonical shared helpers where appropriate. Retain attribution and describe changes. Follow the Licensing section of `docs/shader-library.md`; metadata and references do not accompany published sources. Record related snippet/reference IDs in metadata.reuse.
 4. Run `holodeck-shader-tool library validate ROOT --compile` with an explicit library root. This validates all authoring assets, including temporary template instances, and locally compiles every complete shader, snippet example and shader/snippet template for macOS and tvOS.
-   Register new copyable source paths and MIT/CC provenance in `authoring.json`. Portable `holodeck-shader-check validate ROOT` performs static and CPU profile checks without the native CLI. Before native checks, require `holodeck-shader-tool library info --json` to report the checker version and integer interface recorded in the library's `shader_checker.lock.json`. Run `holodeck-shader-tool library validate ROOT --gpu` locally for actual shared-source uniform/clamp, scene geometry/seed, and long-uptime GPU probes. Checker implementation and integration tests live in HolodeckShaderCheck. Linux CI requires the CPU library and license tests; the GPU-only combined-recipe composition test remains explicit local verification. Use the exact locked source checkout as described below.
+   Register new copyable source paths and MIT/CC provenance in `authoring.json`. Portable `holodeck-shader-check validate ROOT` performs static and CPU profile checks without the native CLI. Before native checks, require `holodeck-shader-tool library artifact-info --json` to match every identity field in this library's `shader_checker.lock.json`, and require `library info --json` to report the same checker version and integer interface. App-managed requests enforce both checks automatically. Run `holodeck-shader-tool library validate ROOT --gpu` locally for actual shared-source uniform/clamp, scene geometry/seed, and long-uptime GPU probes. Checker implementation and integration tests live in HolodeckShaderCheck. Linux CI requires the CPU library and license tests; the GPU-only combined-recipe composition test remains explicit local verification. Use the exact locked source checkout as described below.
 5. Render samples with `holodeck-shader-tool library render ROOT shader my-scene --times 0,3,10` (or `library render ROOT snippet my-technique`). Optional `--width`/`--height` select dimensions. Artifacts go to ignored `.cache/library/`. Review actual animation and target-device performance in the app before selecting a scene.
 6. When editorially ready, add the finished shader ID to the ordered index.shaders array and any appropriate collections. Commit source and metadata, then reload the selected folder in an updated HolodeckMac. The app generates previews; do not add preview files to this repo.
 
@@ -27,18 +27,24 @@ Select scenes for distinctive visual experience, sustained motion quality, repre
 To run checker integration/GPU tests locally, prepare the artifact from this library root and save its validated metadata in ignored storage:
 
 ```sh
-mkdir -p .cache
-python3 -I tools/checker_bootstrap.py prepare > .cache/checker-pin.json
+(
+    set -eu
+    mkdir -p .cache
+    task_checker_pin=$(mktemp .cache/checker-pin.XXXXXX)
+    trap 'rm -f "$task_checker_pin"' EXIT
+    python3 -I tools/checker_bootstrap.py prepare > "$task_checker_pin"
+    mv "$task_checker_pin" .cache/checker-pin.json
+)
 ```
 
-Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests:
+Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits to the test runner or tests; untracked scratch files are permitted:
 
 ```sh
-python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz
+python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz &&
 HOLODECK_LIBRARY_ROOT=/absolute/library/root HOLODECK_SHADER_TOOL=/absolute/holodeck-shader-tool python3 -I /absolute/checker/checkout/tools/run_tests.py --gpu
 ```
 
-Use the selected native executable's `library info --json` to confirm its checker version and integer interface match this library's lock. These integration tests retain specific asset-ID assumptions; use a coordinated library/checker pair when intentionally changing those assets. Generated renders stay in ignored storage.
+Use the selected native executable's `library artifact-info --json` to compare the verified bundled repository, version, interface, source commit and SHA-256 with this library's lock, and `library info --json` to confirm the packaged checker's version/interface. Source correspondence is established by `verify-source` during release adoption; runtime hash verification establishes artifact integrity. These integration tests retain specific asset-ID assumptions; use a coordinated library/checker pair when intentionally changing those assets. Generated renders stay in ignored storage.
 
 Library validation includes unlisted shaders. HolodeckMac loads only index.shaders; snippets, originals, documentation and reuse links remain authoring-only. Reload the selected folder after edits. Holodeck's [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md) owns preview generation, caching, publication, and delivery guidance.
 

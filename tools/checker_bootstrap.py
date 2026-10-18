@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+import zlib
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,7 +73,7 @@ def prepare(pin, cache):
     temporary = Path(filename)
     try:
         subprocess.run(
-            ["curl", "--fail", "--location", "--proto", "=https", "--proto-redir", "=https",
+            ["curl", "--silent", "--show-error", "--fail", "--location", "--proto", "=https", "--proto-redir", "=https",
              "--tlsv1.2", "--retry", "3", "--connect-timeout", "15", "--max-time", "120",
              "--output", str(temporary), url],
             check=True, stdin=subprocess.DEVNULL, timeout=540,
@@ -101,6 +102,12 @@ def verify_source(pin, source, artifact):
     ).stdout.strip()
     if head != pin["sourceCommit"]:
         raise BootstrapError("Checker source HEAD does not match the locked sourceCommit")
+    status = subprocess.run(
+        ["git", "-C", str(source), "status", "--porcelain", "--untracked-files=no"],
+        check=True, capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=10,
+    ).stdout
+    if status.strip():
+        raise BootstrapError(f"Checker source has tracked changes:\n{status.rstrip()}")
     verify_hash(artifact, pin)
     package = source / "src"
     expected = {path.relative_to(package).as_posix(): path.read_bytes()
@@ -108,17 +115,20 @@ def verify_source(pin, source, artifact):
     if not expected or "holodeck_shader_check/__init__.py" not in expected:
         raise BootstrapError("Checker source package is missing")
     expected["__main__.py"] = ENTRY_POINT
-    with zipfile.ZipFile(artifact) as archive:
-        names = archive.namelist()
-        if len(names) != len(set(names)):
-            raise BootstrapError("Checker archive contains duplicate entries")
-        if set(names) != set(expected):
-            missing = sorted(set(expected) - set(names))
-            extra = sorted(set(names) - set(expected))
-            raise BootstrapError(f"Checker archive inventory differs from source: missing={missing}, extra={extra}")
-        for name in names:
-            if archive.read(name) != expected[name]:
-                raise BootstrapError(f"Checker archive bytes differ from source: {name}")
+    try:
+        with zipfile.ZipFile(artifact) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)):
+                raise BootstrapError("Checker archive contains duplicate entries")
+            if set(names) != set(expected):
+                missing = sorted(set(expected) - set(names))
+                extra = sorted(set(names) - set(expected))
+                raise BootstrapError(f"Checker archive inventory differs from source: missing={missing}, extra={extra}")
+            for name in names:
+                if archive.read(name) != expected[name]:
+                    raise BootstrapError(f"Checker archive bytes differ from source: {name}")
+    except (zipfile.BadZipFile, RuntimeError, zlib.error, EOFError) as error:
+        raise BootstrapError(f"Cannot read checker archive {artifact}: {error}") from error
 
 
 def parser():
@@ -157,8 +167,14 @@ def main(arguments=None):
             print(json.dumps(metadata))
             return 0
         os.execv(sys.executable, [sys.executable, "-I", metadata["artifactPath"], *checker_args])
-    except (BootstrapError, OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile) as error:
+    except (BootstrapError, OSError, ValueError, subprocess.SubprocessError) as error:
         print(f"checker-bootstrap: {error}", file=sys.stderr)
+        if isinstance(error, (subprocess.CalledProcessError, subprocess.TimeoutExpired)):
+            for stream, output in (("stdout", error.stdout), ("stderr", error.stderr)):
+                if isinstance(output, bytes):
+                    output = output.decode("utf-8", errors="replace")
+                if output and output.strip():
+                    print(f"{stream}:\n{output.rstrip()}", file=sys.stderr)
         return 2
 
 

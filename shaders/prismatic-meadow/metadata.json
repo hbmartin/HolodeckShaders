@@ -1,0 +1,31 @@
+{
+  "category": "PROCEDURAL",
+  "colors": [
+    [
+      0.16,
+      0.65,
+      0.35
+    ],
+    [
+      0.93,
+      0.38,
+      0.62
+    ]
+  ],
+  "description": "Sunlight washes a futuristic meadow of faceted green hills, turquoise inlays and jewel-petal flowers swaying together in a gentle breeze.",
+  "discovery": {
+    "tags": ["meadow", "flowers", "geometric", "futuristic", "crystal", "sunny", "nature", "breeze"],
+    "moods": ["calm", "dreamy"],
+    "motion": "slow"
+  },
+  "id": "prismatic-meadow",
+  "name": "Prismatic Meadow",
+  "reuse": {
+    "snippets": ["value-noise", "grid-lines"],
+    "references": ["hoskins-hash"]
+  },
+  "shared": [
+    "common",
+    "fragment"
+  ]
+}

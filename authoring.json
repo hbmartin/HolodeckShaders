@@ -39,6 +39,9 @@
     "shaders/mutara-veil/body.metal": [],
     "shaders/orange-flow/body.metal": [],
     "shaders/plasma/body.metal": [],
+    "shaders/prismatic-meadow/body.metal": [
+      "hoskins-hash"
+    ],
     "shaders/side-view-of-the-ocean/body.metal": [],
     "shaders/sonar-pulse/body.metal": [
       "inferno"

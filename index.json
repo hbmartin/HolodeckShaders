@@ -22,7 +22,8 @@
         "sunlit-shallows",
         "fireworks",
         "side-view-of-the-ocean",
-        "mutara-veil"
+        "mutara-veil",
+        "prismatic-meadow"
       ]
     },
     {
@@ -62,7 +63,8 @@
         "force-shield",
         "warp-speed",
         "matrix-corridor",
-        "mutara-veil"
+        "mutara-veil",
+        "prismatic-meadow"
       ]
     }
   ],
@@ -91,6 +93,7 @@
     "green-caresses",
     "orange-flow",
     "side-view-of-the-ocean",
-    "mutara-veil"
+    "mutara-veil",
+    "prismatic-meadow"
   ]
 }

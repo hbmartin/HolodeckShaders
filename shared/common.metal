@@ -39,17 +39,28 @@ vertex RasterData vertexShader(uint id [[vertex_id]]) {
     return out;
 }
 
-float hash21(float2 p) {
-    float3 q = fract(float3(p.x, p.y, p.x) * 0.1031);
+// Internal second stage of hash21. Keeping the dot and final arithmetic here
+// also lets noise2 reuse identical fractional coordinates at adjacent corners.
+inline float hash21Fraction(float3 q) {
     q += dot(q, q.yzx + 33.33);
     return fract((q.x + q.y) * q.z);
+}
+
+float hash21(float2 p) {
+    return hash21Fraction(fract(float3(p.x, p.y, p.x) * 0.1031));
 }
 
 float noise2(float2 p) {
     float2 i = floor(p), f = fract(p);
     f = f * f * (3.0 - 2.0 * f);
-    return mix(mix(hash21(i), hash21(i + float2(1, 0)), f.x),
-               mix(hash21(i + float2(0, 1)), hash21(i + 1.0), f.x), f.y);
+    // Four corners have only four distinct scalar coordinates. Apply fract to
+    // those once, retaining the original hash arithmetic and interpolation.
+    float4 h = fract(float4(i, i + 1.0) * 0.1031);
+    float a = hash21Fraction(float3(h.x, h.y, h.x));
+    float b = hash21Fraction(float3(h.z, h.y, h.z));
+    float c = hash21Fraction(float3(h.x, h.w, h.x));
+    float d = hash21Fraction(float3(h.z, h.w, h.z));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 float fbm(float2 p) {

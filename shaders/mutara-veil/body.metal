@@ -15,18 +15,22 @@ float3 mutaraStars(float2 p, float phase, float footprint) {
                      * float2(sin(phase), cos(phase));
         float2 q = p * scale + drift;
         float2 cell = floor(q);
-        float2 local = fract(q) - 0.5;
         float seed = hash21(cell + layer * 19.0);
+        // The original step(0.91, seed) makes these cells exactly black.
+        // Skip their offset hashes, exponentials and twinkle at full precision.
+        if (seed < 0.91) continue;
+        float2 local = fract(q) - 0.5;
         float2 offset = float2(hash21(cell + 8.3), hash21(cell + 3.1)) * 0.6 - 0.3;
         float2 delta = local - offset;
         float nativeVariance = 0.00045 + 0.0006 * seed * seed;
-        float variance = nativeVariance + pow(footprint * scale, 2.0) * 0.3;
+        float scaledFootprint = footprint * scale;
+        float variance = nativeVariance + scaledFootprint * scaledFootprint * 0.3;
         float core = exp(-dot(delta, delta) / variance) * nativeVariance / variance;
         float halo = exp(-dot(delta, delta) * 110.0) * 0.045;
         // Centers stay at least 0.2 cells from a boundary; halo is negligible there.
         float twinkle = 0.86 + 0.14 * sin(phase * 4.0 + seed * 50.0);
         float3 tint = mix(float3(0.45, 0.65, 1.0), float3(1.0, 0.78, 0.61), seed);
-        light += tint * (core + halo) * step(0.91, seed) * twinkle;
+        light += tint * (core + halo) * twinkle;
     }
     return light;
 }
@@ -55,7 +59,8 @@ float3 shade(float2 p, float time, float2 pixel) {
 
         float lane = q.y - 0.24 * q.x + 0.13 * sin(q.x * 3.2 + layer)
                    + 0.23 * warp.y + (layer - 1.0) * 0.21;
-        float envelope = exp(-pow(lane / (0.23 + layer * 0.025), 2.0));
+        float normalizedLane = lane / (0.23 + layer * 0.025);
+        float envelope = exp(-normalizedLane * normalizedLane);
         float cloud = smoothstep(0.27, 0.69, billow + 0.12 * (detail - 0.5));
         float density = envelope * cloud * (0.38 + 1.25 * detail);
 

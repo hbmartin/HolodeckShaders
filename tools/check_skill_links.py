@@ -30,9 +30,21 @@ def check(root):
         raise ValueError(f"Skill discovery inventory differs: missing={missing}, unexpected={extra}; update .agents/skills links")
     for name, target in expected.items():
         link = actual[name]
-        if (not link.is_symlink() or Path(os.readlink(link)).is_absolute()
-                or not (link / "SKILL.md").is_file() or link.resolve() != target):
-            raise ValueError(f"Broken or incorrectly targeted skill link: .agents/skills/{name}; expected a relative link to {target}")
+        label = f".agents/skills/{name}"
+        stored = os.readlink(link) if link.is_symlink() else None
+        canonical = os.path.relpath(target, link.parent)
+        if stored is None:
+            raise ValueError(f"Skill discovery entry is not a symlink: {label}")
+        if Path(stored).is_absolute():
+            raise ValueError(f"Absolute skill link: {label}; expected relative target {canonical}")
+        if not link.exists():
+            raise ValueError(f"Broken skill link: {label}; stored target {stored}")
+        if link.resolve() != target:
+            raise ValueError(f"Wrong skill link target: {label}; expected {target}, resolved to {link.resolve()}")
+        if stored != canonical:
+            raise ValueError(f"Noncanonical relative skill link: {label}; expected {canonical}, got {stored}")
+        if not (link / "SKILL.md").is_file():
+            raise ValueError(f"Missing SKILL.md through skill link: {label}")
     return len(expected)
 
 

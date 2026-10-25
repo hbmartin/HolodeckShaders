@@ -37,11 +37,11 @@ To run checker integration/GPU tests locally, prepare the artifact from this lib
 )
 ```
 
-Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits to the test runner or tests; untracked scratch files are permitted:
+Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits hidden by Git index flags, and all extra files and symlinks under `src/`, `tests/` and `tools/`. Untracked scratch files are permitted elsewhere. Existing bytecode caches must be removed by the user or avoided through a fresh checkout; the verifier never deletes files. Disable bytecode writes in the test process and its children so the checkout can be verified again afterward:
 
 ```sh
 python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz &&
-HOLODECK_LIBRARY_ROOT=/absolute/library/root HOLODECK_SHADER_TOOL=/absolute/holodeck-shader-tool python3 -I /absolute/checker/checkout/tools/run_tests.py --gpu
+HOLODECK_LIBRARY_ROOT=/absolute/library/root HOLODECK_SHADER_TOOL=/absolute/holodeck-shader-tool PYTHONDONTWRITEBYTECODE=1 python3 -I -B /absolute/checker/checkout/tools/run_tests.py --gpu
 ```
 
 Use the selected native executable's `library artifact-info --json` to compare the verified bundled repository, version, interface, source commit and SHA-256 with this library's lock, and `library info --json` to confirm the packaged checker's version/interface. Source correspondence is established by `verify-source` during release adoption; runtime hash verification establishes artifact integrity. These integration tests retain specific asset-ID assumptions; use a coordinated library/checker pair when intentionally changing those assets. Generated renders stay in ignored storage.

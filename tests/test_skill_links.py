@@ -69,7 +69,7 @@ class SkillLinkTests(unittest.TestCase):
                 link = self.links / target.name
                 link.unlink()
                 link.symlink_to(target.resolve(), target_is_directory=True)
-                with self.assertRaisesRegex(ValueError, "expected a relative link"):
+                with self.assertRaisesRegex(ValueError, "Absolute skill link.*expected relative target"):
                     skills.check(self.root)
                 link.unlink()
                 self.link(link, target)
@@ -78,7 +78,7 @@ class SkillLinkTests(unittest.TestCase):
         link = self.links / self.vendor.name
         link.unlink()
         shutil.copytree(self.vendor, link)
-        with self.assertRaisesRegex(ValueError, "Broken or incorrectly targeted"):
+        with self.assertRaisesRegex(ValueError, "not a symlink"):
             skills.check(self.root)
 
     def test_vendor_addition_removal_and_rename_require_link_updates(self):
@@ -101,11 +101,27 @@ class SkillLinkTests(unittest.TestCase):
 
     def test_missing_broken_and_wrong_target_links_fail(self):
         link = self.links / self.vendor.name
-        for target in (self.root / "missing", self.local):
+        for target, message in ((self.root / "missing", "Broken skill link"), (self.local, "Wrong skill link target")):
             link.unlink()
             self.link(link, target)
-            with self.assertRaisesRegex(ValueError, "Broken or incorrectly targeted"):
+            with self.assertRaisesRegex(ValueError, message):
                 skills.check(self.root)
         link.unlink()
         with self.assertRaisesRegex(ValueError, "missing=.*metal-compute"):
             skills.check(self.root)
+
+    def test_relative_links_cannot_leave_the_checkout_and_reenter_by_name(self):
+        link = self.links / self.local.name
+        link.unlink()
+        link.symlink_to("../../../" + self.root.name + "/skills/" + self.local.name)
+        self.assertEqual(link.resolve(), self.local.resolve())
+        with self.assertRaisesRegex(ValueError, "Noncanonical relative skill link.*expected ../../skills/"):
+            skills.check(self.root)
+
+    def test_canonical_links_survive_checkout_rename(self):
+        renamed = self.root.with_name(self.root.name + " renamed")
+        self.root.rename(renamed)
+        try:
+            self.assertEqual(skills.check(renamed), 2)
+        finally:
+            renamed.rename(self.root)

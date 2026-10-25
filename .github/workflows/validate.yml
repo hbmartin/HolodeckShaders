@@ -11,12 +11,17 @@ concurrency:
   cancel-in-progress: true
 jobs:
   static:
-    runs-on: ubuntu-latest
+    name: static (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.15']
+        include:
+          - python-version: '3.9'
+            os: ubuntu-24.04
+          - python-version: '3.15'
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -50,4 +55,9 @@ jobs:
         working-directory: .cache/checker-source
         env:
           HOLODECK_LIBRARY_ROOT: ${{ github.workspace }}
-        run: python3 -I tools/run_tests.py
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -I -B tools/run_tests.py
+      - name: Require source to remain verified after tests
+        env:
+          CHECKER_ARTIFACT: ${{ steps.checker.outputs.artifactPath }}
+        run: python3 -I tools/checker_bootstrap.py verify-source --source "$GITHUB_WORKSPACE/.cache/checker-source" --artifact "$CHECKER_ARTIFACT"

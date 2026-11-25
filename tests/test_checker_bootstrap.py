@@ -8,6 +8,7 @@ import marshal
 import os
 from pathlib import Path
 import shutil
+import shlex
 import struct
 import subprocess
 import sys
@@ -245,6 +246,12 @@ class SourceVerificationTests(unittest.TestCase):
         self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
                  "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "fixture")
 
+    def commit_source(self, *paths):
+        self.git("add", *paths)
+        self.commit()
+        self.pin["sourceCommit"] = self.git("rev-parse", "HEAD").decode().strip()
+        self.archive()
+
     def write_lock(self, **overrides):
         lock = self.root / "lock.json"
         lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
@@ -348,7 +355,7 @@ class SourceVerificationTests(unittest.TestCase):
         tools.symlink_to(saved, target_is_directory=True)
         result = self.cli()
         self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn("tools/run_tests.py", result.stderr)
+        self.assertIn("requires a real tools/ directory", result.stderr)
 
     def test_staged_changes_fail_even_when_working_bytes_match_head(self):
         self.archive()
@@ -378,7 +385,9 @@ class SourceVerificationTests(unittest.TestCase):
                 finally:
                     path.unlink()
         (self.root / "tests/empty-directory").mkdir()
-        self.assertEqual(self.cli().returncode, 0)
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tests/empty-directory/", result.stderr)
 
     def test_forged_matching_bytecode_is_rejected(self):
         self.archive()
@@ -391,7 +400,8 @@ class SourceVerificationTests(unittest.TestCase):
                           marshal.dumps(code))
         result = self.cli()
         self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn(cache.relative_to(self.root).as_posix(), result.stderr)
+        self.assertIn(cache.parent.relative_to(self.root).as_posix() + "/", result.stderr)
+        self.assertTrue(cache.exists(), "Verification must not delete bytecode")
         self.assertNotIn("Traceback", result.stderr)
 
     def test_untracked_directory_links_are_rejected_without_following_them(self):
@@ -442,6 +452,136 @@ class SourceVerificationTests(unittest.TestCase):
         self.archive()
         result = self.cli(self.root / "src")
         self.assertEqual(result.returncode, 2, result.stderr)
+
+    def test_root_guard_rejects_an_explicit_alternate_worktree(self):
+        self.archive()
+        alternate = self.root / "alternate worktree"
+        alternate.mkdir()
+        self.git("config", "core.worktree", str(alternate))
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Checker source must be the Git checkout root", result.stderr)
+
+    def test_crlf_readme_is_accepted_without_refreshing_the_index(self):
+        self.archive()
+        self.git("config", "core.autocrlf", "true")
+        readme = self.root / "README.md"
+        readme.unlink()
+        self.git("checkout-index", "--force", "--index", "--", "README.md")
+        self.assertIn(b"\r\n", readme.read_bytes())
+        self.assertEqual(self.git("status", "--porcelain", "--untracked-files=no"), b"")
+        index = (self.root / ".git/index").read_bytes()
+        result = self.cli()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual((self.root / ".git/index").read_bytes(), index)
+
+    def test_only_utf8_text_outside_the_package_may_change_line_endings(self):
+        cases = [("text", b"caf\xc3\xa9\nsecond\r\n", b"caf\xc3\xa9\r\nsecond\n", 0),
+                 ("nul", b"data\0\n", b"data\0\r\n", 2),
+                 ("nonutf8", b"\xff\n", b"\xff\r\n", 2),
+                 ("barecr", b"line\n", b"line\r", 2),
+                 ("content", b"line\n", b"changed\r\n", 2)]
+        for name, original, changed, status in cases:
+            with self.subTest(kind=name):
+                path = self.root / "tests" / (name + ".data")
+                path.write_bytes(original)
+                self.commit_source(path.relative_to(self.root).as_posix())
+                path.write_bytes(changed)
+                try:
+                    result = self.cli()
+                    self.assertEqual(result.returncode, status, result.stderr)
+                    if status:
+                        self.assertIn(path.name, result.stderr)
+                finally:
+                    path.write_bytes(original)
+        package_file = self.package / "cli.py"
+        package_file.write_bytes(package_file.read_bytes().replace(b"\n", b"\r\n"))
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("src/holodeck_shader_check/cli.py", result.stderr)
+
+    def test_executable_bit_follows_owner_bit_and_core_filemode(self):
+        self.archive()
+        self.git("config", "core.fileMode", "true")
+        readme = self.root / "README.md"
+        readme.chmod(0o645)
+        self.assertEqual(self.cli().returncode, 0)
+        readme.chmod(0o755)
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("README.md", result.stderr)
+        self.git("config", "core.fileMode", "false")
+        for name in self.git("ls-files", "-z").split(b"\0"):
+            if name:
+                (self.root / os.fsdecode(name)).chmod(0o777)
+        result = self.cli()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_finder_exception_is_only_for_regular_untracked_files(self):
+        self.archive()
+        for directory in (self.package, self.root / "tools", self.root / "tests"):
+            (directory / ".DS_Store").write_bytes(b"Finder metadata")
+        self.assertEqual(self.cli().returncode, 0)
+        metadata = self.package / ".DS_Store"
+        metadata.unlink()
+        metadata.mkdir()
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(".DS_Store/", result.stderr)
+        metadata.rmdir()
+        metadata.symlink_to(self.package / "cli.py")
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(".DS_Store", result.stderr)
+
+    def test_empty_import_namespace_is_rejected(self):
+        self.archive()
+        (self.root / "src/tomllib").mkdir()
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("src/tomllib/", result.stderr)
+
+    def test_missing_required_roots_have_context_even_when_absent_from_head(self):
+        for name in ("src", "tests", "tools"):
+            with self.subTest(directory=name):
+                nested = SourceVerificationTests()
+                try:
+                    nested.setUp()
+                    shutil.rmtree(nested.root / name)
+                    nested.commit_source("-u")
+                    result = nested.cli()
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn(f"requires a real {name}/ directory", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+                finally:
+                    nested.doCleanups()
+
+    def test_custom_filter_cannot_hide_a_changed_runner_or_run_during_verification(self):
+        (self.root / ".gitattributes").write_text("tools/run_tests.py filter=mask\n")
+        self.commit_source(".gitattributes")
+        marker = self.root / "filter executed"
+        script = self.root / "filter command.py"
+        script.write_text("import pathlib,sys\npathlib.Path(" + repr(str(marker)) + ").touch()\n"
+                          "sys.stdout.write('raise SystemExit(1)\\n')\n")
+        self.git("config", "filter.mask.clean", shlex.quote(sys.executable) + " " + shlex.quote(str(script)))
+        (self.root / "tools/run_tests.py").write_text("raise SystemExit(0)\n")
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tools/run_tests.py", result.stderr)
+        self.assertFalse(marker.exists(), "Verification must not execute custom filters")
+
+    def test_git_process_count_does_not_grow_per_tracked_file(self):
+        self.archive()
+        with mock.patch.object(bootstrap.subprocess, "run", wraps=subprocess.run) as run:
+            bootstrap.verify_source(self.pin, self.root, self.artifact)
+            small_count = run.call_count
+        for number in range(40):
+            (self.root / "tests" / f"fixture-{number}.txt").write_text(f"Fixture {number}\n")
+        self.commit_source("tests")
+        with mock.patch.object(bootstrap.subprocess, "run", wraps=subprocess.run) as run:
+            bootstrap.verify_source(self.pin, self.root, self.artifact)
+            self.assertEqual(run.call_count, small_count)
 
     def test_fixtures_are_isolated_inside_an_outer_repo_with_git_environment(self):
         original_head = self.git("rev-parse", "HEAD")
@@ -573,7 +713,9 @@ class SourceVerificationTests(unittest.TestCase):
                 bootstrap.verify_source(self.pin, self.root, self.artifact)
 
     def test_corrupt_optional_compression_and_unicode_filenames_have_archive_context(self):
-        methods = [("bzip2", zipfile.ZIP_BZIP2, 0)]
+        methods = []
+        if zipfile.bz2 is not None:
+            methods.append(("bzip2", zipfile.ZIP_BZIP2, 0))
         if bootstrap.lzma is not None:
             methods.append(("lzma", zipfile.ZIP_LZMA, 9))
         if bootstrap.zstd is not None:
@@ -602,6 +744,10 @@ class SourceVerificationTests(unittest.TestCase):
                 self.assertIn("Cannot read checker archive", result.stderr)
                 self.assertIn(str(self.artifact), result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
+
+    def test_archive_cases_run_without_optional_bzip2(self):
+        with mock.patch.object(zipfile, "bz2", None):
+            self.test_corrupt_optional_compression_and_unicode_filenames_have_archive_context()
 
     def test_source_failure_is_reported_as_bootstrap_exit_two(self):
         self.archive()

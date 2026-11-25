@@ -3,8 +3,8 @@
 1. Search the library and inspect relevant contracts and complete shaders.
 2. Use the authoring skill to copy a matching template into a valid unused asset directory. Check for existing files and symlinks, refuse overwrites, and replace all ID/name placeholders. Refine names, descriptions, code and contracts before reuse.
 3. Copy and adapt recipe functions and their required license notices into the shader body; use canonical shared helpers where appropriate. Retain attribution and describe changes. Follow the Licensing section of `docs/shader-library.md`; metadata and references do not accompany published sources. Record related snippet/reference IDs in metadata.reuse.
-4. Run `holodeck-shader-tool library validate ROOT --compile` with an explicit library root. This validates all authoring assets, including temporary template instances, and locally compiles every complete shader, snippet example and shader/snippet template for macOS and tvOS.
-   Register new copyable source paths and MIT/CC provenance in `authoring.json`. Portable `holodeck-shader-check validate ROOT` performs static and CPU profile checks without the native CLI. Before native checks, require `holodeck-shader-tool library artifact-info --json` to match every identity field in this library's `shader_checker.lock.json`, and require `library info --json` to report the same checker version and integer interface. App-managed requests enforce both checks automatically. Run `holodeck-shader-tool library validate ROOT --gpu` locally for actual shared-source uniform/clamp, scene geometry/seed, and long-uptime GPU probes. Checker implementation and integration tests live in HolodeckShaderCheck. Linux CI requires the CPU library and license tests; the GPU-only combined-recipe composition test remains explicit local verification. Use the exact locked source checkout as described below.
+4. Complete the [native checker preflight](#native-checker-preflight), then run native `library validate ROOT --compile` with the same tool and interpreter and an explicit library root. This validates all authoring assets, including temporary template instances, and locally compiles every complete shader, snippet example and shader/snippet template for macOS and tvOS.
+   Register new copyable source paths and MIT/CC provenance in `authoring.json`. Portable `holodeck-shader-check validate ROOT` performs static and CPU profile checks without the native CLI. Run native `library validate ROOT --gpu` locally for actual shared-source uniform/clamp, scene geometry/seed, and long-uptime GPU probes. Checker implementation and integration tests live in HolodeckShaderCheck. Linux CI requires the CPU library and license tests; the GPU-only combined-recipe composition test remains explicit local verification. Use the exact locked source checkout as described below.
 5. Render samples with `holodeck-shader-tool library render ROOT shader my-scene --times 0,3,10` (or `library render ROOT snippet my-technique`). Optional `--width`/`--height` select dimensions. Artifacts go to ignored `.cache/library/`. Review actual animation and target-device performance in the app before selecting a scene.
 6. When editorially ready, add the finished shader ID to the ordered index.shaders array and any appropriate collections. Commit source and metadata, then reload the selected folder in an updated HolodeckMac. The app generates previews; do not add preview files to this repo.
 
@@ -22,6 +22,28 @@ Optional index.collections entries contain id/name/description and ordered shade
 
 Select scenes for distinctive visual experience, sustained motion quality, representative previews and acceptable measured performance at target resolution. Compile success alone does not select a shader for the catalog. Record device-specific performance evidence without claiming measurements on untested devices.
 
+## Native checker preflight
+
+Install a Holodeck build containing `bd006a0` or later with its matching resource bundle; the executable's `1.1.0` version alone does not establish support for `library artifact-info`. Set absolute paths for the library, native tool and Python interpreter (Python 3.9 or later). Run this preflight before the first native command, and repeat it whenever those selections, the resource bundle or the library lock change:
+
+```sh
+task_library_root=/absolute/library/root
+task_shader_tool=/absolute/holodeck-shader-tool
+task_shader_python=/absolute/python3
+
+python3 -I "$task_library_root/tools/checker_bootstrap.py" verify-native --tool "$task_shader_tool" --python "$task_shader_python" &&
+"$task_shader_tool" library validate "$task_library_root" --compile --python "$task_shader_python"
+```
+
+`verify-native` parses `library artifact-info --json` and compares repository, version, integer interface, source commit and SHA-256 with the library lock. It then checks `library info --json` using the selected interpreter. JSON key order and escaped slashes do not affect comparison. The native artifact command checks the bundled artifact's checksum; its other identity fields are declarations from the bundled lock. Source correspondence is established separately by `verify-source` during release adoption. A missing native capability produces an update instruction. The helper succeeds silently, returns 2 with diagnostics on failure, and performs no downloads. `--lock` can select another lock; omitted `--python` defaults to `/usr/bin/python3`.
+
+Reuse these exact tool and interpreter selections for later native commands:
+
+```sh
+"$task_shader_tool" library validate "$task_library_root" --gpu --python "$task_shader_python"
+"$task_shader_tool" library render "$task_library_root" shader my-scene --times 0,3,10 --python "$task_shader_python"
+```
+
 ## Validation and delivery
 
 To run checker integration/GPU tests locally, prepare the artifact from this library root and save its validated metadata in ignored storage:
@@ -37,14 +59,15 @@ To run checker integration/GPU tests locally, prepare the artifact from this lib
 )
 ```
 
-Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits hidden by Git index flags, and all extra files and symlinks under `src/`, `tests/` and `tools/`. Untracked scratch files are permitted elsewhere. Existing bytecode caches must be removed by the user or avoided through a fresh checkout; the verifier never deletes files. Disable bytecode writes in the test process and its children so the checkout can be verified again afterward:
+Continue only if preparation succeeds; failure preserves any previous pin file. Read `repository`, `sourceCommit` and `artifactPath` from that JSON. Fetch `https://github.com/<repository>.git` into an unused scratch checkout, check out exactly `sourceCommit` with a detached HEAD, then verify it before running tests. Verification rejects staged or unstaged tracked changes, including edits hidden by Git index flags. Packaged Python remains byte-exact; other UTF-8 text without NUL may differ only in LF/CRLF line endings. Custom filter transformations are not accepted. Extra files, directories (even empty ones) and symlinks under `src/`, `tests/` and `tools/` are rejected, except untracked regular `.DS_Store` files. Scratch files are permitted elsewhere. Existing bytecode caches must be removed by the user or avoided through a fresh checkout; the verifier never deletes files. Use the tool, interpreter and library selections from the native preflight above, with bytecode writes disabled so the checkout can be verified again afterward:
 
 ```sh
 python3 -I tools/checker_bootstrap.py verify-source --source /absolute/checker/checkout --artifact /absolute/prepared/checker.pyz &&
-HOLODECK_LIBRARY_ROOT=/absolute/library/root HOLODECK_SHADER_TOOL=/absolute/holodeck-shader-tool PYTHONDONTWRITEBYTECODE=1 python3 -I -B /absolute/checker/checkout/tools/run_tests.py --gpu
+python3 -I "$task_library_root/tools/checker_bootstrap.py" verify-native --tool "$task_shader_tool" --python "$task_shader_python" &&
+HOLODECK_LIBRARY_ROOT="$task_library_root" HOLODECK_SHADER_TOOL="$task_shader_tool" PYTHONDONTWRITEBYTECODE=1 "$task_shader_python" -I -B /absolute/checker/checkout/tools/run_tests.py --gpu
 ```
 
-Use the selected native executable's `library artifact-info --json` to compare the verified bundled repository, version, interface, source commit and SHA-256 with this library's lock, and `library info --json` to confirm the packaged checker's version/interface. Source correspondence is established by `verify-source` during release adoption; runtime hash verification establishes artifact integrity. These integration tests retain specific asset-ID assumptions; use a coordinated library/checker pair when intentionally changing those assets. Generated renders stay in ignored storage.
+These integration tests retain specific asset-ID assumptions; use a coordinated library/checker pair when intentionally changing those assets. Generated renders stay in ignored storage.
 
 Library validation includes unlisted shaders. HolodeckMac loads only index.shaders; snippets, originals, documentation and reuse links remain authoring-only. Reload the selected folder after edits. Holodeck's [local library workflow](https://github.com/hbmartin/Holodeck/blob/main/docs/shader-catalog-workflow.md) owns preview generation, caching, publication, and delivery guidance.
 

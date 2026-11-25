@@ -125,3 +125,22 @@ class SkillLinkTests(unittest.TestCase):
             self.assertEqual(skills.check(renamed), 2)
         finally:
             renamed.rename(self.root)
+
+    def test_canonical_links_follow_lexical_paths_through_symlinked_source_roots(self):
+        for relative in ("skills", "vendor/metal-skills"):
+            with self.subTest(source=relative), tempfile.TemporaryDirectory() as temporary:
+                folder = self.root / relative
+                external = Path(temporary) / "external skills"
+                folder.rename(external)
+                folder.symlink_to(external, target_is_directory=True)
+                try:
+                    self.assertEqual(skills.check(self.root), 2)
+                    renamed = self.root.with_name(self.root.name + " renamed")
+                    self.root.rename(renamed)
+                    try:
+                        self.assertEqual(skills.check(renamed), 2)
+                    finally:
+                        renamed.rename(self.root)
+                finally:
+                    folder.unlink()
+                    external.rename(folder)

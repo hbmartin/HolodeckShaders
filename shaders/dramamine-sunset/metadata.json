@@ -2,17 +2,17 @@
   "category": "PROCEDURAL",
   "colors": [
     [
-      0.46,
-      0,
-      0.79
+      0.55,
+      0.06,
+      0.13
     ],
     [
-      0,
-      0.64,
-      0.65
+      0.85,
+      0.48,
+      0.08
     ]
   ],
-  "description": "A pearl of light glides along a violet and coral arc above a turquoise dusk.",
+  "description": "A warm cream pearl glides along a pumpkin and gold arc over cranberry and russet dusk in Thanksgiving colors.",
   "discovery": {
     "moods": [
       "calm",
@@ -20,14 +20,18 @@
     ],
     "motion": "slow",
     "tags": [
-      "violet",
+      "thanksgiving",
+      "harvest",
+      "cranberry",
+      "pumpkin",
+      "gold",
       "sunset",
       "glow",
       "ribbons"
     ]
   },
   "id": "dramamine-sunset",
-  "name": "Dramamine Sunset",
+  "name": "Harvest Sunset",
   "reuse": {
     "references": [],
     "snippets": [

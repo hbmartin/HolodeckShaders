@@ -6,17 +6,32 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 import tempfile
 import zipfile
 import zlib
 
+try:
+    import lzma
+except ImportError:
+    lzma = None
+try:
+    from compression import zstd
+except ImportError:
+    zstd = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 APPROVED_REPOSITORY = "hbmartin/HolodeckShaderCheck"
 SUPPORTED_INTERFACE = 1
 ENTRY_POINT = b"from holodeck_shader_check.cli import main\nraise SystemExit(main())\n"
+ARCHIVE_ERRORS = (zipfile.BadZipFile, RuntimeError, zlib.error, EOFError, OSError, UnicodeDecodeError)
+if lzma is not None:
+    ARCHIVE_ERRORS += (lzma.LZMAError,)
+if zstd is not None:
+    ARCHIVE_ERRORS += (zstd.ZstdError,)
 
 
 class BootstrapError(Exception):
@@ -73,7 +88,7 @@ def prepare(pin, cache):
     temporary = Path(filename)
     try:
         subprocess.run(
-            ["curl", "--silent", "--show-error", "--fail", "--location", "--proto", "=https", "--proto-redir", "=https",
+            ["curl", "--no-progress-meter", "--fail", "--location", "--proto", "=https", "--proto-redir", "=https",
              "--tlsv1.2", "--retry", "3", "--connect-timeout", "15", "--max-time", "120",
              "--output", str(temporary), url],
             check=True, stdin=subprocess.DEVNULL, timeout=540,
@@ -94,20 +109,81 @@ def github_outputs(path, metadata):
             print(f"{key}={value}", file=output)
 
 
-def verify_source(pin, source, artifact):
-    source = Path(source).resolve()
-    head = subprocess.run(
-        ["git", "-C", str(source), "rev-parse", "--verify", "HEAD^{commit}"],
-        check=True, capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=10,
-    ).stdout.strip()
+def source_git(source, *arguments):
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    environment.update(GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0",
+                       GIT_CEILING_DIRECTORIES=str(source.parent))
+    return subprocess.run(
+        ["git", "-C", str(source), *arguments], env=environment,
+        check=True, capture_output=True, stdin=subprocess.DEVNULL, timeout=10,
+    ).stdout
+
+
+def verify_checkout(pin, source):
+    checkout = Path(os.fsdecode(source_git(source, "rev-parse", "--show-toplevel").rstrip(b"\n"))).resolve()
+    if checkout != source:
+        raise BootstrapError("Checker source must be the Git checkout root")
+    head = source_git(source, "rev-parse", "--verify", "HEAD^{commit}").decode("ascii").strip()
     if head != pin["sourceCommit"]:
         raise BootstrapError("Checker source HEAD does not match the locked sourceCommit")
-    status = subprocess.run(
-        ["git", "-C", str(source), "status", "--porcelain", "--untracked-files=no"],
-        check=True, capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=10,
-    ).stdout
+    status = os.fsdecode(source_git(source, "status", "--porcelain", "--untracked-files=no"))
     if status.strip():
         raise BootstrapError(f"Checker source has tracked changes:\n{status.rstrip()}")
+
+    tracked = set()
+    changed = []
+    # Read HEAD's objects directly: status and diff can trust index flags or cached stat data.
+    for entry in source_git(source, "ls-tree", "-r", "-z", "--full-tree", "HEAD").split(b"\0"):
+        if not entry:
+            continue
+        header, name = entry.split(b"\t", 1)
+        mode, kind, object_id = header.split()
+        relative = os.fsdecode(name)
+        path = source / relative
+        tracked.add(relative)
+        if kind != b"blob" or mode not in (b"100644", b"100755", b"120000"):
+            raise BootstrapError(f"Unsupported checker source entry: {relative}")
+        if any(parent.is_symlink() or not parent.is_dir()
+               for parent in path.parents if parent != source and source in parent.parents):
+            changed.append(relative)
+            continue
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            changed.append(relative)
+            continue
+        if mode == b"120000":
+            valid_type = stat.S_ISLNK(info.st_mode)
+            content = os.fsencode(os.readlink(path)) if valid_type else None
+        else:
+            valid_type = stat.S_ISREG(info.st_mode) and bool(info.st_mode & 0o111) == (mode == b"100755")
+            content = path.read_bytes() if valid_type else None
+        if not valid_type or content != source_git(source, "cat-file", "blob", object_id.decode("ascii")):
+            changed.append(relative)
+    if changed:
+        raise BootstrapError("Checker source has tracked changes:\n" + "\n".join(sorted(changed)))
+
+    unexpected = []
+    pending = [source / name for name in ("src", "tests", "tools")]
+    while pending:
+        folder = pending.pop()
+        if folder.is_symlink():
+            unexpected.append(folder.relative_to(source).as_posix())
+            continue
+        for path in folder.iterdir():
+            if path.is_dir() and not path.is_symlink():
+                pending.append(path)
+            elif path.relative_to(source).as_posix() not in tracked:
+                unexpected.append(path.relative_to(source).as_posix())
+    if unexpected:
+        raise BootstrapError("Unexpected checker execution files (including ignored files):\n" +
+                             "\n".join(sorted(unexpected)) +
+                             "\nUse a fresh checkout or remove these files; keep scratch storage outside src/, tests/ and tools/.")
+
+
+def verify_source(pin, source, artifact):
+    source = Path(source).resolve()
+    verify_checkout(pin, source)
     verify_hash(artifact, pin)
     package = source / "src"
     expected = {path.relative_to(package).as_posix(): path.read_bytes()
@@ -127,7 +203,7 @@ def verify_source(pin, source, artifact):
             for name in names:
                 if archive.read(name) != expected[name]:
                     raise BootstrapError(f"Checker archive bytes differ from source: {name}")
-    except (zipfile.BadZipFile, RuntimeError, zlib.error, EOFError) as error:
+    except ARCHIVE_ERRORS as error:
         raise BootstrapError(f"Cannot read checker archive {artifact}: {error}") from error
 
 

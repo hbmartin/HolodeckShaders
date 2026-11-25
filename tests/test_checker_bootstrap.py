@@ -1,10 +1,13 @@
 import contextlib
 import hashlib
 import importlib.util
+import importlib.machinery
 import io
 import json
+import marshal
 import os
 from pathlib import Path
+import shutil
 import struct
 import subprocess
 import sys
@@ -19,6 +22,10 @@ SCRIPT = Path(__file__).resolve().parents[1] / "tools/checker_bootstrap.py"
 spec = importlib.util.spec_from_file_location("checker_bootstrap", SCRIPT)
 bootstrap = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bootstrap)
+
+
+def fixture_environment():
+    return dict({key: value for key, value in os.environ.items() if not key.startswith("GIT_")}, LC_ALL="C")
 
 
 class BootstrapTests(unittest.TestCase):
@@ -36,8 +43,10 @@ class BootstrapTests(unittest.TestCase):
         curl.write_text(f"#!{sys.executable}\n" + """
 import json, os, pathlib, sys
 pathlib.Path(os.environ['BOOTSTRAP_CURL_ARGUMENTS']).write_text(json.dumps(sys.argv[1:]))
-if '--silent' not in sys.argv:
+if '--silent' not in sys.argv and '--no-progress-meter' not in sys.argv:
     print('curl progress table', file=sys.stderr)
+if os.environ.get('BOOTSTRAP_DOWNLOAD_RETRY') and '--silent' not in sys.argv:
+    print('Warning: simulated retry, 1 retries left', file=sys.stderr)
 target = pathlib.Path(sys.argv[sys.argv.index('--output') + 1])
 if os.environ.get('BOOTSTRAP_DOWNLOAD_FAILURE'):
     target.write_bytes(b'partial download')
@@ -47,7 +56,7 @@ if os.environ.get('BOOTSTRAP_DOWNLOAD_FAILURE'):
 target.write_bytes(pathlib.Path(os.environ['BOOTSTRAP_DOWNLOAD']).read_bytes())
 """)
         curl.chmod(0o755)
-        self.env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ.get("PATH", ""),
+        self.env = dict(fixture_environment(), PATH=str(self.bin) + os.pathsep + os.environ.get("PATH", ""),
                         BOOTSTRAP_DOWNLOAD=str(self.artifact), BOOTSTRAP_TEST_MARKER=str(self.marker),
                         BOOTSTRAP_CURL_ARGUMENTS=str(self.root / "curl.json"))
         self.pin = {"version": "1.1.0", "interfaceVersion": 1,
@@ -118,12 +127,19 @@ else:
             self.assertEqual(metadata["sourceCommit"], self.pin["sourceCommit"])
             self.assertEqual(Path(metadata["artifactPath"]).read_bytes(), self.artifact.read_bytes())
         curl = json.loads((self.root / "curl.json").read_text())
-        self.assertIn("--silent", curl)
-        self.assertIn("--show-error", curl)
+        self.assertIn("--no-progress-meter", curl)
+        self.assertNotIn("--silent", curl)
         self.assertEqual(curl[curl.index("--proto") + 1], "=https")
         self.assertEqual(curl[curl.index("--proto-redir") + 1], "=https")
         self.assertIn("https://github.com/hbmartin/HolodeckShaderCheck/releases/download/v1.1.0/holodeck-shader-check-1.1.0.pyz", curl)
         self.assertEqual(len(list(self.cache.iterdir())), 1)
+
+    def test_retry_notices_are_preserved_without_progress(self):
+        self.env["BOOTSTRAP_DOWNLOAD_RETRY"] = "1"
+        result = self.prepare()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "Warning: simulated retry, 1 retries left\n")
+        self.assertEqual(json.loads(result.stdout)["sourceCommit"], self.pin["sourceCommit"])
 
     def test_bad_hash_preserves_cache_and_does_not_execute_download(self):
         self.previous_cache()
@@ -210,13 +226,30 @@ class SourceVerificationTests(unittest.TestCase):
             path = self.root / relative
             path.parent.mkdir()
             path.write_text("raise SystemExit(1)\n")
-        for command in (["git", "init", "--quiet", str(self.root)], ["git", "-C", str(self.root), "add", "src", "tools", "tests"],
-                        ["git", "-C", str(self.root), "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "fixture"]):
-            subprocess.run(command, check=True, capture_output=True)
-        self.pin = {"sourceCommit": subprocess.check_output(["git", "-C", str(self.root), "rev-parse", "HEAD"], text=True).strip()}
+        (self.root / ".gitignore").write_text("__pycache__/\n*.so\nignored.bin\n")
+        (self.root / "README.md").write_text("Fixture checkout\n")
+        self.git("init", "--quiet")
+        self.git("add", "src", "tools", "tests", ".gitignore", "README.md")
+        self.commit()
+        self.pin = {"sourceCommit": self.git("rev-parse", "HEAD").decode().strip()}
         self.entries = {"holodeck_shader_check/" + p.name: p.read_bytes() for p in self.package.iterdir()}
         self.entries["__main__.py"] = bootstrap.ENTRY_POINT
         self.artifact = self.root / "checker.pyz"
+
+    def git(self, *arguments):
+        environment = dict(fixture_environment(), GIT_CEILING_DIRECTORIES=str(self.root.parent))
+        return subprocess.run(["git", "-C", str(self.root), *arguments], env=environment,
+                              check=True, capture_output=True).stdout
+
+    def commit(self):
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "fixture")
+
+    def write_lock(self, **overrides):
+        lock = self.root / "lock.json"
+        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
+                                        repository="hbmartin/HolodeckShaderCheck") | overrides))
+        return lock
 
     def archive(self, entries=None):
         with warnings.catch_warnings():
@@ -226,14 +259,12 @@ class SourceVerificationTests(unittest.TestCase):
                     archive.writestr(name, value)
         self.pin["sha256"] = hashlib.sha256(self.artifact.read_bytes()).hexdigest()
 
-    def cli(self, source=None):
-        lock = self.root / "lock.json"
-        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
-                                        repository="hbmartin/HolodeckShaderCheck")))
+    def cli(self, source=None, env=None):
+        lock = self.write_lock()
         return subprocess.run(
             [sys.executable, "-I", str(SCRIPT), "verify-source", "--lock", str(lock),
              "--source", str(source if source is not None else self.root), "--artifact", str(self.artifact)],
-            capture_output=True, text=True, env=dict(os.environ, LC_ALL="C"),
+            capture_output=True, text=True, env=env if env is not None else fixture_environment(),
         )
 
     def test_matches_sources_independently_of_archive_encoding_without_imports(self):
@@ -256,6 +287,181 @@ class SourceVerificationTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
         self.assertEqual(result.stderr, "")
 
+    def test_index_flags_do_not_hide_edits_to_any_tracked_file(self):
+        self.archive()
+        for flag in ("assume-unchanged", "skip-worktree"):
+            for relative in ("tools/run_tests.py", "tests/test_checker.py", "src/holodeck_shader_check/cli.py", "README.md"):
+                with self.subTest(flag=flag, path=relative):
+                    path = self.root / relative
+                    original = path.read_bytes()
+                    self.git("update-index", "--" + flag, relative)
+                    try:
+                        self.assertEqual(self.cli().returncode, 0)
+                        path.write_text("raise SystemExit(0)\n")
+                        self.assertEqual(self.git("status", "--porcelain", "--untracked-files=no"), b"")
+                        result = self.cli()
+                        self.assertEqual(result.returncode, 2, result.stderr)
+                        self.assertIn("tracked changes", result.stderr)
+                        self.assertIn(relative, result.stderr)
+                    finally:
+                        path.write_bytes(original)
+                        self.git("update-index", "--no-" + flag, relative)
+
+    def test_hidden_deletions_and_file_type_substitutions_fail(self):
+        self.archive()
+        relative = "tools/run_tests.py"
+        path = self.root / relative
+        original = path.read_bytes()
+        target = self.root / "same-bytes.py"
+        target.write_bytes(original)
+        self.git("update-index", "--assume-unchanged", relative)
+        try:
+            for kind in ("deleted", "symlink", "directory", "executable"):
+                with self.subTest(kind=kind):
+                    path.unlink()
+                    if kind == "symlink":
+                        path.symlink_to(target)
+                    elif kind == "directory":
+                        path.mkdir()
+                    elif kind == "executable":
+                        path.write_bytes(original)
+                        path.chmod(0o755)
+                    try:
+                        result = self.cli()
+                        self.assertEqual(result.returncode, 2, result.stderr)
+                        self.assertIn(relative, result.stderr)
+                    finally:
+                        if path.is_dir() and not path.is_symlink():
+                            path.rmdir()
+                        elif path.exists() or path.is_symlink():
+                            path.unlink()
+                        path.write_bytes(original)
+        finally:
+            self.git("update-index", "--no-assume-unchanged", relative)
+
+    def test_tracked_parent_directory_cannot_be_replaced_by_a_symlink(self):
+        self.archive()
+        tools = self.root / "tools"
+        saved = self.root / "saved-tools"
+        self.git("update-index", "--assume-unchanged", "tools/run_tests.py")
+        tools.rename(saved)
+        tools.symlink_to(saved, target_is_directory=True)
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tools/run_tests.py", result.stderr)
+
+    def test_staged_changes_fail_even_when_working_bytes_match_head(self):
+        self.archive()
+        path = self.root / "tools/run_tests.py"
+        original = path.read_bytes()
+        path.write_text("raise SystemExit(0)\n")
+        self.git("add", "tools/run_tests.py")
+        path.write_bytes(original)
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tracked changes", result.stderr)
+
+    def test_extra_execution_files_fail_even_when_ignored(self):
+        self.archive()
+        suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
+        for relative in ("tests/test_zz.py", "src/holodeck_shader_check/scratch.py",
+                         "src/holodeck_shader_check/cli" + suffix, "tools/ignored.bin"):
+            with self.subTest(path=relative):
+                path = self.root / relative
+                path.write_text("raise SystemExit(0)\n")
+                try:
+                    result = self.cli()
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("Unexpected checker execution files", result.stderr)
+                    self.assertIn(relative, result.stderr)
+                    self.assertTrue(path.exists(), "Verification must not delete unexpected files")
+                finally:
+                    path.unlink()
+        (self.root / "tests/empty-directory").mkdir()
+        self.assertEqual(self.cli().returncode, 0)
+
+    def test_forged_matching_bytecode_is_rejected(self):
+        self.archive()
+        source = self.package / "cli.py"
+        info = source.stat()
+        cache = Path(importlib.util.cache_from_source(str(source)))
+        cache.parent.mkdir()
+        code = compile("raise SystemExit(0)\n", str(source), "exec")
+        cache.write_bytes(importlib.util.MAGIC_NUMBER + struct.pack("<III", 0, int(info.st_mtime), info.st_size) +
+                          marshal.dumps(code))
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(cache.relative_to(self.root).as_posix(), result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_untracked_directory_links_are_rejected_without_following_them(self):
+        self.archive()
+        for target in (self.root / "absent", self.package, self.root / "tests"):
+            with self.subTest(target=target):
+                link = self.root / "tests/extra"
+                link.symlink_to(target, target_is_directory=True)
+                try:
+                    result = self.cli()
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("tests/extra", result.stderr)
+                finally:
+                    link.unlink()
+
+    def test_git_environment_cannot_redirect_verification(self):
+        self.archive()
+        invalid = dict(fixture_environment(), GIT_DIR=str(self.root / "absent-git"),
+                       GIT_WORK_TREE=str(self.root / "absent-worktree"), GIT_INDEX_FILE=str(self.root / "absent-index"))
+        result = self.cli(env=invalid)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with tempfile.TemporaryDirectory(prefix="foreign checker ") as temporary:
+            foreign = Path(temporary) / "clean"
+            shutil.copytree(self.root, foreign)
+            index = (foreign / ".git/index").read_bytes()
+            environment = dict(fixture_environment(), GIT_DIR=str(foreign / ".git"),
+                               GIT_WORK_TREE=str(foreign), GIT_INDEX_FILE=str(foreign / ".git/index"))
+            (self.root / "tools/run_tests.py").write_text("raise SystemExit(0)\n")
+            result = self.cli(env=environment)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn("tools/run_tests.py", result.stderr)
+            self.assertEqual((foreign / ".git/index").read_bytes(), index)
+
+    def test_git_replacement_refs_cannot_change_the_verified_commit(self):
+        self.archive()
+        (self.root / "tools/run_tests.py").write_text("raise SystemExit(0)\n")
+        self.git("add", "tools/run_tests.py")
+        self.commit()
+        replacement = self.git("rev-parse", "HEAD").decode().strip()
+        self.git("checkout", "--quiet", "--detach", self.pin["sourceCommit"])
+        self.git("replace", self.pin["sourceCommit"], replacement)
+        self.git("reset", "--hard", "HEAD")
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tools/run_tests.py", result.stderr)
+
+    def test_nested_source_directory_is_not_a_checkout_root(self):
+        self.archive()
+        result = self.cli(self.root / "src")
+        self.assertEqual(result.returncode, 2, result.stderr)
+
+    def test_fixtures_are_isolated_inside_an_outer_repo_with_git_environment(self):
+        original_head = self.git("rev-parse", "HEAD")
+        original_index = (self.root / ".git/index").read_bytes()
+        original_runner = (self.root / "tools/run_tests.py").read_bytes()
+        environment = dict(GIT_DIR=str(self.root / ".git"), GIT_WORK_TREE=str(self.root),
+                           GIT_INDEX_FILE=str(self.root / ".git/index"))
+        with mock.patch.dict(os.environ, environment), mock.patch.object(tempfile, "tempdir", str(self.root)):
+            nested = SourceVerificationTests()
+            try:
+                nested.setUp()
+                nested.archive()
+                self.assertEqual(nested.cli().returncode, 0)
+                nested.test_failed_git_keeps_its_diagnostic()
+            finally:
+                nested.doCleanups()
+        self.assertEqual(self.git("rev-parse", "HEAD"), original_head)
+        self.assertEqual((self.root / ".git/index").read_bytes(), original_index)
+        self.assertEqual((self.root / "tools/run_tests.py").read_bytes(), original_runner)
+
     def test_modified_staged_and_deleted_tracked_tests_fail(self):
         self.archive()
         for relative in ("tools/run_tests.py", "tests/test_checker.py"):
@@ -267,7 +473,7 @@ class SourceVerificationTests(unittest.TestCase):
                     else:
                         path.write_text("raise SystemExit(0)\n")
                     if state.startswith("staged"):
-                        subprocess.run(["git", "-C", str(self.root), "add", relative], check=True, capture_output=True)
+                        self.git("add", relative)
                     try:
                         result = self.cli()
                         self.assertEqual(result.returncode, 2, result.stderr)
@@ -276,8 +482,7 @@ class SourceVerificationTests(unittest.TestCase):
                         self.assertIn(relative, result.stderr)
                         self.assertNotIn("Traceback", result.stderr)
                     finally:
-                        subprocess.run(["git", "-C", str(self.root), "restore", "--staged", "--worktree", "--", relative],
-                                       check=True, capture_output=True)
+                        self.git("restore", "--staged", "--worktree", "--", relative)
 
     def test_failed_git_keeps_its_diagnostic(self):
         self.archive()
@@ -292,9 +497,7 @@ class SourceVerificationTests(unittest.TestCase):
 
     def test_timeout_keeps_partial_output_without_a_traceback(self):
         self.archive()
-        lock = self.root / "lock.json"
-        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
-                                        repository="hbmartin/HolodeckShaderCheck")))
+        lock = self.write_lock()
         for output, diagnostic in ((b"partial output\xff\n", b"partial error\xff\n"),
                                    ("partial output\n", "partial error\n")):
             with self.subTest(output_type=type(output).__name__):
@@ -369,11 +572,40 @@ class SourceVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(bootstrap.BootstrapError, "Cannot read checker archive.*truncated archive"):
                 bootstrap.verify_source(self.pin, self.root, self.artifact)
 
+    def test_corrupt_optional_compression_and_unicode_filenames_have_archive_context(self):
+        methods = [("bzip2", zipfile.ZIP_BZIP2, 0)]
+        if bootstrap.lzma is not None:
+            methods.append(("lzma", zipfile.ZIP_LZMA, 9))
+        if bootstrap.zstd is not None:
+            methods.append(("zstandard", zipfile.ZIP_ZSTANDARD, 0))
+        for kind, method, preserved in methods + [("unicode", zipfile.ZIP_STORED, 0)]:
+            with self.subTest(kind=kind):
+                with zipfile.ZipFile(self.artifact, "w", compression=method) as archive:
+                    for name, content in reversed(list(self.entries.items())):
+                        archive.writestr(name, content)
+                data = bytearray(self.artifact.read_bytes())
+                if kind == "unicode":
+                    central = data.index(b"PK\x01\x02")
+                    for offset in (6, central + 8):
+                        struct.pack_into("<H", data, offset, struct.unpack_from("<H", data, offset)[0] | 0x800)
+                    data[30] = data[central + 46] = 0xff
+                else:
+                    name_size, extra_size = struct.unpack_from("<HH", data, 26)
+                    start = 30 + name_size + extra_size
+                    size = struct.unpack_from("<I", data, 18)[0]
+                    data[start + preserved:start + size] = b"\xff" * (size - preserved)
+                self.artifact.write_bytes(data)
+                self.pin["sha256"] = hashlib.sha256(data).hexdigest()
+                result = self.cli()
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertIn("Cannot read checker archive", result.stderr)
+                self.assertIn(str(self.artifact), result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+
     def test_source_failure_is_reported_as_bootstrap_exit_two(self):
         self.archive()
-        lock = self.root / "lock.json"
-        lock.write_text(json.dumps(dict(self.pin, version="1.1.0", interfaceVersion=1,
-                                        repository="hbmartin/HolodeckShaderCheck", sourceCommit="b" * 40)))
+        lock = self.write_lock(sourceCommit="b" * 40)
         with contextlib.redirect_stderr(io.StringIO()) as output:
             status = bootstrap.main(["verify-source", "--lock", str(lock), "--source", str(self.root), "--artifact", str(self.artifact)])
         self.assertEqual(status, 2)

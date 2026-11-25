@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import io
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -27,6 +28,8 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 APPROVED_REPOSITORY = "hbmartin/HolodeckShaderCheck"
 SUPPORTED_INTERFACE = 1
+NATIVE_TIMEOUT_ENV = "HOLODECK_NATIVE_PREFLIGHT_TIMEOUT_SECONDS"
+NATIVE_UPGRADE_GUIDANCE = "Install a Holodeck build containing bd006a0 or later with its matching resource bundle."
 ENTRY_POINT = b"from holodeck_shader_check.cli import main\nraise SystemExit(main())\n"
 ARCHIVE_ERRORS = (zipfile.BadZipFile, RuntimeError, zlib.error, EOFError, OSError, UnicodeDecodeError)
 if lzma is not None:
@@ -43,9 +46,14 @@ def read_lock(path):
     return validate_lock(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
-def validate_lock(pin):
+def field_error(label, field, expected, value):
+    actual = f"{value[field]!r} ({type(value[field]).__name__})" if field in value else "<missing>"
+    return BootstrapError(f"{label} field {field}: expected {expected}; got {actual}")
+
+
+def validate_lock(pin, label="Checker lock"):
     if not isinstance(pin, dict):
-        raise BootstrapError("Checker lock must be a JSON object")
+        raise BootstrapError(f"{label} must be a JSON object; got {pin!r} ({type(pin).__name__})")
     patterns = {
         "version": r"1\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)",
         "sourceCommit": r"[0-9a-f]{40}",
@@ -54,11 +62,11 @@ def validate_lock(pin):
     for field, pattern in patterns.items():
         value = pin.get(field)
         if type(value) is not str or not re.fullmatch(pattern, value):
-            raise BootstrapError(f"Invalid checker lock field: {field}")
+            raise field_error(label, field, f"a string matching {pattern!r}", pin)
     if type(pin.get("repository")) is not str or pin["repository"] != APPROVED_REPOSITORY:
-        raise BootstrapError("Checker lock repository is not approved")
+        raise field_error(label, "repository", f"{APPROVED_REPOSITORY!r} (str)", pin)
     if type(pin.get("interfaceVersion")) is not int or pin["interfaceVersion"] != SUPPORTED_INTERFACE:
-        raise BootstrapError("Checker lock interfaceVersion is unsupported or not an integer")
+        raise field_error(label, "interfaceVersion", f"{SUPPORTED_INTERFACE} (int, not bool)", pin)
     return {field: pin[field] for field in (*patterns, "repository", "interfaceVersion")}
 
 
@@ -75,18 +83,20 @@ def verify_info(artifact, pin):
     validate_info(json.loads(result.stdout), pin)
 
 
-def validate_info(info, pin):
+def validate_info(info, pin, label="Checker info"):
     if not isinstance(info, dict):
-        raise BootstrapError("Checker info must be a JSON object")
+        raise BootstrapError(f"{label} must be a JSON object; got {info!r} ({type(info).__name__})")
     if type(info.get("checkerVersion")) is not str or info["checkerVersion"] != pin["version"]:
-        raise BootstrapError("Checker reported version does not match the lock")
+        raise field_error(label, "checkerVersion", f"{pin['version']!r} (str)", info)
     if type(info.get("interfaceVersion")) is not int or info["interfaceVersion"] != pin["interfaceVersion"]:
-        raise BootstrapError("Checker reported interface does not match the lock")
+        raise field_error(label, "interfaceVersion", f"{pin['interfaceVersion']} (int, not bool)", info)
 
 
 def captured_output(result):
     lines = []
     for stream, output in (("stdout", result.stdout), ("stderr", result.stderr)):
+        if stream == "stdout" and getattr(result, "_stdout_is_data", False):
+            continue
         if isinstance(output, bytes):
             output = output.decode("utf-8", errors="replace")
         if output and output.strip():
@@ -94,33 +104,61 @@ def captured_output(result):
     return "\n".join(lines)
 
 
-def native_json(tool, arguments, label):
+def native_timeout():
+    raw = os.environ.get(NATIVE_TIMEOUT_ENV, "30")
     try:
-        result = subprocess.run([str(tool), "library", *arguments], check=True, capture_output=True,
-                                stdin=subprocess.DEVNULL, timeout=5)
-    except (OSError, subprocess.SubprocessError) as error:
-        guidance = (" Require a Holodeck build containing bd006a0 or later and its matching resource bundle."
-                    if arguments[0] == "artifact-info" else "")
-        raise BootstrapError(f"Native {label} failed: {error}.{guidance}") from error
+        seconds = float(raw)
+    except ValueError:
+        seconds = float("nan")
+    if not math.isfinite(seconds) or seconds <= 0:
+        raise BootstrapError(f"{NATIVE_TIMEOUT_ENV} must be a positive finite number of seconds; got {raw!r}")
+    return seconds
+
+
+def native_json(tool, arguments, label, timeout):
+    command = [str(tool), "library", *arguments]
+    try:
+        result = subprocess.run(command, check=True, capture_output=True,
+                                stdin=subprocess.DEVNULL, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        raise BootstrapError(f"Native {label} timed out after {timeout:g} seconds: {command!r}") from error
+    except subprocess.CalledProcessError as error:
+        message = f"Native {label} failed: {error}"
+        response = captured_output(error).lower()
+        unsupported = "artifact-info" in response and any(
+            phrase in response for phrase in ("invalid choice", "unknown command", "unsupported command",
+                                               "unrecognized command", "unrecognized arguments")
+        )
+        if arguments[0] == "artifact-info" and error.returncode > 0 and unsupported:
+            message += "\n" + NATIVE_UPGRADE_GUIDANCE
+        raise BootstrapError(message) from error
+    except OSError as error:
+        raise BootstrapError(f"Native {label} could not be launched: {error}") from error
     try:
         return json.loads(result.stdout)
     except ValueError as error:
-        raise BootstrapError(f"Native {label} returned invalid JSON: {error}\n{captured_output(result)}") from error
+        message = f"Native {label} returned invalid JSON: {error}"
+        if arguments[0] == "artifact-info":
+            message += "\nIf this build does not support library artifact-info --json: " + NATIVE_UPGRADE_GUIDANCE
+        raise BootstrapError(f"{message}\n{captured_output(result)}") from error
 
 
 def verify_native(pin, tool, python):
+    timeout = native_timeout()
     for label, path in (("--tool", tool), ("--python", python)):
         if not path.is_absolute() or not path.is_file() or not os.access(path, os.X_OK):
             raise BootstrapError(f"{label} requires an absolute executable path: {path}")
     try:
-        identity = validate_lock(native_json(tool, ["artifact-info", "--json"], "artifact identity check"))
+        identity = validate_lock(native_json(tool, ["artifact-info", "--json"], "artifact identity check", timeout),
+                                 label="Native artifact identity")
     except BootstrapError as error:
         raise BootstrapError(f"Cannot verify native checker identity: {error}") from error
     mismatches = [f"{field}: expected {expected!r}, got {identity[field]!r}"
                   for field, expected in pin.items() if identity[field] != expected]
     if mismatches:
         raise BootstrapError("Native checker identity differs from the library lock:\n" + "\n".join(mismatches))
-    validate_info(native_json(tool, ["info", "--json", "--python", str(python)], "checker info check"), pin)
+    validate_info(native_json(tool, ["info", "--json", "--python", str(python)], "checker info check", timeout), pin,
+                  label="Native checker info")
 
 
 def prepare(pin, cache):
@@ -155,15 +193,19 @@ def github_outputs(path, metadata):
             print(f"{key}={value}", file=output)
 
 
-def source_git(source, *arguments, input=None):
+def source_git(source, *arguments, input=None, stdout_is_data=False):
     environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     environment.update(GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0",
                        GIT_CEILING_DIRECTORIES=str(source.parent))
-    return subprocess.run(
-        ["git", "-C", str(source), *arguments], env=environment,
-        check=True, capture_output=True, input=input,
-        stdin=subprocess.DEVNULL if input is None else None, timeout=10,
-    ).stdout
+    try:
+        return subprocess.run(
+            ["git", "-c", "core.fsmonitor=", "-C", str(source), *arguments], env=environment,
+            check=True, capture_output=True, input=input,
+            stdin=subprocess.DEVNULL if input is None else None, timeout=10,
+        ).stdout
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        error._stdout_is_data = stdout_is_data
+        raise
 
 
 def committed_files(source):
@@ -178,7 +220,8 @@ def committed_files(source):
             raise BootstrapError(f"Unsupported checker source entry: {relative}")
         entries[relative] = (mode, object_id)
     object_ids = list(dict.fromkeys(object_id for _, object_id in entries.values()))
-    stream = io.BytesIO(source_git(source, "cat-file", "--batch", input=b"\n".join(object_ids) + b"\n"))
+    stream = io.BytesIO(source_git(source, "cat-file", "--batch", input=b"\n".join(object_ids) + b"\n",
+                                  stdout_is_data=True))
     blobs = {}
     for object_id in object_ids:
         header = stream.readline().split()
@@ -197,8 +240,8 @@ def committed_files(source):
 def matches_text_or_bytes(actual, expected, relative):
     if actual == expected:
         return True
-    # Packaged Python remains byte-exact. Other UTF-8 text may differ only in LF/CRLF.
-    if relative.startswith("src/") and relative.endswith(".py"):
+    # Only documentation may vary in LF/CRLF; code, fixtures and configuration stay exact.
+    if relative != "README.md" and not (relative.startswith("docs/") and relative.endswith(".md")):
         return False
     if b"\0" in actual or b"\0" in expected:
         return False

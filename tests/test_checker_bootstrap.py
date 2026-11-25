@@ -230,6 +230,8 @@ class SourceVerificationTests(unittest.TestCase):
         (self.root / ".gitignore").write_text("__pycache__/\n*.so\nignored.bin\n")
         (self.root / "README.md").write_text("Fixture checkout\n")
         self.git("init", "--quiet")
+        self.git("config", "core.autocrlf", "false")
+        self.git("config", "core.fsmonitor", "")
         self.git("add", "src", "tools", "tests", ".gitignore", "README.md")
         self.commit()
         self.pin = {"sourceCommit": self.git("rev-parse", "HEAD").decode().strip()}
@@ -357,6 +359,19 @@ class SourceVerificationTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("requires a real tools/ directory", result.stderr)
 
+    def test_nested_tracked_package_cannot_be_replaced_by_an_identical_symlink(self):
+        self.archive()
+        saved = self.root / "saved package"
+        self.package.rename(saved)
+        self.package.symlink_to(saved, target_is_directory=True)
+        original = (saved / "cli.py").read_bytes()
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tracked changes", result.stderr)
+        self.assertIn("src/holodeck_shader_check/cli.py", result.stderr)
+        self.assertTrue(self.package.is_symlink())
+        self.assertEqual((saved / "cli.py").read_bytes(), original)
+
     def test_staged_changes_fail_even_when_working_bytes_match_head(self):
         self.archive()
         path = self.root / "tools/run_tests.py"
@@ -476,15 +491,21 @@ class SourceVerificationTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
         self.assertEqual((self.root / ".git/index").read_bytes(), index)
 
-    def test_only_utf8_text_outside_the_package_may_change_line_endings(self):
-        cases = [("text", b"caf\xc3\xa9\nsecond\r\n", b"caf\xc3\xa9\r\nsecond\n", 0),
-                 ("nul", b"data\0\n", b"data\0\r\n", 2),
-                 ("nonutf8", b"\xff\n", b"\xff\r\n", 2),
-                 ("barecr", b"line\n", b"line\r", 2),
-                 ("content", b"line\n", b"changed\r\n", 2)]
+    def test_only_documentation_may_change_utf8_line_endings(self):
+        cases = [("docs/nested/guide.md", b"caf\xc3\xa9\nsecond\r\n", b"caf\xc3\xa9\r\nsecond\n", 0),
+                 ("docs/nul.md", b"data\0\n", b"data\0\r\n", 2),
+                 ("docs/nonutf8.md", b"\xff\n", b"\xff\r\n", 2),
+                 ("docs/barecr.md", b"line\n", b"line\r", 2),
+                 ("docs/content.md", b"line\n", b"changed\r\n", 2),
+                 ("tests/fixture.txt", b"line\r\n", b"line\n", 2),
+                 ("tests/fixture.md", b"line\r\n", b"line\n", 2),
+                 ("configuration.toml", b"number = 1\n", b"number = 1\r\n", 2),
+                 ("tools/sample.py", b"# sample\n", b"# sample\r\n", 2),
+                 ("notes.md", b"line\n", b"line\r\n", 2)]
         for name, original, changed, status in cases:
-            with self.subTest(kind=name):
-                path = self.root / "tests" / (name + ".data")
+            with self.subTest(path=name):
+                path = self.root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(original)
                 self.commit_source(path.relative_to(self.root).as_posix())
                 path.write_bytes(changed)
@@ -571,6 +592,31 @@ class SourceVerificationTests(unittest.TestCase):
         self.assertIn("tools/run_tests.py", result.stderr)
         self.assertFalse(marker.exists(), "Verification must not execute custom filters")
 
+    def test_fsmonitor_hook_cannot_run_during_clean_or_modified_verification(self):
+        self.archive()
+        marker = self.root / "fsmonitor executed"
+        hook = self.root / "fsmonitor hook"
+        hook.write_text(f"#!{sys.executable}\nimport pathlib,sys\n"
+                        f"pathlib.Path({str(marker)!r}).touch()\n"
+                        "sys.stdout.buffer.write(b'review-token\\0')\n")
+        hook.chmod(0o755)
+        self.git("config", "core.fsmonitor", shlex.quote(str(hook)))
+        self.git("update-index", "--fsmonitor")
+        self.git("diff", "--cached", "--name-only")
+        self.assertTrue(marker.exists(), "The hook must be active for this regression fixture")
+        marker.unlink()
+        index = (self.root / ".git/index").read_bytes()
+        result = self.cli()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(marker.exists())
+        self.assertEqual((self.root / ".git/index").read_bytes(), index)
+        (self.root / "tools/run_tests.py").write_text("raise SystemExit(0)\n")
+        result = self.cli()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("tools/run_tests.py", result.stderr)
+        self.assertFalse(marker.exists())
+        self.assertEqual((self.root / ".git/index").read_bytes(), index)
+
     def test_git_process_count_does_not_grow_per_tracked_file(self):
         self.archive()
         with mock.patch.object(bootstrap.subprocess, "run", wraps=subprocess.run) as run:
@@ -654,6 +700,45 @@ class SourceVerificationTests(unittest.TestCase):
                 self.assertIn("stdout:\npartial output", stderr.getvalue())
                 self.assertIn("stderr:\npartial error", stderr.getvalue())
                 self.assertNotIn("Traceback", stderr.getvalue())
+
+    def test_batch_failures_never_log_data_stdout_even_through_a_cause(self):
+        self.archive()
+        lock = self.write_lock()
+        original_run = subprocess.run
+        original_git = bootstrap.source_git
+        payload = b"RAW_BLOB_PAYLOAD\0\xff"
+        for failure in ("timeout", "exit"):
+            for wrapped in (False, True):
+                with self.subTest(failure=failure, wrapped=wrapped):
+                    def fail_batch(command, *args, **kwargs):
+                        if "cat-file" in command:
+                            if failure == "timeout":
+                                raise subprocess.TimeoutExpired(command, 10, output=payload, stderr=b"git read diagnostic\n")
+                            raise subprocess.CalledProcessError(23, command, output=payload, stderr=b"git read diagnostic\n")
+                        return original_run(command, *args, **kwargs)
+
+                    def source_git(source, *arguments, **kwargs):
+                        try:
+                            return original_git(source, *arguments, **kwargs)
+                        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                            if wrapped:
+                                raise bootstrap.BootstrapError(f"Cannot read source objects: {error}") from error
+                            raise
+
+                    with mock.patch.object(bootstrap.subprocess, "run", side_effect=fail_batch), \
+                            mock.patch.object(bootstrap, "source_git", side_effect=source_git), \
+                            contextlib.redirect_stdout(io.StringIO()) as stdout, \
+                            contextlib.redirect_stderr(io.StringIO()) as stderr:
+                        status = bootstrap.main(["verify-source", "--lock", str(lock), "--source", str(self.root),
+                                                 "--artifact", str(self.artifact)])
+                    self.assertEqual(status, 2)
+                    self.assertEqual(stdout.getvalue(), "")
+                    self.assertIn("cat-file", stderr.getvalue())
+                    self.assertIn("timed out after 10 seconds" if failure == "timeout" else "exit status 23", stderr.getvalue())
+                    self.assertIn("stderr:\ngit read diagnostic", stderr.getvalue())
+                    self.assertNotIn("RAW_BLOB_PAYLOAD", stderr.getvalue())
+                    self.assertNotIn("stdout:", stderr.getvalue())
+                    self.assertNotIn("Traceback", stderr.getvalue())
 
     def test_missing_additional_duplicate_and_changed_entries_fail(self):
         entries = list(self.entries.items())

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Prepare the locked checker without importing shader-authoring implementation."""
+"""Prepare and verify the locked checker without importing authoring implementation."""
 import argparse
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -39,7 +40,10 @@ class BootstrapError(Exception):
 
 
 def read_lock(path):
-    pin = json.loads(Path(path).read_text(encoding="utf-8"))
+    return validate_lock(json.loads(Path(path).read_text(encoding="utf-8")))
+
+
+def validate_lock(pin):
     if not isinstance(pin, dict):
         raise BootstrapError("Checker lock must be a JSON object")
     patterns = {
@@ -68,13 +72,55 @@ def verify_info(artifact, pin):
         [sys.executable, "-I", str(artifact), "info", "--json"],
         check=True, capture_output=True, stdin=subprocess.DEVNULL, timeout=5,
     )
-    info = json.loads(result.stdout)
+    validate_info(json.loads(result.stdout), pin)
+
+
+def validate_info(info, pin):
     if not isinstance(info, dict):
         raise BootstrapError("Checker info must be a JSON object")
     if type(info.get("checkerVersion")) is not str or info["checkerVersion"] != pin["version"]:
         raise BootstrapError("Checker reported version does not match the lock")
     if type(info.get("interfaceVersion")) is not int or info["interfaceVersion"] != pin["interfaceVersion"]:
         raise BootstrapError("Checker reported interface does not match the lock")
+
+
+def captured_output(result):
+    lines = []
+    for stream, output in (("stdout", result.stdout), ("stderr", result.stderr)):
+        if isinstance(output, bytes):
+            output = output.decode("utf-8", errors="replace")
+        if output and output.strip():
+            lines.append(f"{stream}:\n{output.rstrip()}")
+    return "\n".join(lines)
+
+
+def native_json(tool, arguments, label):
+    try:
+        result = subprocess.run([str(tool), "library", *arguments], check=True, capture_output=True,
+                                stdin=subprocess.DEVNULL, timeout=5)
+    except (OSError, subprocess.SubprocessError) as error:
+        guidance = (" Require a Holodeck build containing bd006a0 or later and its matching resource bundle."
+                    if arguments[0] == "artifact-info" else "")
+        raise BootstrapError(f"Native {label} failed: {error}.{guidance}") from error
+    try:
+        return json.loads(result.stdout)
+    except ValueError as error:
+        raise BootstrapError(f"Native {label} returned invalid JSON: {error}\n{captured_output(result)}") from error
+
+
+def verify_native(pin, tool, python):
+    for label, path in (("--tool", tool), ("--python", python)):
+        if not path.is_absolute() or not path.is_file() or not os.access(path, os.X_OK):
+            raise BootstrapError(f"{label} requires an absolute executable path: {path}")
+    try:
+        identity = validate_lock(native_json(tool, ["artifact-info", "--json"], "artifact identity check"))
+    except BootstrapError as error:
+        raise BootstrapError(f"Cannot verify native checker identity: {error}") from error
+    mismatches = [f"{field}: expected {expected!r}, got {identity[field]!r}"
+                  for field, expected in pin.items() if identity[field] != expected]
+    if mismatches:
+        raise BootstrapError("Native checker identity differs from the library lock:\n" + "\n".join(mismatches))
+    validate_info(native_json(tool, ["info", "--json", "--python", str(python)], "checker info check"), pin)
 
 
 def prepare(pin, cache):
@@ -109,14 +155,59 @@ def github_outputs(path, metadata):
             print(f"{key}={value}", file=output)
 
 
-def source_git(source, *arguments):
+def source_git(source, *arguments, input=None):
     environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     environment.update(GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0",
                        GIT_CEILING_DIRECTORIES=str(source.parent))
     return subprocess.run(
         ["git", "-C", str(source), *arguments], env=environment,
-        check=True, capture_output=True, stdin=subprocess.DEVNULL, timeout=10,
+        check=True, capture_output=True, input=input,
+        stdin=subprocess.DEVNULL if input is None else None, timeout=10,
     ).stdout
+
+
+def committed_files(source):
+    entries = {}
+    for entry in source_git(source, "ls-tree", "-r", "-z", "--full-tree", "HEAD").split(b"\0"):
+        if not entry:
+            continue
+        header, name = entry.split(b"\t", 1)
+        mode, kind, object_id = header.split()
+        relative = os.fsdecode(name)
+        if kind != b"blob" or mode not in (b"100644", b"100755", b"120000"):
+            raise BootstrapError(f"Unsupported checker source entry: {relative}")
+        entries[relative] = (mode, object_id)
+    object_ids = list(dict.fromkeys(object_id for _, object_id in entries.values()))
+    stream = io.BytesIO(source_git(source, "cat-file", "--batch", input=b"\n".join(object_ids) + b"\n"))
+    blobs = {}
+    for object_id in object_ids:
+        header = stream.readline().split()
+        if len(header) != 3 or header[:2] != [object_id, b"blob"] or not header[2].isdigit():
+            raise BootstrapError("Cannot read checker source blobs from Git")
+        size = int(header[2])
+        content = stream.read(size)
+        if len(content) != size or stream.read(1) != b"\n":
+            raise BootstrapError("Truncated checker source blob output from Git")
+        blobs[object_id] = content
+    if stream.read():
+        raise BootstrapError("Unexpected checker source blob output from Git")
+    return {name: (mode, blobs[object_id]) for name, (mode, object_id) in entries.items()}
+
+
+def matches_text_or_bytes(actual, expected, relative):
+    if actual == expected:
+        return True
+    # Packaged Python remains byte-exact. Other UTF-8 text may differ only in LF/CRLF.
+    if relative.startswith("src/") and relative.endswith(".py"):
+        return False
+    if b"\0" in actual or b"\0" in expected:
+        return False
+    try:
+        actual.decode("utf-8")
+        expected.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    return actual.replace(b"\r\n", b"\n") == expected.replace(b"\r\n", b"\n")
 
 
 def verify_checkout(pin, source):
@@ -126,25 +217,25 @@ def verify_checkout(pin, source):
     head = source_git(source, "rev-parse", "--verify", "HEAD^{commit}").decode("ascii").strip()
     if head != pin["sourceCommit"]:
         raise BootstrapError("Checker source HEAD does not match the locked sourceCommit")
-    status = os.fsdecode(source_git(source, "status", "--porcelain", "--untracked-files=no"))
-    if status.strip():
-        raise BootstrapError(f"Checker source has tracked changes:\n{status.rstrip()}")
+    staged = source_git(source, "diff", "--cached", "--no-ext-diff", "--no-textconv",
+                        "--name-only", "-z", "HEAD", "--")
+    if staged:
+        names = "\n".join(os.fsdecode(name) for name in staged.split(b"\0") if name)
+        raise BootstrapError(f"Checker source has tracked changes in the index:\n{names}")
+    for name in ("src", "tests", "tools"):
+        folder = source / name
+        if folder.is_symlink() or not folder.is_dir():
+            raise BootstrapError(f"Checker source requires a real {name}/ directory: {folder}")
 
-    tracked = set()
+    tracked = committed_files(source)
+    directories = {parent for relative in tracked for parent in (source / relative).parents
+                   if source in parent.parents}
+    invalid_directories = {parent for parent in directories if parent.is_symlink() or not parent.is_dir()}
+    file_mode = source_git(source, "config", "--type=bool", "--default=true", "--get", "core.fileMode").strip() == b"true"
     changed = []
-    # Read HEAD's objects directly: status and diff can trust index flags or cached stat data.
-    for entry in source_git(source, "ls-tree", "-r", "-z", "--full-tree", "HEAD").split(b"\0"):
-        if not entry:
-            continue
-        header, name = entry.split(b"\t", 1)
-        mode, kind, object_id = header.split()
-        relative = os.fsdecode(name)
+    for relative, (mode, expected) in tracked.items():
         path = source / relative
-        tracked.add(relative)
-        if kind != b"blob" or mode not in (b"100644", b"100755", b"120000"):
-            raise BootstrapError(f"Unsupported checker source entry: {relative}")
-        if any(parent.is_symlink() or not parent.is_dir()
-               for parent in path.parents if parent != source and source in parent.parents):
+        if invalid_directories.intersection(path.parents):
             changed.append(relative)
             continue
         try:
@@ -154,11 +245,12 @@ def verify_checkout(pin, source):
             continue
         if mode == b"120000":
             valid_type = stat.S_ISLNK(info.st_mode)
-            content = os.fsencode(os.readlink(path)) if valid_type else None
+            matches = valid_type and os.fsencode(os.readlink(path)) == expected
         else:
-            valid_type = stat.S_ISREG(info.st_mode) and bool(info.st_mode & 0o111) == (mode == b"100755")
-            content = path.read_bytes() if valid_type else None
-        if not valid_type or content != source_git(source, "cat-file", "blob", object_id.decode("ascii")):
+            valid_type = stat.S_ISREG(info.st_mode)
+            valid_mode = not file_mode or bool(info.st_mode & stat.S_IXUSR) == (mode == b"100755")
+            matches = valid_type and valid_mode and matches_text_or_bytes(path.read_bytes(), expected, relative)
+        if not matches:
             changed.append(relative)
     if changed:
         raise BootstrapError("Checker source has tracked changes:\n" + "\n".join(sorted(changed)))
@@ -167,14 +259,16 @@ def verify_checkout(pin, source):
     pending = [source / name for name in ("src", "tests", "tools")]
     while pending:
         folder = pending.pop()
-        if folder.is_symlink():
-            unexpected.append(folder.relative_to(source).as_posix())
-            continue
         for path in folder.iterdir():
+            relative = path.relative_to(source).as_posix()
             if path.is_dir() and not path.is_symlink():
-                pending.append(path)
-            elif path.relative_to(source).as_posix() not in tracked:
-                unexpected.append(path.relative_to(source).as_posix())
+                if path in directories:
+                    pending.append(path)
+                else:
+                    unexpected.append(relative + "/")
+            elif relative not in tracked:
+                if path.name != ".DS_Store" or not stat.S_ISREG(path.lstat().st_mode):
+                    unexpected.append(relative)
     if unexpected:
         raise BootstrapError("Unexpected checker execution files (including ignored files):\n" +
                              "\n".join(sorted(unexpected)) +
@@ -210,18 +304,21 @@ def verify_source(pin, source, artifact):
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="command", required=True)
-    for command in ("prepare", "run", "verify-source"):
+    for command in ("prepare", "run", "verify-source", "verify-native"):
         child = commands.add_parser(command)
         child.add_argument("--lock", type=Path, default=ROOT / "shader_checker.lock.json")
-        if command != "verify-source":
+        if command in ("prepare", "run"):
             child.add_argument("--cache-dir", type=Path, default=ROOT / ".cache/checker")
         if command == "prepare":
             child.add_argument("--github-output", type=Path)
         elif command == "run":
             child.add_argument("arguments", nargs=argparse.REMAINDER, help="Checker arguments after --")
-        else:
+        elif command == "verify-source":
             child.add_argument("--source", required=True, type=Path)
             child.add_argument("--artifact", required=True, type=Path)
+        else:
+            child.add_argument("--tool", required=True, type=Path)
+            child.add_argument("--python", type=Path, default=Path("/usr/bin/python3"))
     return result
 
 
@@ -236,6 +333,9 @@ def main(arguments=None):
         if args.command == "verify-source":
             verify_source(pin, args.source, args.artifact)
             return 0
+        if args.command == "verify-native":
+            verify_native(pin, args.tool, args.python)
+            return 0
         metadata = prepare(pin, args.cache_dir)
         if args.command == "prepare":
             if args.github_output:
@@ -245,12 +345,13 @@ def main(arguments=None):
         os.execv(sys.executable, [sys.executable, "-I", metadata["artifactPath"], *checker_args])
     except (BootstrapError, OSError, ValueError, subprocess.SubprocessError) as error:
         print(f"checker-bootstrap: {error}", file=sys.stderr)
-        if isinstance(error, (subprocess.CalledProcessError, subprocess.TimeoutExpired)):
-            for stream, output in (("stdout", error.stdout), ("stderr", error.stderr)):
-                if isinstance(output, bytes):
-                    output = output.decode("utf-8", errors="replace")
-                if output and output.strip():
-                    print(f"{stream}:\n{output.rstrip()}", file=sys.stderr)
+        cause = error
+        while cause is not None and not isinstance(cause, (subprocess.CalledProcessError, subprocess.TimeoutExpired)):
+            cause = cause.__cause__
+        if cause is not None:
+            details = captured_output(cause)
+            if details:
+                print(details, file=sys.stderr)
         return 2
 
 

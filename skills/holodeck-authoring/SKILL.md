@@ -19,16 +19,9 @@ Use canonical shared helpers. `reuse` links identify related assets and never as
 
 ## Verify
 
-Use the installed `holodeck-shader-tool` version 1.1.0 or later with its matching resource bundle. First run `library info --json` and compare `checkerVersion` and the integer `interfaceVersion` with the selected library's `shader_checker.lock.json`. Require both to match before compilation, GPU checks or rendering; otherwise install the matching bundle. The native executable version alone is insufficient, since older bundles omit template validation.
+Before compilation, GPU checks or rendering, complete the selected checkout's [native checker preflight](../../docs/shader-authoring.md#native-checker-preflight) using its own `tools/checker_bootstrap.py verify-native`. This is the authoritative procedure for bundle identity, required native capability and interpreter selection. Reuse the exact selected native executable and absolute Python interpreter for subsequent commands; the executable version alone is insufficient.
 
-```sh
-holodeck-shader-tool library info --json
-holodeck-shader-tool library validate /absolute/library/root --compile
-holodeck-shader-tool library validate /absolute/library/root --gpu
-holodeck-shader-tool library render /absolute/library/root shader my-scene --times 0,3,10
-```
-
-For snippets, replace `shader my-scene` with `snippet my-technique`. A standalone verified `holodeck-shader-check` wheel or zipapp can run portable `validate ROOT` without the native tool, Git, Xcode or Metal. Use an absolute `--python` interpreter on native library commands when the default system Python is unsuitable. See the root README for installation and checksum verification.
+For snippet rendering, replace `shader my-scene` with `snippet my-technique` in the documented commands. A standalone verified `holodeck-shader-check` wheel or zipapp can run portable `validate ROOT` without the native tool, Git, Xcode or Metal. See the root README for installation guidance.
 
 Linux CI validates structure, provenance and CPU profiles but does not compile Metal. For local checker integration/GPU tests, follow the locked-source checkout and source-verification instructions in `docs/shader-authoring.md`; do not run a different checker checkout implicitly.
 

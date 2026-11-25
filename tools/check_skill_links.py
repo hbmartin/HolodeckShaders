@@ -13,7 +13,7 @@ def expected_skills(root):
             if skill.is_dir() and (skill / "SKILL.md").is_file():
                 if skill.name in expected:
                     raise ValueError(f"Duplicate local/vendor skill name: {skill.name}")
-                expected[skill.name] = skill.resolve()
+                expected[skill.name] = skill
     return expected
 
 
@@ -39,12 +39,10 @@ def check(root):
             raise ValueError(f"Absolute skill link: {label}; expected relative target {canonical}")
         if not link.exists():
             raise ValueError(f"Broken skill link: {label}; stored target {stored}")
-        if link.resolve() != target:
-            raise ValueError(f"Wrong skill link target: {label}; expected {target}, resolved to {link.resolve()}")
+        if link.resolve() != target.resolve():
+            raise ValueError(f"Wrong skill link target: {label}; expected {target.resolve()}, resolved to {link.resolve()}")
         if stored != canonical:
             raise ValueError(f"Noncanonical relative skill link: {label}; expected {canonical}, got {stored}")
-        if not (link / "SKILL.md").is_file():
-            raise ValueError(f"Missing SKILL.md through skill link: {label}")
     return len(expected)
 
 

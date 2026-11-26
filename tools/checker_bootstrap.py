@@ -29,7 +29,12 @@ ROOT = Path(__file__).resolve().parents[1]
 APPROVED_REPOSITORY = "hbmartin/HolodeckShaderCheck"
 SUPPORTED_INTERFACE = 1
 NATIVE_TIMEOUT_ENV = "HOLODECK_NATIVE_PREFLIGHT_TIMEOUT_SECONDS"
+MAX_NATIVE_TIMEOUT_SECONDS = 2_000_000
 NATIVE_UPGRADE_GUIDANCE = "Install a Holodeck build containing bd006a0 or later with its matching resource bundle."
+LEGACY_NATIVE_USAGE = (
+    "usage: holodeck-shader-tool --version | render source output [--width n --height n --time seconds] "
+    "| probe render|compute source samples_json result_json"
+)
 ENTRY_POINT = b"from holodeck_shader_check.cli import main\nraise SystemExit(main())\n"
 ARCHIVE_ERRORS = (zipfile.BadZipFile, RuntimeError, zlib.error, EOFError, OSError, UnicodeDecodeError)
 if lzma is not None:
@@ -110,8 +115,9 @@ def native_timeout():
         seconds = float(raw)
     except ValueError:
         seconds = float("nan")
-    if not math.isfinite(seconds) or seconds <= 0:
-        raise BootstrapError(f"{NATIVE_TIMEOUT_ENV} must be a positive finite number of seconds; got {raw!r}")
+    if not math.isfinite(seconds) or not 0 < seconds <= MAX_NATIVE_TIMEOUT_SECONDS:
+        raise BootstrapError(f"{NATIVE_TIMEOUT_ENV} must be a positive finite number of seconds no greater than "
+                             f"{MAX_NATIVE_TIMEOUT_SECONDS:,} (got {raw!r})")
     return seconds
 
 
@@ -121,16 +127,18 @@ def native_json(tool, arguments, label, timeout):
         result = subprocess.run(command, check=True, capture_output=True,
                                 stdin=subprocess.DEVNULL, timeout=timeout)
     except subprocess.TimeoutExpired as error:
-        raise BootstrapError(f"Native {label} timed out after {timeout:g} seconds: {command!r}") from error
+        raise BootstrapError(f"Native {label} timed out after {timeout} seconds: {command!r}") from error
     except subprocess.CalledProcessError as error:
         message = f"Native {label} failed: {error}"
-        response = captured_output(error).lower()
-        unsupported = "artifact-info" in response and any(
-            phrase in response for phrase in ("invalid choice", "unknown command", "unsupported command",
-                                               "unrecognized command", "unrecognized arguments")
-        )
-        if arguments[0] == "artifact-info" and error.returncode > 0 and unsupported:
-            message += "\n" + NATIVE_UPGRADE_GUIDANCE
+        if arguments[0] == "artifact-info" and error.returncode > 0:
+            response = captured_output(error).lower()
+            unsupported = "artifact-info" in response and any(
+                phrase in response for phrase in ("invalid choice", "unknown command", "unsupported command",
+                                                   "unrecognized command", "unrecognized arguments")
+            )
+            legacy_usage = any(line.strip() == LEGACY_NATIVE_USAGE for line in response.splitlines())
+            if unsupported or legacy_usage:
+                message += "\n" + NATIVE_UPGRADE_GUIDANCE
         raise BootstrapError(message) from error
     except OSError as error:
         raise BootstrapError(f"Native {label} could not be launched: {error}") from error
@@ -195,14 +203,15 @@ def github_outputs(path, metadata):
 
 def source_git(source, *arguments, input=None, stdout_is_data=False):
     environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    # Git before 2.45 ignores GIT_NO_LAZY_FETCH. The empty allowlist still blocks transports.
     environment.update(GIT_NO_REPLACE_OBJECTS="1", GIT_OPTIONAL_LOCKS="0",
-                       GIT_CEILING_DIRECTORIES=str(source.parent))
+                       GIT_CEILING_DIRECTORIES=str(source.parent), GIT_NO_LAZY_FETCH="1", GIT_ALLOW_PROTOCOL="")
     try:
         return subprocess.run(
             ["git", "-c", "core.fsmonitor=", "-C", str(source), *arguments], env=environment,
             check=True, capture_output=True, input=input,
             stdin=subprocess.DEVNULL if input is None else None, timeout=10,
-        ).stdout
+        )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         error._stdout_is_data = stdout_is_data
         raise
@@ -210,7 +219,8 @@ def source_git(source, *arguments, input=None, stdout_is_data=False):
 
 def committed_files(source):
     entries = {}
-    for entry in source_git(source, "ls-tree", "-r", "-z", "--full-tree", "HEAD").split(b"\0"):
+    tree = source_git(source, "ls-tree", "-r", "-z", "--full-tree", "HEAD").stdout
+    for entry in tree.split(b"\0"):
         if not entry:
             continue
         header, name = entry.split(b"\t", 1)
@@ -220,11 +230,21 @@ def committed_files(source):
             raise BootstrapError(f"Unsupported checker source entry: {relative}")
         entries[relative] = (mode, object_id)
     object_ids = list(dict.fromkeys(object_id for _, object_id in entries.values()))
-    stream = io.BytesIO(source_git(source, "cat-file", "--batch", input=b"\n".join(object_ids) + b"\n",
-                                  stdout_is_data=True))
+    local_checkout_hint = "Use a checkout with all required Git objects available locally."
+    try:
+        result = source_git(source, "cat-file", "--batch", input=b"\n".join(object_ids) + b"\n", stdout_is_data=True)
+    except subprocess.CalledProcessError as error:
+        raise BootstrapError(f"Cannot read checker source blobs from Git: {error}\n{local_checkout_hint}") from error
+    stream = io.BytesIO(result.stdout)
     blobs = {}
     for object_id in object_ids:
         header = stream.readline().split()
+        if header == [object_id, b"missing"]:
+            message = f"Checker source Git object {object_id.decode('ascii')} is missing locally.\n{local_checkout_hint}"
+            diagnostic = result.stderr.decode("utf-8", errors="replace").rstrip()
+            if diagnostic:
+                message += f"\nstderr:\n{diagnostic}"
+            raise BootstrapError(message)
         if len(header) != 3 or header[:2] != [object_id, b"blob"] or not header[2].isdigit():
             raise BootstrapError("Cannot read checker source blobs from Git")
         size = int(header[2])
@@ -254,14 +274,15 @@ def matches_text_or_bytes(actual, expected, relative):
 
 
 def verify_checkout(pin, source):
-    checkout = Path(os.fsdecode(source_git(source, "rev-parse", "--show-toplevel").rstrip(b"\n"))).resolve()
+    checkout_root = source_git(source, "rev-parse", "--show-toplevel").stdout.rstrip(b"\n")
+    checkout = Path(os.fsdecode(checkout_root)).resolve()
     if checkout != source:
         raise BootstrapError("Checker source must be the Git checkout root")
-    head = source_git(source, "rev-parse", "--verify", "HEAD^{commit}").decode("ascii").strip()
+    head = source_git(source, "rev-parse", "--verify", "HEAD^{commit}").stdout.decode("ascii").strip()
     if head != pin["sourceCommit"]:
         raise BootstrapError("Checker source HEAD does not match the locked sourceCommit")
     staged = source_git(source, "diff", "--cached", "--no-ext-diff", "--no-textconv",
-                        "--name-only", "-z", "HEAD", "--")
+                        "--name-only", "-z", "HEAD", "--").stdout
     if staged:
         names = "\n".join(os.fsdecode(name) for name in staged.split(b"\0") if name)
         raise BootstrapError(f"Checker source has tracked changes in the index:\n{names}")
@@ -274,7 +295,8 @@ def verify_checkout(pin, source):
     directories = {parent for relative in tracked for parent in (source / relative).parents
                    if source in parent.parents}
     invalid_directories = {parent for parent in directories if parent.is_symlink() or not parent.is_dir()}
-    file_mode = source_git(source, "config", "--type=bool", "--default=true", "--get", "core.fileMode").strip() == b"true"
+    config = source_git(source, "config", "--type=bool", "--default=true", "--get", "core.fileMode").stdout
+    file_mode = config.strip() == b"true"
     changed = []
     for relative, (mode, expected) in tracked.items():
         path = source / relative

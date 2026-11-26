@@ -52,6 +52,7 @@ raise SystemExit(config.get(label + '_status', 0))
         self.tool.chmod(0o755)
         self.config = dict(identity=dict(self.pin), info=dict(checkerVersion="1.1.1", interfaceVersion=1))
         self.env = dict(os.environ, NATIVE_LOG=str(self.log), NATIVE_CONFIG=str(self.config_file))
+        self.env.pop(bootstrap.NATIVE_TIMEOUT_ENV, None)
 
     def arguments(self, tool=None, python=None, default_python=False):
         args = ["verify-native", "--lock", str(self.lock), "--tool", str(tool if tool is not None else self.tool)]
@@ -70,6 +71,15 @@ raise SystemExit(config.get(label + '_status', 0))
         self.assertIn(message, result.stderr)
         self.assertNotIn("Traceback", result.stderr)
 
+    def main_result(self, arguments=None):
+        self.config_file.write_text(json.dumps(self.config))
+        args = arguments if arguments is not None else self.arguments()
+        with mock.patch.dict(os.environ, self.env, clear=True), \
+                contextlib.redirect_stdout(io.StringIO()) as stdout, \
+                contextlib.redirect_stderr(io.StringIO()) as stderr:
+            status = bootstrap.main(args)
+        return subprocess.CompletedProcess(args, status, stdout.getvalue(), stderr.getvalue())
+
     def test_semantic_identity_and_exact_interpreter_forwarding(self):
         self.config["identity"] = dict(reversed(list(self.pin.items())), additional="supported")
         self.config["artifact_stdout"] = json.dumps(self.config["identity"]).replace("/", r"\/")
@@ -85,10 +95,26 @@ raise SystemExit(config.get(label + '_status', 0))
     def test_default_interpreter_matches_native_default(self):
         args = bootstrap.parser().parse_args(self.arguments(default_python=True))
         self.assertEqual(args.python, Path("/usr/bin/python3"))
-        result = self.cli(default_python=True)
+
+    def test_default_interpreter_is_forwarded_without_requiring_it_on_the_test_host(self):
+        responses = [subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""),
+                     subprocess.CompletedProcess([], 0, json.dumps(self.config["info"]).encode(), b"")]
+        with mock.patch.object(Path, "is_file", return_value=True), mock.patch.object(os, "access", return_value=True), \
+                mock.patch.object(bootstrap.subprocess, "run", side_effect=responses) as run:
+            result = self.main_result(self.arguments(default_python=True))
         self.assertEqual(result.returncode, 0, result.stderr)
-        commands = [json.loads(line) for line in self.log.read_text().splitlines()]
-        self.assertEqual(commands[-1][-1], "/usr/bin/python3")
+        self.assertEqual(run.call_args_list[-1].args[0][-1], "/usr/bin/python3")
+
+    def test_absent_default_interpreter_fails_without_falling_back(self):
+        original_is_file = Path.is_file
+
+        def absent_system_python(path):
+            return False if path == Path("/usr/bin/python3") else original_is_file(path)
+
+        with mock.patch.object(Path, "is_file", new=absent_system_python), \
+                mock.patch.object(bootstrap.subprocess, "run", side_effect=AssertionError("No native launch")):
+            result = self.main_result(self.arguments(default_python=True))
+        self.assert_failure(result, "--python requires an absolute executable path: /usr/bin/python3")
 
     def test_each_identity_field_is_required_and_strictly_typed(self):
         alternatives = dict(repository="other/repository", version="1.1.2", interfaceVersion=2,
@@ -97,10 +123,17 @@ raise SystemExit(config.get(label + '_status', 0))
             for value in (other, None, True, 1.0):
                 with self.subTest(field=field, value=value):
                     self.config["identity"] = dict(self.pin, **{field: value})
-                    self.assert_failure(self.cli(), field)
+                    result = self.cli()
+                    self.assert_failure(result, field)
+                    self.assertIn("expected", result.stderr)
+                    self.assertIn("got", result.stderr)
+                    self.assertNotIn("Checker lock", result.stderr)
             with self.subTest(missing=field):
                 self.config["identity"] = {key: value for key, value in self.pin.items() if key != field}
-                self.assert_failure(self.cli(), field)
+                result = self.cli()
+                self.assert_failure(result, field)
+                self.assertIn("got <missing>", result.stderr)
+                self.assertIn("Native artifact identity", result.stderr)
 
     def test_nonobject_and_malformed_native_json_fail(self):
         for label in ("artifact", "info"):
@@ -116,7 +149,10 @@ raise SystemExit(config.get(label + '_status', 0))
                      dict(checkerVersion="1.1.1", interfaceVersion=1.0)):
             with self.subTest(info=info):
                 self.config["info"] = info
-                self.assert_failure(self.cli(), "does not match the lock")
+                result = self.cli()
+                self.assert_failure(result, "Native checker info field")
+                self.assertIn("expected", result.stderr)
+                self.assertIn("got", result.stderr)
 
     def test_old_native_tool_has_update_guidance_and_keeps_diagnostics(self):
         self.config.update(artifact_status=2, artifact_stdout="partial native output",
@@ -126,6 +162,48 @@ raise SystemExit(config.get(label + '_status', 0))
         self.assertIn("resource bundle", result.stderr)
         self.assertIn("stdout:\npartial native output", result.stderr)
         self.assertIn("stderr:\nargparse: invalid choice", result.stderr)
+        self.assertNotIn("status 2..", result.stderr)
+
+    def test_nonjson_success_has_conditional_compatibility_guidance(self):
+        self.config["artifact_stdout"] = "usage: old native tool"
+        result = self.cli()
+        self.assert_failure(result, "invalid JSON")
+        self.assertIn("If this build does not support", result.stderr)
+        self.assertIn("bd006a0", result.stderr)
+        self.assertIn("stdout:\nusage: old native tool", result.stderr)
+
+    def test_unrelated_failures_and_crashes_do_not_get_upgrade_advice(self):
+        self.config.update(artifact_status=23, artifact_stderr="checksum read failure")
+        result = self.cli()
+        self.assert_failure(result, "exit status 23")
+        self.assertIn("checksum read failure", result.stderr)
+        self.assertNotIn("bd006a0", result.stderr)
+        for error, message in ((subprocess.CalledProcessError(-11, [str(self.tool)],
+                                                            output=b"artifact-info invalid choice", stderr=b"crash"), "failed"),
+                               (OSError("Exec format error"), "could not be launched")):
+            with self.subTest(error=type(error).__name__):
+                with mock.patch.object(bootstrap.subprocess, "run", side_effect=error):
+                    result = self.main_result()
+                self.assert_failure(result, message)
+                self.assertNotIn("bd006a0", result.stderr)
+
+    def test_timeout_override_applies_to_both_native_calls(self):
+        for value in ("0.125", "90.5"):
+            with self.subTest(timeout=value):
+                self.env[bootstrap.NATIVE_TIMEOUT_ENV] = value
+                responses = [subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""),
+                             subprocess.CompletedProcess([], 0, json.dumps(self.config["info"]).encode(), b"")]
+                with mock.patch.object(bootstrap.subprocess, "run", side_effect=responses) as run:
+                    result = self.main_result()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual([call.kwargs["timeout"] for call in run.call_args_list], [float(value)] * 2)
+
+    def test_invalid_timeout_overrides_fail_before_launch(self):
+        for value in ("", "0", "-1", "nan", "inf", "-inf", "1e999", "not a number"):
+            with self.subTest(timeout=value):
+                self.env[bootstrap.NATIVE_TIMEOUT_ENV] = value
+                self.assert_failure(self.cli(), "must be a positive finite number")
+                self.assertFalse(self.log.exists())
 
     def test_failed_info_keeps_its_command_and_captured_output(self):
         self.config.update(info_status=23, info_stdout="partial info", info_stderr="interpreter failure")
@@ -147,27 +225,25 @@ raise SystemExit(config.get(label + '_status', 0))
     def test_timeouts_disconnect_stdin_and_keep_partial_output(self):
         for label in ("artifact", "info"):
             with self.subTest(command=label):
-                error = subprocess.TimeoutExpired([str(self.tool), "library", label], 5,
+                error = subprocess.TimeoutExpired([str(self.tool), "library", label], 30,
                                                    output=b"partial output\xff\n", stderr=b"partial error\xff\n")
                 responses = [error] if label == "artifact" else [
                     subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""), error]
-                with mock.patch.object(bootstrap.subprocess, "run", side_effect=responses) as run, \
-                        contextlib.redirect_stdout(io.StringIO()) as stdout, \
-                        contextlib.redirect_stderr(io.StringIO()) as stderr:
-                    status = bootstrap.main(self.arguments())
-                self.assertEqual(status, 2)
-                self.assertEqual(stdout.getvalue(), "")
-                self.assertIn("timed out after 5 seconds", stderr.getvalue())
-                self.assertIn("stdout:\npartial output\ufffd", stderr.getvalue())
-                self.assertIn("stderr:\npartial error\ufffd", stderr.getvalue())
-                self.assertNotIn("Traceback", stderr.getvalue())
+                with mock.patch.object(bootstrap.subprocess, "run", side_effect=responses) as run:
+                    result = self.main_result()
+                self.assert_failure(result, "timed out after 30 seconds")
+                self.assertIn(str(self.tool), result.stderr)
+                self.assertIn("stdout:\npartial output\ufffd", result.stderr)
+                self.assertIn("stderr:\npartial error\ufffd", result.stderr)
+                self.assertNotIn("bd006a0", result.stderr)
                 for call in run.call_args_list:
                     self.assertEqual(call.kwargs["stdin"], subprocess.DEVNULL)
-                    self.assertEqual(call.kwargs["timeout"], 5)
+                    self.assertEqual(call.kwargs["timeout"], 30)
 
     def test_preflight_never_prepares_or_downloads_an_artifact(self):
         responses = [subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""),
                      subprocess.CompletedProcess([], 0, json.dumps(self.config["info"]).encode(), b"")]
         with mock.patch.object(bootstrap.subprocess, "run", side_effect=responses), \
                 mock.patch.object(bootstrap, "prepare", side_effect=AssertionError("No preparation during native preflight")):
-            self.assertEqual(bootstrap.main(self.arguments()), 0)
+            result = self.main_result()
+        self.assertEqual(result.returncode, 0, result.stderr)

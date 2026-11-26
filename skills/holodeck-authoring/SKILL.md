@@ -19,7 +19,7 @@ Use canonical shared helpers. `reuse` links identify related assets and never as
 
 ## Verify
 
-Before compilation, GPU checks or rendering, complete the selected checkout's [native checker preflight](../../docs/shader-authoring.md#native-checker-preflight) using its own `tools/checker_bootstrap.py verify-native`. This is the authoritative procedure for bundle identity, required native capability and interpreter selection. Reuse the exact selected native executable and absolute Python interpreter for subsequent commands; the executable version alone is insufficient.
+Before compilation, GPU checks or rendering, open `docs/shader-authoring.md` inside the selected library checkout and complete its "Native checker preflight" section using that checkout's `tools/checker_bootstrap.py verify-native`. Resolve these paths against the chosen library root, never the installed skill directory or discovery link. This is the authoritative procedure for bundle identity, required native capability and interpreter selection. Reuse the exact selected native executable and absolute Python interpreter for subsequent commands; the executable version alone is insufficient.
 
 For snippet rendering, replace `shader my-scene` with `snippet my-technique` in the documented commands. A standalone verified `holodeck-shader-check` wheel or zipapp can run portable `validate ROOT` without the native tool, Git, Xcode or Metal. See the root README for installation guidance.
 

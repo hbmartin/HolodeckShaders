@@ -296,6 +296,47 @@ class SourceVerificationTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
         self.assertEqual(result.stderr, "")
 
+    def test_missing_blob_fails_without_obtaining_it_from_a_promisor_remote(self):
+        self.archive()
+        remote = self.root / "remote.git"
+        self.git("-c", "protocol.file.allow=always", "clone", "--bare", "--no-hardlinks", str(self.root), str(remote))
+        self.git("remote", "add", "origin", str(remote))
+        self.git("config", "remote.origin.promisor", "true")
+        self.git("config", "protocol.file.allow", "always")
+        object_id = self.git("rev-parse", "HEAD:README.md").decode("ascii").strip()
+        self.git("--git-dir", str(remote), "cat-file", "-e", object_id)
+        objects = self.root / ".git/objects"
+        blob = objects / object_id[:2] / object_id[2:]
+        saved = blob.rename(self.root / "saved blob")
+        packs_before = set((objects / "pack").iterdir())
+
+        env = dict(fixture_environment(), GIT_NO_LAZY_FETCH="0", GIT_ALLOW_PROTOCOL="file")
+        result = self.cli(env=env)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("available locally", result.stderr)
+        self.assertIn(object_id, result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(blob.exists())
+        self.assertEqual(set((objects / "pack").iterdir()), packs_before)
+
+        saved.rename(blob)
+        result = self.cli(env=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_missing_batch_object_keeps_git_stderr_without_logging_blob_data(self):
+        object_id = b"a" * 40
+        tree = b"100644 blob " + object_id + b"\tREADME.md\0"
+        batch = object_id + b" missing\nRAW_BLOB_PAYLOAD"
+        responses = [subprocess.CompletedProcess([], 0, tree, b""),
+                     subprocess.CompletedProcess([], 0, batch, b"fatal: transport 'file' not allowed\n")]
+        with mock.patch.object(bootstrap, "source_git", side_effect=responses):
+            with self.assertRaises(bootstrap.BootstrapError) as error:
+                bootstrap.committed_files(self.root)
+        self.assertIn("is missing locally", str(error.exception))
+        self.assertIn("stderr:\nfatal: transport 'file' not allowed", str(error.exception))
+        self.assertNotIn("RAW_BLOB_PAYLOAD", str(error.exception))
+
     def test_index_flags_do_not_hide_edits_to_any_tracked_file(self):
         self.archive()
         for flag in ("assume-unchanged", "skip-worktree"):

@@ -164,6 +164,18 @@ raise SystemExit(config.get(label + '_status', 0))
         self.assertIn("stderr:\nargparse: invalid choice", result.stderr)
         self.assertNotIn("status 2..", result.stderr)
 
+    def test_top_level_usage_identifies_the_legacy_native_tool(self):
+        usage = ("Usage: holodeck-shader-tool --version | {library}render SOURCE OUTPUT "
+                 "[--width N --height N --time SECONDS] | probe render|compute SOURCE SAMPLES_JSON RESULT_JSON")
+        for library in ("", "library info|artifact-info|validate|assemble|render ... [--python ABSOLUTE_PATH] | "):
+            with self.subTest(library=library):
+                response = usage.format(library=library)
+                self.config.update(artifact_status=1, artifact_stdout="", artifact_stderr=response)
+                result = self.cli()
+                self.assert_failure(result, "exit status 1")
+                self.assertIn(response, result.stderr)
+                self.assertEqual("bd006a0" in result.stderr, not library)
+
     def test_nonjson_success_has_conditional_compatibility_guidance(self):
         self.config["artifact_stdout"] = "usage: old native tool"
         result = self.cli()
@@ -188,7 +200,7 @@ raise SystemExit(config.get(label + '_status', 0))
                 self.assertNotIn("bd006a0", result.stderr)
 
     def test_timeout_override_applies_to_both_native_calls(self):
-        for value in ("0.125", "90.5"):
+        for value in ("0.125", "2000000"):
             with self.subTest(timeout=value):
                 self.env[bootstrap.NATIVE_TIMEOUT_ENV] = value
                 responses = [subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""),
@@ -199,10 +211,12 @@ raise SystemExit(config.get(label + '_status', 0))
                 self.assertEqual([call.kwargs["timeout"] for call in run.call_args_list], [float(value)] * 2)
 
     def test_invalid_timeout_overrides_fail_before_launch(self):
-        for value in ("", "0", "-1", "nan", "inf", "-inf", "1e999", "not a number"):
+        for value in ("", "0", "-1", "nan", "inf", "-inf", "1e999", "not a number", "1e9", "2000000.1"):
             with self.subTest(timeout=value):
                 self.env[bootstrap.NATIVE_TIMEOUT_ENV] = value
-                self.assert_failure(self.cli(), "must be a positive finite number")
+                result = self.cli()
+                self.assert_failure(result, f"{bootstrap.NATIVE_TIMEOUT_ENV} must be a positive finite number "
+                                            f"of seconds no greater than 2,000,000 (got {value!r})")
                 self.assertFalse(self.log.exists())
 
     def test_failed_info_keeps_its_command_and_captured_output(self):
@@ -223,22 +237,24 @@ raise SystemExit(config.get(label + '_status', 0))
         self.assertFalse(self.log.exists())
 
     def test_timeouts_disconnect_stdin_and_keep_partial_output(self):
-        for label in ("artifact", "info"):
-            with self.subTest(command=label):
-                error = subprocess.TimeoutExpired([str(self.tool), "library", label], 30,
+        for label, seconds in (("artifact", 30.0), ("info", 100000.5)):
+            with self.subTest(command=label, seconds=seconds):
+                if label == "info":
+                    self.env[bootstrap.NATIVE_TIMEOUT_ENV] = str(seconds)
+                error = subprocess.TimeoutExpired([str(self.tool), "library", label], seconds,
                                                    output=b"partial output\xff\n", stderr=b"partial error\xff\n")
                 responses = [error] if label == "artifact" else [
                     subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""), error]
                 with mock.patch.object(bootstrap.subprocess, "run", side_effect=responses) as run:
                     result = self.main_result()
-                self.assert_failure(result, "timed out after 30 seconds")
+                self.assert_failure(result, f"timed out after {seconds} seconds")
                 self.assertIn(str(self.tool), result.stderr)
                 self.assertIn("stdout:\npartial output\ufffd", result.stderr)
                 self.assertIn("stderr:\npartial error\ufffd", result.stderr)
                 self.assertNotIn("bd006a0", result.stderr)
                 for call in run.call_args_list:
                     self.assertEqual(call.kwargs["stdin"], subprocess.DEVNULL)
-                    self.assertEqual(call.kwargs["timeout"], 30)
+                    self.assertEqual(call.kwargs["timeout"], seconds)
 
     def test_preflight_never_prepares_or_downloads_an_artifact(self):
         responses = [subprocess.CompletedProcess([], 0, json.dumps(self.pin).encode(), b""),
